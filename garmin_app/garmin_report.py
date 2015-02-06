@@ -7,7 +7,7 @@
 
 import os
 
-from garmin_utils import print_date_string, print_h_m_s, run_command,\
+from garmin_app.garmin_utils import print_date_string, print_h_m_s, run_command,\
     METERS_PER_MILE, MARATHON_DISTANCE_MI
 
 class GarminReport(object):

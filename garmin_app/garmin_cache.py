@@ -29,7 +29,7 @@ except ImportError:
         os.sys.path.append('%s/scripts' % os.getenv('HOME'))
         from util import run_command
 
-from garmin_file import GarminSummary, GarminFile, GarminLap, GarminPoint
+from garmin_app.garmin_file import GarminSummary, GarminFile, GarminLap, GarminPoint
 
 class GarminCache(object):
     ''' class to manage caching objects '''

@@ -9,7 +9,7 @@
         GarminSummary
 '''
 
-from garmin_utils import convert_date_string, convert_time_string,\
+from garmin_app.garmin_utils import convert_date_string, convert_time_string,\
     METERS_PER_MILE, SPORT_TYPES
 
 try:

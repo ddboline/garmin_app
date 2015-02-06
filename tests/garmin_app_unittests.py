@@ -15,11 +15,16 @@ TCXFILE = 'test/test.tcx'
 FITFILE = 'test/test.fit'
 TXTFILE = 'test/test.txt'
 
-import garmin_utils
-import garmin_file
-import garmin_parse
-import garmin_cache
-import garmin_report
+CURDIR = os.path.abspath(os.curdir)
+print CURDIR
+print '\n'.join(os.sys.path)
+
+import garmin_app
+import garmin_app.garmin_utils
+import garmin_app.garmin_file
+import garmin_app.garmin_parse
+import garmin_app.garmin_cache
+import garmin_app.garmin_report
 
 try:
     from util import run_command, datetimefromstring
