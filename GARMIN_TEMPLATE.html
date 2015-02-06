@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title></title>
+
+<script language="JavaScript" type="text/javascript">
+    function send_command( command ) {
+        var ostr = '../../../cgi-bin/control_garmin.py?cmd=' + command;
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open( "GET", ostr , true );
+        xmlhttp.onload = function reload_page() {
+            location.reload(true);
+        }
+        xmlhttp.send(null);
+    }
+    function processFormData() {
+        var garmin_cmd = document.getElementById( 'garmin_cmd' );
+        send_command( garmin_cmd.value );
+    }
+</script>
+
+<p>
+<form>
+<input type="text" name="cmd" id="garmin_cmd"/>
+<input type="button" name="submitGARMIN" value="Submit" onclick="processFormData();"/>
+</form>
+</p>
+
+<meta name="generator" content="HTML::TextToHTML v2.51"/>
+</head>
+<body>
+<pre>
+INSERTTEXTHERE
+</pre>
+</body>
+</html>

@@ -1,0 +1,1 @@
+date=20130116 type=elliptical dis=0mi dur=00:50:00 cal=900
