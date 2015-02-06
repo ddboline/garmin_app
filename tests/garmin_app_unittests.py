@@ -10,21 +10,19 @@ import dateutil.tz
 import glob
 import hashlib
 
-GMNFILE = 'test/test.gmn'
-TCXFILE = 'test/test.tcx'
-FITFILE = 'test/test.fit'
-TXTFILE = 'test/test.txt'
+GMNFILE = 'tests/test.gmn'
+TCXFILE = 'tests/test.tcx'
+FITFILE = 'tests/test.fit'
+TXTFILE = 'tests/test.txt'
 
 CURDIR = os.path.abspath(os.curdir)
-print CURDIR
-print '\n'.join(os.sys.path)
+os.sys.path.append(CURDIR)
 
-import garmin_app
-import garmin_app.garmin_utils
-import garmin_app.garmin_file
-import garmin_app.garmin_parse
-import garmin_app.garmin_cache
-import garmin_app.garmin_report
+from garmin_app import garmin_utils,\
+                       garmin_file,\
+                       garmin_parse,\
+                       garmin_cache,\
+                       garmin_report
 
 try:
     from util import run_command, datetimefromstring
@@ -167,7 +165,7 @@ class TestGarminApp(unittest.TestCase):
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), 'dc49eed73bf44c1b5d5c2444a59bec96')
-        script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
+        script_path = CURDIR
         options = {'script_path': script_path}
         gr.file_report_html(gfile, **options)
 
