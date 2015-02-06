@@ -69,7 +69,6 @@ class GarminParse(GarminFile):
         cur_point = None
         last_ent = None
         temp_points = []
-        print self.filename
         for l in run_command('xml2 < %s' % self.filename, do_popen=True):
             ent = l.strip().split('/')
             if ent[2] == 'run':
