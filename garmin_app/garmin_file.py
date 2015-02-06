@@ -192,7 +192,8 @@ class GarminFile(object):
 
     def __repr__(self):
         return 'GarminFile<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self.__slots__)
+            '%s=%s' % (x, getattr(self, x)) for x in self.__slots__ 
+                                            if x not in ['points', 'laps'])
 
     def calculate_speed(self):
         ''' calculate instantaneous speed (could maybe be a bit more elaborate?) '''
@@ -246,10 +247,10 @@ class GarminSummary(object):
 
     def read_file(self):
         '''  read the file, calculate some stuff '''
-        temp_gfile = garmin_file(self.filename)
-
-        self.begin_time = temp_gfile.begin_time
-        self.begin_date = temp_gfile.begin_date
+        from garmin_app.garmin_parse import GarminParse
+        temp_gfile = GarminParse(self.filename)
+        temp_gfile.read_file()
+        self.begin_datetime = temp_gfile.begin_datetime
         self.sport = temp_gfile.sport
         self.total_calories = temp_gfile.total_calories
         self.total_distance = temp_gfile.total_distance
@@ -263,14 +264,14 @@ class GarminSummary(object):
         elif self.total_calories == 0 and self.sport == 'stairs' and self.total_duration > 0:
             self.total_calories = 325 * (self.total_duration / 1100.89)
         elif self.total_calories == 0:
-            return True
+            return temp_gfile
         if self.total_calories < 3:
-            return True
+            return temp_gfile
         if self.sport not in SPORT_TYPES:
             print '%s not supported' % self.sport
             return False
 
-        return True
+        return temp_gfile
 
 
     def add(self, summary_to_add):
