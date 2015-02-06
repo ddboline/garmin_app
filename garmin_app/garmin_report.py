@@ -165,7 +165,7 @@ class GarminReport(object):
                 latlon_min = max((maxlat-minlat), (maxlon-minlon))
                 print 'latlon', latlon_min
                 latlon_thresholds = [[15, 0.015], [14, 0.038], [13, 0.07], [12, 0.12], [11, 0.20], [10, 0.4]]
-                for line in open('%s/MAP_TEMPLATE.html' % curpath, 'r'):
+                for line in open('%s/templates/MAP_TEMPLATE.html' % curpath, 'r'):
                     if 'SPORTTITLEDATE' in line:
                         newtitle = 'Garmin Event %s on %s' % (gfile.sport.title(), gfile.begin_datetime)
                         htmlfile.write(line.replace('SPORTTITLEDATE',newtitle))
