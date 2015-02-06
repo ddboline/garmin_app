@@ -58,3 +58,5 @@ run/
 *.out
 *.prof
 *.png
+*.csv
+*.gz
