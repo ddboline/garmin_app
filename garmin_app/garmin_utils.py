@@ -9,6 +9,8 @@
 '''
 
 import os
+import hashlib
+import datetime
 
 try:
     from util import run_command, datetimefromstring
@@ -26,6 +28,17 @@ MARATHON_DISTANCE_MI = MARATHON_DISTANCE_M / METERS_PER_MILE # meters
 SPORT_TYPES = ('running', 'biking', 'walking', 'ultimate', 'elliptical', 'stairs', 'lifting', 'swimming', 'other', 'snowshoeing', 'skiing')
 MONTH_NAMES = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
 WEEKDAY_NAMES = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
+
+def days_in_year(year=datetime.date.today().year):
+    ''' return number of days in a given year '''
+    return (datetime.date(year=year+1, month=1, day=1)-datetime.date(year=year, month=1, day=1)).days
+
+def days_in_month(month=datetime.date.today().month, year=datetime.date.today().year):
+    ''' return number of days in a given month '''
+    y1, m1 = year, month + 1
+    if m1 == 13:
+        y1, m1 = y1 + 1, 1
+    return (datetime.date(year=y1, month=m1, day=1)-datetime.date(year=year, month=month, day=1)).days
 
 ### maybe change output to datetime object?
 def convert_date_string(date_str):
