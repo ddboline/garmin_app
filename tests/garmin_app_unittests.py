@@ -274,10 +274,10 @@ class TestGarminApp(unittest.TestCase):
     def test_garmin_cache_get_summary_list(self):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/cache' % CURDIR)
         sl = gc.get_summary_list(directory='%s/tests' % CURDIR)
-        output = '\n'.join('%s' % s for s in sorted(sl))
+        output = '\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), 'a054376b0031cb139322c405b041f301')
+        self.assertEqual(m.hexdigest(), 'f84070c7362bf3f613f91a24ce85e71f')
 
     def test_cached_gfile(self):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/cache' % CURDIR)
