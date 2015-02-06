@@ -170,12 +170,13 @@ class GarminFile(object):
                 read_file(), read_file_tcx(), read_file_xml(),
                 print_file_string(), calculate_speed(), print_splits()
     '''
-    __slots__ = ['filename', 'filetype', 'begin_datetime', 'sport',
-                 'total_calories', 'total_distance', 'total_duration',
+    __slots__ = ['filename', 'orig_filename', 'filetype', 'begin_datetime',
+                 'sport', 'total_calories', 'total_distance', 'total_duration',
                  'total_hr_dur', 'total_hr_dis', 'laps', 'points']
     garmin_file_types = ('txt', 'tcx', 'fit', 'gpx', 'gmn')
 
     def __init__(self, filename='', filetype=''):
+        self.orig_filename = filename
         self.filename = filename
         self.filetype = ''
         if filetype in self.garmin_file_types:
@@ -192,7 +193,7 @@ class GarminFile(object):
 
     def __repr__(self):
         return 'GarminFile<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self.__slots__ 
+            '%s=%s' % (x, getattr(self, x)) for x in self.__slots__
                                             if x not in ['points', 'laps'])
 
     def calculate_speed(self):

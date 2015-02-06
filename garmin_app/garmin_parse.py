@@ -29,7 +29,6 @@ class GarminParse(GarminFile):
     def __init__(self, filename, filetype=''):
         GarminFile.__init__(self, filename, filetype)
 
-        self.orig_filename = filename
         if filetype in GarminFile.garmin_file_types:
             self.filetype = filetype
         else:
