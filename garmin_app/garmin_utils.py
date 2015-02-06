@@ -102,3 +102,12 @@ def convert_gmn_to_xml(gmn_filename):
         xml_file.write('</root>\n')
     run_command('mv /tmp/.temp.xml /tmp/temp.xml')
     return '/tmp/temp.xml'
+
+def get_md5_full(fname):
+    if not os.path.exists(fname):
+        return None
+    m = hashlib.md5()
+    with open(fname, 'r') as infile:
+        for line in infile:
+            m.update(line)
+    return m.hexdigest()
