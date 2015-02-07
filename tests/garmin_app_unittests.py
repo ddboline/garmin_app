@@ -180,7 +180,7 @@ class TestGarminApp(unittest.TestCase):
         gr = garmin_report.GarminReport()
         script_path = CURDIR
         options = {'script_path': script_path}
-        html_path = gr.file_report_html(gfile, **options)
+        html_path = gr.file_report_html(gfile, copy_to_public_html=False, **options)
         file_md5 = [# ['altitude.png', '21175eae42854badcc793e1dc2e76258'],
                     # ['avg_speed_minpermi.png', '370eae2ada1e63bd24dd19352a8bbe7f'],
                     # ['avg_speed_mph.png', 'a6cb114e0a9e3f6eab20d0dcaf1d87e5'],
@@ -292,7 +292,10 @@ class TestGarminApp(unittest.TestCase):
         options = {'do_plot': False, 'do_year': False, 'do_month': False, 'do_week': False, 'do_day': False, 'do_file': False, 'do_sport': None, 'do_update': False, 'do_average': False}
         script_path = CURDIR
         options['script_path'] = script_path
-        rp.summary_report(sl, **options)
+        output = rp.summary_report(sl, copy_to_public_html=False, **options)
+        m = hashlib.md5()
+        m.update(output)
+        self.assertEqual(m.hexdigest(), '022c8b604d32c9297195ad80aef5b73c')
 
 if __name__ == '__main__':
     unittest.main()

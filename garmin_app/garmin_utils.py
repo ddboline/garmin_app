@@ -240,8 +240,6 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
             options['occur'] = True
         elif os.path.isfile(arg):
             gdir.append(arg)
-            # read_garmin_file(arg)
-            # exit(0)
         elif arg != 'run' and os.path.isdir(arg):
             gdir.append(arg)
         elif arg != 'run' and os.path.isdir('%s/run/%s' % (script_path, arg)):

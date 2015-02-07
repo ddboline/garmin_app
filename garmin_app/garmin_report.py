@@ -36,7 +36,7 @@ class GarminReport(object):
         self.cache_obj = cache_obj
         self.msg_q = msg_q
 
-    def summary_report(self, summary_list, **options):
+    def summary_report(self, summary_list, copy_to_public_html=True, **options):
         ''' get summary of files in directory '''
         opts = ['do_plot', 'do_year', 'do_month', 'do_week', 'do_day', 'do_file', 'do_sport', 'do_update', 'do_average']
         do_plot, do_year, do_month, do_week, do_day, do_file, do_sport, do_update, do_average = [options[o] for o in opts]
@@ -333,7 +333,8 @@ class GarminReport(object):
                 else:
                     htmlfile.write(line)
 
-        if os.path.exists('%s/html' % curpath) and os.path.exists('%s/public_html/garmin' % os.getenv('HOME')):
+        if (os.path.exists('%s/html' % curpath) and os.path.exists('%s/public_html/garmin' % os.getenv('HOME')))\
+                and copy_to_public_html:
             if os.path.exists('%s/public_html/garmin/html' % os.getenv('HOME')):
                 run_command('rm -rf %s/public_html/garmin/html' % os.getenv('HOME'))
             run_command('mv %s/html %s/public_html/garmin' % (curpath, os.getenv('HOME')))
@@ -394,7 +395,7 @@ class GarminReport(object):
 
         return '\n'.join(retval)
     
-    def file_report_html(self, gfile, use_time=False, **options):
+    def file_report_html(self, gfile, use_time=False, copy_to_public_html=True, **options):
         ''' create pretty plots '''
         avg_hr = 0
         sum_time = 0
@@ -533,8 +534,9 @@ class GarminReport(object):
                             htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
                     else:
                         htmlfile.write(line.replace('<pre>', '<div>').replace('</pre>', '</div>'))
-        os.chdir(curpath)
-        if os.path.exists('%s/html' % curpath) and os.path.exists('%s/public_html/garmin' % os.getenv('HOME')):
+
+        if (os.path.exists('%s/html' % curpath) and os.path.exists('%s/public_html/garmin' % os.getenv('HOME')))\
+                    and copy_to_public_html:
             if os.path.exists('%s/public_html/garmin/html' % os.getenv('HOME')):
                 run_command('rm -rf %s/public_html/garmin/html' % os.getenv('HOME'))
             run_command('mv %s/html %s/public_html/garmin' % (curpath, os.getenv('HOME')))
