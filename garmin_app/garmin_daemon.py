@@ -48,6 +48,9 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
             isprev = True
             args.pop(0)
 
+        if msg_q != None:
+            print(msg_q)
+            
         if msg_q != None and isprev:
             _tmp = ' '.join(args)
             if _tmp in msg_q:
@@ -58,6 +61,9 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
                 elif idx == 0:
                     while len(msg_q) > 1:
                         msg_q.pop(-1)
+            if _tmp == 'year':
+                while len(msg_q) > 0:
+                    msg_q.pop(-1)
         
         gdir = []
         options = {'do_plot': False, 'do_year': False, 'do_month': False, 'do_week': False, 'do_day': False, 'do_file': False, 'do_sport': None, 'do_update': False, 'do_average': False}
@@ -66,7 +72,11 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
         garmin_parse_arg_list(args, msg_q, **options)
 
         if msg_q != None and not isprev:
-            msg_q.append(d.strip())
+            if d.strip() != 'prev year':
+                msg_q.append(d.strip())
+
+        if msg_q != None:
+            print(msg_q)
 
         c.send('done')
         c.close()
