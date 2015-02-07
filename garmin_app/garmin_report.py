@@ -896,9 +896,11 @@ def get_lap_html(glap, sport):
               '%.2f mi' % (glap.lap_distance/METERS_PER_MILE),
               print_h_m_s(glap.lap_duration),
               glap.lap_calories,
-              '%.2f min' % (glap.lap_duration/60.),
-              '%s / mi' % print_h_m_s(glap.lap_duration / (glap.lap_distance / METERS_PER_MILE), False),
-              '%s / km' % print_h_m_s(glap.lap_duration / (glap.lap_distance / 1000.), False),]
+              '%.2f min' % (glap.lap_duration/60.),]
+    if glap.lap_distance > 0:
+        values.extend([
+            '%s / mi' % print_h_m_s(glap.lap_duration / (glap.lap_distance / METERS_PER_MILE), False),
+            '%s / km' % print_h_m_s(glap.lap_duration / (glap.lap_distance / 1000.), False),])
     if glap.lap_avg_hr:
         values.append('%i bpm' % glap.lap_avg_hr)
 
