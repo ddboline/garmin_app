@@ -124,6 +124,19 @@ class GarminParse(GarminFile):
             if cur_point.distance > 0:
                 self.points.append(cur_point)
 
+        printed_datetime = print_date_string(self.laps[0].lap_start)
+        for sport in list_of_mislabeled_times:
+            if printed_datetime in list_of_mislabeled_times[sport]:
+                self.sport = sport
+                if self.sport == 'biking':
+                    self.total_calories = int(self.total_calories * (1701/26.26) / (3390/26.43))
+                    for l in self.laps:
+                        l.lap_calories = int(l.lap_calories * (1701/26.26) / (3390/26.43))
+                if self.sport == 'running':
+                    self.total_calories = int(self.total_calories * (3390/26.43) / (1701/26.26))
+                    for l in self.laps:
+                        l.lap_calories = int(l.lap_calories * (3390/26.43) / (1701/26.26))
+
         return None
 
     def read_file_tcx(self):

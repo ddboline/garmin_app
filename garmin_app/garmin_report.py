@@ -292,7 +292,6 @@ class GarminReport(object):
                         if occur_map[i] > 0:
                             retval.append(i, occur_map[i])
         outstr = '\n'.join(retval)
-        print(outstr)
         
         htmlostr = []
         for o in retval:
@@ -306,7 +305,6 @@ class GarminReport(object):
 
         htmlostr = '\n'.join(htmlostr)
         curpath = options['script_path']
-        print curpath
         if not os.path.exists('%s/html' % curpath):
             os.makedirs('%s/html' % curpath)
         with open('%s/html/index.html' % curpath, 'w') as htmlfile:
@@ -321,7 +319,7 @@ class GarminReport(object):
                 run_command('rm -rf %s/public_html/garmin/html' % os.getenv('HOME'))
             run_command('mv %s/html %s/public_html/garmin' % (curpath, os.getenv('HOME')))
         
-        pass
+        return outstr
 
     def file_report_txt(self, gfile):
         ''' nice output string for a file '''

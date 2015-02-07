@@ -41,7 +41,9 @@ class GarminCache(object):
         self.cache_summary_md5_dict = {}
         self.cache_summary_file_dict = {}
         self.pickle_file_is_modified = False
-        pass
+        if cache_directory:
+            if not os.path.exists(cache_directory):
+                os.makedirs(cache_directory)
     
     def read_pickle_object_in_file(self, pickle_file=''):
         ''' read python object from gzipped pickle file '''

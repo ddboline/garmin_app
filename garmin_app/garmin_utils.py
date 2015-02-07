@@ -189,7 +189,7 @@ def read_garmin_file(fname, **options):
     from garmin_app.garmin_report import GarminReport
     script_path = options['script_path']
     _pickle_file = '%s/run/garmin.pkl.gz' % script_path
-    _cache_dir = '%s/cache' % script_path
+    _cache_dir = '%s/run/cache' % script_path
     _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir)
     _temp_file = _cache.read_cached_gfile(gfbasename=os.path.basename(fname))
     if _temp_file:
@@ -211,7 +211,7 @@ def do_summary(directory_, **options):
     from garmin_app.garmin_report import GarminReport
     script_path = options['script_path']
     _pickle_file = '%s/run/garmin.pkl.gz' % script_path
-    _cache_dir = '%s/cache' % script_path
+    _cache_dir = '%s/run/cache' % script_path
     _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir)
     if 'build' in options and options['build']:
         return _cache.get_cache_summary_list(directory='%s/run' % script_path)
@@ -219,7 +219,7 @@ def do_summary(directory_, **options):
     if not _summary_list:
         return None
     _report = GarminReport(cache_obj=_cache)
-    _report.summary_report(_summary_list, **options)
+    print(_report.summary_report(_summary_list, **options))
 
 def garmin_parse_arg_list(args, **options):
     script_path = options['script_path']
@@ -230,7 +230,7 @@ def garmin_parse_arg_list(args, **options):
             options['build'] = True
         elif arg == 'backup':
             fname = '%s/garmin_data_%s.tar.gz' % (script_path, datetime.date.today().strftime('%Y%m%d'))
-            run_command('cd %s/run/ ; tar zcvf %s 2* garmin.pkl' % (script_path, fname))
+            run_command('cd %s/run/ ; tar zcvf %s 2* garmin.pkl* cache/' % (script_path, fname))
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
                 run_command('cp %s %s/public_html/backup/garmin_data.tar.gz' % (fname, os.getenv('HOME')))
             if os.path.exists('%s/public_html/garmin/tar' % os.getenv('HOME')):
