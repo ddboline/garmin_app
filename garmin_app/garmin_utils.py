@@ -148,7 +148,10 @@ def compare_with_remote(script_path):
     def process_files(arg, dirname, names):
         for fn in names:
             fname = '%s/%s' % (dirname, fn)
-            if os.path.isdir(fname) or fn == 'garmin.pkl' or fn == 'garmin.list' or fn == 'garmin.pkl.gz':
+            if os.path.isdir(fname) or\
+                ('garmin.pkl' in fn) or\
+                ('garmin.list' in fn) or\
+                ('.pkl.gz' in fn):
                 continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True).read().split()[0]
@@ -220,6 +223,7 @@ def do_summary(directory_, **options):
         return None
     _report = GarminReport(cache_obj=_cache)
     print(_report.summary_report(_summary_list, **options))
+    return True
 
 def garmin_parse_arg_list(args, **options):
     script_path = options['script_path']
@@ -279,6 +283,6 @@ def garmin_parse_arg_list(args, **options):
 
     
     if len(gdir) == 1 and os.path.isfile(gdir[0]):
-        read_garmin_file(gdir[0], **options)
+        return read_garmin_file(gdir[0], **options)
     else:
-        do_summary(gdir, **options)
+        return do_summary(gdir, **options)
