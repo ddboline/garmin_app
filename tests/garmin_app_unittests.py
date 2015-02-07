@@ -24,12 +24,7 @@ from garmin_app import garmin_utils,\
                        garmin_cache,\
                        garmin_report
 
-try:
-    from util import run_command, datetimefromstring
-except ImportError:
-    if os.path.exists('%s/scripts' % os.getenv('HOME')):
-        os.sys.path.append('%s/scripts' % os.getenv('HOME'))
-        from util import run_command, datetimefromstring
+from garmin_app.util import run_command, datetimefromstring
 
 class TestGarminApp(unittest.TestCase):
 

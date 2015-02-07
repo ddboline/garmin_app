@@ -14,13 +14,7 @@ from garmin_app.garmin_utils import METERS_PER_MILE, MARATHON_DISTANCE_M,\
      convert_fit_to_tcx, convert_gmn_to_xml, expected_calories
 from garmin_app.garmin_corrections import list_of_mislabeled_times, list_of_corrected_laps
 
-try:
-    from util import run_command
-except ImportError:
-    if os.path.exists('%s/scripts' % os.getenv('HOME')):
-        os.sys.path.append('%s/scripts' % os.getenv('HOME'))
-        from util import run_command
-
+from garmin_app.util import run_command
 
 class GarminParse(GarminFile):
     '''

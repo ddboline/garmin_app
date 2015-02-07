@@ -5,7 +5,7 @@ from __future__ import print_function
 import os, glob
 import datetime
 from garmin_app.garmin_utils import garmin_parse_arg_list
-from util import run_command
+from garmin_app.util import run_command
 import multiprocessing
 import socket
 

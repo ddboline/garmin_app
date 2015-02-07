@@ -9,15 +9,12 @@
         GarminSummary
 '''
 
+import os
+
 from garmin_app.garmin_utils import convert_date_string, convert_time_string,\
     get_md5_full, expected_calories, METERS_PER_MILE, SPORT_TYPES
 
-try:
-    from util import datetimefromstring
-except ImportError:
-    if os.path.exists('%s/scripts' % os.getenv('HOME')):
-        os.sys.path.append('%s/scripts' % os.getenv('HOME'))
-        from util import datetimefromstring
+from garmin_app.util import datetimefromstring
 
 class GarminPoint(object):
     '''

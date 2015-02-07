@@ -22,12 +22,7 @@ except ImportError:
 
 import pandas as pd
 
-try:
-    from util import run_command
-except ImportError:
-    if os.path.exists('%s/scripts' % os.getenv('HOME')):
-        os.sys.path.append('%s/scripts' % os.getenv('HOME'))
-        from util import run_command
+from garmin_app.util import run_command
 
 from garmin_app.garmin_corrections import list_of_corrected_laps
 from garmin_app.garmin_file import GarminSummary, GarminFile, GarminLap, GarminPoint

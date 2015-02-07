@@ -13,12 +13,7 @@ import glob
 import hashlib
 import datetime
 
-try:
-    from util import run_command, datetimefromstring
-except ImportError:
-    if os.path.exists('%s/scripts' % os.getenv('HOME')):
-        os.sys.path.append('%s/scripts' % os.getenv('HOME'))
-        from util import run_command, datetimefromstring
+from garmin_app.util import run_command, datetimefromstring
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 
