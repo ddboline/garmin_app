@@ -8,9 +8,11 @@
 import os
 import datetime
 
+from garmin_app.garmin_file import GarminSummary
+from garmin_app.garmin_cache import GarminCache
 from garmin_app.garmin_utils import print_date_string, print_h_m_s, run_command,\
      days_in_month, days_in_year,\
-     METERS_PER_MILE, MARATHON_DISTANCE_MI, WEEKDAY_NAMES, MONTH_NAMES
+     METERS_PER_MILE, MARATHON_DISTANCE_MI, WEEKDAY_NAMES, MONTH_NAMES, SPORT_TYPES
 
 class GarminReport(object):
     '''
@@ -19,8 +21,301 @@ class GarminReport(object):
             individual files
             summaries of files, days, weeks, months and years
     '''
-    def __init__(self):
-        self.report_type = ''
+    def __init__(self, cache_obj=None):
+        self.cache_obj = cache_obj
+
+    def summary_report(self, summary_list, **options):
+        ''' get summary of files in directory '''
+        opts = ['do_plot', 'do_year', 'do_month', 'do_week', 'do_day', 'do_file', 'do_sport', 'do_update', 'do_average']
+        do_plot, do_year, do_month, do_week, do_day, do_file, do_sport, do_update, do_average = [options[o] for o in opts]
+
+        summary_list = sorted(summary_list, key=lambda x: x.begin_datetime)
+
+        year_set = list(set(x.begin_datetime.year for x in summary_list))
+        month_set = list(set((x.begin_datetime.year*100 + x.begin_datetime.month) for x in summary_list))
+        week_set = list(set((x.begin_datetime.isocalendar()[0]*100+x.begin_datetime.isocalendar()[1]) for x in summary_list))
+        day_set = list(set(x.begin_datetime.date() for x in summary_list))
+        sport_set = list(set(x.sport for x in summary_list))
+
+        for item in year_set, month_set, week_set, day_set, sport_set:
+            item.sort()
+
+        total_sport_summary = {s: GarminSummary() for s in sport_set}
+        year_sport_summary = {s: {y: GarminSummary() for y in year_set} for s in sport_set}
+        month_sport_summary = {s: {m: GarminSummary() for m in month_set} for s in sport_set}
+        day_sport_summary = {s: {d: GarminSummary() for d in day_set} for s in sport_set}
+        week_sport_summary = {s: {w: GarminSummary() for w in week_set} for s in sport_set}
+
+        total_sport_day_set = {s: set() for s in sport_set}
+        year_sport_day_set = {s: {y: set() for y in year_set} for s in sport_set}
+        month_sport_day_set = {s: {m: set() for m in month_set} for s in sport_set}
+        day_sport_set = {s: set() for s in sport_set}
+        week_sport_day_set = {s: {w: set() for w in week_set} for s in sport_set}
+        week_sport_set = {s: set() for s in sport_set}
+
+        total_summary = GarminSummary()
+        year_summary = {y: GarminSummary() for y in year_set}
+        month_summary = {m: GarminSummary() for m in month_set}
+        day_summary = {d: GarminSummary() for d in day_set}
+        week_summary = {w: GarminSummary() for w in week_set}
+
+        year_day_set = {y: set() for y in year_set}
+        month_day_set = {m: set() for m in month_set}
+        week_day_set = {w: set() for w in week_set}
+
+        for gfile in summary_list:
+            cur_date = gfile.begin_datetime.date()
+            month_index = cur_date.year * 100 + cur_date.month
+            week_index = cur_date.isocalendar()[0]*100 + cur_date.isocalendar()[1]
+            sport = gfile.sport
+            if do_sport and do_sport not in gfile.sport:
+                continue
+            year = cur_date.year
+            total_sport_summary[sport].add(gfile)
+            total_sport_day_set[sport].add(cur_date)
+            total_summary.add(gfile)
+            year_sport_summary[sport][year].add(gfile)
+            year_sport_day_set[sport][year].add(cur_date)
+            year_summary[year].add(gfile)
+            year_day_set[year].add(cur_date)
+            month_sport_summary[sport][month_index].add(gfile)
+            month_sport_day_set[sport][month_index].add(cur_date)
+            month_summary[month_index].add(gfile)
+            month_day_set[month_index].add(cur_date)
+            day_sport_summary[sport][cur_date].add(gfile)
+            day_sport_set[sport].add(cur_date)
+            day_summary[cur_date].add(gfile)
+            week_sport_summary[sport][week_index].add(gfile)
+            week_sport_day_set[sport][week_index].add(cur_date)
+            week_sport_set[sport].add(week_index)
+            week_summary[week_index].add(gfile)
+            week_day_set[week_index].add(cur_date)
+
+        ### If more than one year, default to year-to-year summary
+        retval = []
+        cmd_args = []
+        if do_file:
+            for sport in SPORT_TYPES:
+                if sport not in sport_set:
+                    continue
+                for gfile in summary_list:
+                    cur_date = gfile.begin_datetime.date()
+                    if gfile.sport != sport:
+                        continue
+                    retval.append(self.day_summary_report_txt(gfile, sport, cur_date))
+                    cmd_args.append('%s' % os.path.basename(gfile.filename))
+                retval.append('')
+            retval.append('')
+        if do_day:
+            for sport in SPORT_TYPES:
+                if sport not in sport_set:
+                    continue
+                for cur_date in day_set:
+                    if cur_date not in day_sport_set[sport]:
+                        continue
+                    retval.append(self.day_summary_report_txt(day_sport_summary[sport][cur_date], sport, cur_date))
+                    cmd_args.append('%04d-%02d-%02d file %s' % (cur_date.year,
+                                                                            cur_date.month,
+                                                                            cur_date.day,
+                                                                            sport))
+                retval.append('')
+                if not do_sport and do_average:
+                    retval.append(total_sport_summary[sport].print_day_average(sport, len(day_sport_set[sport])))
+                    cmd_args.append('')
+                    retval.append('')
+            if not do_sport:
+                for cur_date in day_set:
+                    retval.append(self.day_summary_report_txt(day_summary[cur_date], 'total', cur_date))
+                    cmd_args.append('')
+                retval.append('')
+            if not do_sport and do_average:
+                retval.append(total_summary.print_day_average('total', len(day_set)))
+                cmd_args.append('')
+                retval.append('')
+        if do_week:
+            for sport in SPORT_TYPES:
+                if sport not in sport_set:
+                    continue
+                for yearweek in week_set:
+                    if len(week_sport_day_set[sport][yearweek]) == 0:
+                        continue
+                    isoyear = int(yearweek/100)
+                    isoweek = yearweek % 100
+                    retval.append(self.week_summary_report_txt(week_sport_summary[sport][yearweek], sport, isoyear, isoweek, len(week_sport_day_set[sport][yearweek])))
+                    cmd_args.append('')
+                retval.append('')
+                if not do_sport and do_average:
+                    retval.append(total_sport_summary[sport].print_week_average(sport=sport, number_days=len(total_sport_day_set[sport]), number_of_weeks=len(week_sport_set[sport])))
+                    cmd_args.append('')
+                    retval.append('')
+            for yearweek in week_set:
+                isoyear = int(yearweek/100)
+                isoweek = yearweek % 100
+                if not do_sport:
+                    retval.append(self.week_summary_report_txt(week_summary[yearweek], 'total', isoyear, isoweek, len(week_day_set[yearweek])))
+                    cmd_args.append('')
+            if not do_sport and do_average:
+                retval.append('')
+                retval.append(total_summary.print_week_average(sport='total', number_days=len(day_set), number_of_weeks=len(week_set)))
+                cmd_args.append('')
+                retval.append('')
+        if do_month:
+            for sport in SPORT_TYPES:
+                if sport not in sport_set:
+                    continue
+                for yearmonth in month_set:
+                    year = int(yearmonth / 100)
+                    month = yearmonth % 100
+                    if len(month_sport_day_set[sport][yearmonth]) == 0:
+                        continue
+                    retval.append(month_sport_summary[sport][yearmonth].print_month_summary(sport, year, month, len(month_sport_day_set[sport][yearmonth])))
+                    cmd_args.append('')
+                retval.append('')
+                if not do_sport and do_average:
+                    retval.append(total_sport_summary[sport].print_month_average(sport, number_of_months=len(month_sport_day_set[sport])))
+                    cmd_args.append('')
+                    retval.append('')
+            retval.append('')
+            for yearmonth in month_set:
+                year = int(yearmonth / 100)
+                month = yearmonth % 100
+                if len(month_day_set[yearmonth]) == 0:
+                    continue
+                if not do_sport:
+                    retval.append(month_summary[yearmonth].print_month_summary('total', year, month, len(month_day_set[yearmonth])))
+                    cmd_args.append('')
+            retval.append('')
+            if not do_sport and do_average:
+                retval.append(total_summary.print_month_average(sport='total', number_of_months=len(month_set)))
+                cmd_args.append('')
+                retval.append('')
+        if do_year:
+            for sport in SPORT_TYPES:
+                if sport not in sport_set:
+                    continue
+                for year in year_set:
+                    if len(year_sport_day_set[sport][year]) == 0:
+                        continue
+                    retval.append(year_sport_summary[sport][year].print_year_summary(sport, year, len(year_sport_day_set[sport][year])))
+                    cmd_args.append('')
+                retval.append('')
+            retval.append('')
+            for year in year_set:
+                if len(year_day_set[year]) == 0:
+                    continue
+                if not do_sport:
+                    retval.append(year_summary[year].print_year_summary('total', year, len(year_day_set[year])))
+                    cmd_args.append('')
+            retval.append('')
+
+        for sport in SPORT_TYPES:
+            if sport not in sport_set:
+                continue
+            if len(total_sport_day_set[sport]) > 1 and not do_day and do_average:
+                print total_sport_summary[sport].print_day_average(sport, len(day_sport_set[sport]))
+        if not do_sport and do_average:
+            retval.append('')
+            retval.append(total_summary.print_day_average('total', len(day_set)))
+            cmd_args.append('')
+            retval.append('')
+        for sport in SPORT_TYPES:
+            if sport not in sport_set:
+                continue
+            if len(week_sport_set[sport]) > 1 and not do_week and do_average:
+                retval.append(total_sport_summary[sport].print_week_average(sport=sport, number_days=len(total_sport_day_set[sport]), number_of_weeks=len(week_sport_set[sport])))
+                cmd_args.append('')
+        if not do_sport and do_average:
+            retval.append('')
+            retval.append(total_summary.print_week_average('total', number_days=len(day_set), number_of_weeks=len(week_set)))
+            cmd_args.append('')
+            retval.append('')
+        for sport in SPORT_TYPES:
+            if sport not in sport_set:
+                continue
+            if len(month_sport_day_set[sport]) > 1 and not do_month and do_average:
+                retval.append(total_sport_summary[sport].print_month_average(sport, number_of_months=len(month_sport_day_set[sport])))
+                cmd_args.append('')
+        if not do_sport and do_average:
+            retval.append('')
+            retval.append(total_summary.print_month_average('total', number_of_months=len(month_set)))
+            cmd_args.append('')
+            retval.append('')
+        begin_date = day_set[0]
+        end_date = day_set[-1]
+        total_days = (end_date - begin_date).days
+        for sport in SPORT_TYPES:
+            if sport not in sport_set:
+                continue
+            if len(total_sport_day_set[sport]) == 0:
+                continue
+            if not do_sport:
+                retval.append(total_sport_summary[sport].print_total_summary(sport, len(total_sport_day_set[sport]), total_days))
+                cmd_args.append('')
+        if not do_sport:
+            retval.append('')
+            retval.append(total_summary.print_total_summary('total', len(day_set), total_days))
+            cmd_args.append('')
+            retval.append('')
+
+        if 'occur' in options:
+            occur_map = {}
+            for i in range(0, len(day_set)+1):
+                occur_map[i] = 0
+
+            if len(day_set) > 1:
+                last_date = day_set[0]
+                for i in range(1, len(day_set)):
+                    if (day_set[i]-day_set[i-1]).days > 1:
+                        occur_map[(day_set[i-1] - last_date).days + 1] += 1
+                        if ((day_set[i-1] - last_date).days + 1) > 5:
+                            retval.append(day_set[i-1])
+                            cmd_args.append('')
+                        last_date = day_set[i]
+                try:
+                    occur_map[(day_set[-1]-last_date).days + 1] += 1
+                except KeyError:
+                    print day_set[-1], last_date
+                    print (day_set[-1]-last_date).days + 1
+                    print occur_map
+                    print day_set
+                    print 'key error'
+                    exit(1)
+
+                if not do_sport:
+                    for i in range(0, len(day_set)+1):
+                        if occur_map[i] > 0:
+                            retval.append(i, occur_map[i])
+        outstr = '\n'.join(retval)
+        print(outstr)
+        
+        htmlostr = []
+        for o in retval:
+            htmlostr.append(o)
+            if not o:
+                continue
+            if cmd_args:
+                c = cmd_args.pop(0)
+                if c:
+                    htmlostr[-1] = '<button type="submit" onclick="send_command(\'%s\');">%s</button> %s' % (c, c, o)
+
+        htmlostr = '\n'.join(htmlostr)
+        curpath = options['script_path']
+        print curpath
+        if not os.path.exists('%s/html' % curpath):
+            os.makedirs('%s/html' % curpath)
+        with open('%s/html/index.html' % curpath, 'w') as htmlfile:
+            for line in open('%s/templates/GARMIN_TEMPLATE.html' % curpath, 'r'):
+                if 'INSERTTEXTHERE' in line:
+                    htmlfile.write(htmlostr)
+                else:
+                    htmlfile.write(line)
+
+        if os.path.exists('%s/html' % curpath) and os.path.exists('%s/public_html/garmin' % os.getenv('HOME')):
+            if os.path.exists('%s/public_html/garmin/html' % os.getenv('HOME')):
+                run_command('rm -rf %s/public_html/garmin/html' % os.getenv('HOME'))
+            run_command('mv %s/html %s/public_html/garmin' % (curpath, os.getenv('HOME')))
+        
+        pass
 
     def file_report_txt(self, gfile):
         ''' nice output string for a file '''
