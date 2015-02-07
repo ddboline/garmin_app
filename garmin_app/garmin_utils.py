@@ -148,7 +148,7 @@ def compare_with_remote(script_path):
     def process_files(arg, dirname, names):
         for fn in names:
             fname = '%s/%s' % (dirname, fn)
-            if os.path.isdir(fname) or fn == 'garmin.pkl' or fn == 'garmin.list':
+            if os.path.isdir(fname) or fn == 'garmin.pkl' or fn == 'garmin.list' or fn == 'garmin.pkl.gz':
                 continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True).read().split()[0]

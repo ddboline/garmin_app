@@ -120,16 +120,22 @@ class GarminReport(object):
                                                                             sport))
                 retval.append('')
                 if not do_sport and do_average:
-                    retval.append(total_sport_summary[sport].print_day_average(sport, len(day_sport_set[sport])))
-                    cmd_args.append('')
+                    retval.append(self.day_average_report_txt(total_sport_summary[sport], sport, len(day_sport_set[sport])))
+                    cmd_args.append('%04d-%02d-%02d file %s' % (cur_date.year,
+                                                                            cur_date.month,
+                                                                            cur_date.day,
+                                                                            sport))
                     retval.append('')
             if not do_sport:
                 for cur_date in day_set:
                     retval.append(self.day_summary_report_txt(day_summary[cur_date], 'total', cur_date))
-                    cmd_args.append('')
+                    cmd_args.append('%04d-%02d-%02d file %s' % (cur_date.year,
+                                                                            cur_date.month,
+                                                                            cur_date.day,
+                                                                            sport))
                 retval.append('')
             if not do_sport and do_average:
-                retval.append(total_summary.print_day_average('total', len(day_set)))
+                retval.append(self.day_average_report_txt(total_summary, 'total', len(day_set)))
                 cmd_args.append('')
                 retval.append('')
         if do_week:
@@ -145,7 +151,7 @@ class GarminReport(object):
                     cmd_args.append('')
                 retval.append('')
                 if not do_sport and do_average:
-                    retval.append(total_sport_summary[sport].print_week_average(sport=sport, number_days=len(total_sport_day_set[sport]), number_of_weeks=len(week_sport_set[sport])))
+                    retval.append(self.week_average_report_txt(total_sport_summary[sport], sport=sport, number_days=len(total_sport_day_set[sport]), number_of_weeks=len(week_sport_set[sport])))
                     cmd_args.append('')
                     retval.append('')
             for yearweek in week_set:
@@ -156,7 +162,7 @@ class GarminReport(object):
                     cmd_args.append('')
             if not do_sport and do_average:
                 retval.append('')
-                retval.append(total_summary.print_week_average(sport='total', number_days=len(day_set), number_of_weeks=len(week_set)))
+                retval.append(self.week_average_report_txt(total_summary, sport='total', number_days=len(day_set), number_of_weeks=len(week_set)))
                 cmd_args.append('')
                 retval.append('')
         if do_month:
@@ -168,12 +174,12 @@ class GarminReport(object):
                     month = yearmonth % 100
                     if len(month_sport_day_set[sport][yearmonth]) == 0:
                         continue
-                    retval.append(month_sport_summary[sport][yearmonth].print_month_summary(sport, year, month, len(month_sport_day_set[sport][yearmonth])))
-                    cmd_args.append('')
+                    retval.append(self.month_summary_report_txt(month_sport_summary[sport][yearmonth], sport, year, month, len(month_sport_day_set[sport][yearmonth])))
+                    cmd_args.append('%04d-%02d day %s' % (year, month, sport))
                 retval.append('')
                 if not do_sport and do_average:
-                    retval.append(total_sport_summary[sport].print_month_average(sport, number_of_months=len(month_sport_day_set[sport])))
-                    cmd_args.append('')
+                    retval.append(self.month_average_report_txt(total_sport_summary[sport], sport, number_of_months=len(month_sport_day_set[sport])))
+                    cmd_args.append('%04d-%02d day %s' % (year, month, sport))
                     retval.append('')
             retval.append('')
             for yearmonth in month_set:
@@ -182,11 +188,11 @@ class GarminReport(object):
                 if len(month_day_set[yearmonth]) == 0:
                     continue
                 if not do_sport:
-                    retval.append(month_summary[yearmonth].print_month_summary('total', year, month, len(month_day_set[yearmonth])))
-                    cmd_args.append('')
+                    retval.append(self.month_summary_report_txt(month_summary[yearmonth], 'total', year, month, len(month_day_set[yearmonth])))
+                    cmd_args.append('%04d-%02d day' % (year, month))
             retval.append('')
             if not do_sport and do_average:
-                retval.append(total_summary.print_month_average(sport='total', number_of_months=len(month_set)))
+                retval.append(self.month_average_report_txt(total_summary, sport='total', number_of_months=len(month_set)))
                 cmd_args.append('')
                 retval.append('')
         if do_year:
@@ -196,48 +202,48 @@ class GarminReport(object):
                 for year in year_set:
                     if len(year_sport_day_set[sport][year]) == 0:
                         continue
-                    retval.append(year_sport_summary[sport][year].print_year_summary(sport, year, len(year_sport_day_set[sport][year])))
-                    cmd_args.append('')
+                    retval.append(self.year_summary_report_txt(year_sport_summary[sport][year], sport, year, len(year_sport_day_set[sport][year])))
+                    cmd_args.append('%d month %s' % (year, sport))
                 retval.append('')
             retval.append('')
             for year in year_set:
                 if len(year_day_set[year]) == 0:
                     continue
                 if not do_sport:
-                    retval.append(year_summary[year].print_year_summary('total', year, len(year_day_set[year])))
-                    cmd_args.append('')
+                    retval.append(self.year_summary_report_txt(year_summary[year], 'total', year, len(year_day_set[year])))
+                    cmd_args.append('%d month' % year)
             retval.append('')
 
         for sport in SPORT_TYPES:
             if sport not in sport_set:
                 continue
             if len(total_sport_day_set[sport]) > 1 and not do_day and do_average:
-                print total_sport_summary[sport].print_day_average(sport, len(day_sport_set[sport]))
+                retval.append(self.day_average_report_txt(total_sport_summary[sport], sport, len(day_sport_set[sport])))
         if not do_sport and do_average:
             retval.append('')
-            retval.append(total_summary.print_day_average('total', len(day_set)))
+            retval.append(self.day_average_report_txt(total_summary, 'total', len(day_set)))
             cmd_args.append('')
             retval.append('')
         for sport in SPORT_TYPES:
             if sport not in sport_set:
                 continue
             if len(week_sport_set[sport]) > 1 and not do_week and do_average:
-                retval.append(total_sport_summary[sport].print_week_average(sport=sport, number_days=len(total_sport_day_set[sport]), number_of_weeks=len(week_sport_set[sport])))
+                retval.append(self.week_average_report_txt(total_sport_summary[sport], sport=sport, number_days=len(total_sport_day_set[sport]), number_of_weeks=len(week_sport_set[sport])))
                 cmd_args.append('')
         if not do_sport and do_average:
             retval.append('')
-            retval.append(total_summary.print_week_average('total', number_days=len(day_set), number_of_weeks=len(week_set)))
+            retval.append(self.week_average_report_txt(total_summary, 'total', number_days=len(day_set), number_of_weeks=len(week_set)))
             cmd_args.append('')
             retval.append('')
         for sport in SPORT_TYPES:
             if sport not in sport_set:
                 continue
             if len(month_sport_day_set[sport]) > 1 and not do_month and do_average:
-                retval.append(total_sport_summary[sport].print_month_average(sport, number_of_months=len(month_sport_day_set[sport])))
+                retval.append(self.month_average_report_txt(total_sport_summary[sport], sport, number_of_months=len(month_sport_day_set[sport])))
                 cmd_args.append('')
         if not do_sport and do_average:
             retval.append('')
-            retval.append(total_summary.print_month_average('total', number_of_months=len(month_set)))
+            retval.append(self.month_average_report_txt(total_summary, 'total', number_of_months=len(month_set)))
             cmd_args.append('')
             retval.append('')
         begin_date = day_set[0]
@@ -249,11 +255,11 @@ class GarminReport(object):
             if len(total_sport_day_set[sport]) == 0:
                 continue
             if not do_sport:
-                retval.append(total_sport_summary[sport].print_total_summary(sport, len(total_sport_day_set[sport]), total_days))
+                retval.append(self.total_summary_report_txt(total_sport_summary[sport], sport, len(total_sport_day_set[sport]), total_days))
                 cmd_args.append('')
         if not do_sport:
             retval.append('')
-            retval.append(total_summary.print_total_summary('total', len(day_set), total_days))
+            retval.append(self.total_summary_report_txt(total_summary, 'total', len(day_set), total_days))
             cmd_args.append('')
             retval.append('')
 
