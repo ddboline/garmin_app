@@ -10,7 +10,7 @@
 '''
 
 from garmin_app.garmin_utils import convert_date_string, convert_time_string,\
-    get_md5_full, METERS_PER_MILE, SPORT_TYPES
+    get_md5_full, expected_calories, METERS_PER_MILE, SPORT_TYPES
 
 try:
     from util import datetimefromstring
@@ -280,7 +280,7 @@ class GarminSummary(object):
         self.total_calories += summary_to_add.total_calories
         self.total_distance += summary_to_add.total_distance
         self.total_duration += summary_to_add.total_duration
-        if summary_to_add.total_hr_dur[0] > 0:
-            self.total_hr_dur[0] += summary_to_add.total_hr_dur[0]
-            self.total_hr_dur[1] += summary_to_add.total_hr_dur[1]
+        if summary_to_add.total_hr_dur > 0:
+            self.total_hr_dur += summary_to_add.total_hr_dur
+            self.total_hr_dis += summary_to_add.total_hr_dis
         self.number_of_items += 1

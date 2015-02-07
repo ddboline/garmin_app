@@ -37,9 +37,9 @@ class GarminCache(object):
     def __init__(self, pickle_file='', cache_directory=''):
         self.pickle_file = pickle_file
         self.cache_directory = cache_directory
-        self.summary_list = []
-        self.summary_md5_dict = {}
-        self.summary_file_dict = {}
+        self.cache_summary_list = []
+        self.cache_summary_md5_dict = {}
+        self.cache_summary_file_dict = {}
         self.pickle_file_is_modified = False
         pass
     
@@ -87,16 +87,19 @@ class GarminCache(object):
         pfname = '%s/%s.pkl.gz' % (self.cache_directory, gfbasename)
         return self.write_pickle_object_to_file(garminfile, pickle_file=pfname)
 
-    def get_summary_list(self, directory):
+    def get_cache_summary_list(self, directory, **options):
         ''' '''
-        #opts = ['do_plot', 'do_year', 'do_month', 'do_week', 'do_day', 'do_file', 'do_sport', 'do_update', 'do_average']
-        #do_plot, do_year, do_month, do_week, do_day, do_file, do_sport, do_update, do_average = [options[o] for o in opts]
+        do_update = False
+        if 'update' in options and options['update']:
+            do_update = True
+        summary_list = []
+        
         self.pickle_file_is_modified = False
         temp_list = self.read_pickle_object_in_file()
         if temp_list and type(temp_list) == list:
-            self.summary_list = temp_list
-        self.summary_file_dict = {os.path.basename(x.filename): x for x in self.summary_list}
-        self.summary_md5_dict = {x.md5sum: x for x in self.summary_list}
+            self.cache_summary_list = temp_list
+        self.cache_summary_file_dict = {os.path.basename(x.filename): x for x in self.cache_summary_list}
+        self.cache_summary_md5_dict = {x.md5sum: x for x in self.cache_summary_list}
 
         def process_files(arg, dirname, names):
             for name in names:
@@ -113,23 +116,23 @@ class GarminCache(object):
             reduced_gmn_filename = os.path.basename(gmn_filename)
             gmn_md5sum = get_md5_full(gmn_filename)
 
-            if ((reduced_gmn_filename not in self.summary_file_dict) or
-                    (self.summary_file_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
-                    (do_update and print_date_string(self.summary_md5_dict[reduced_gmn_filename].begin_time)
+            if ((reduced_gmn_filename not in self.cache_summary_file_dict) or
+                    (self.cache_summary_file_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
+                    (do_update and print_date_string(self.cache_summary_md5_dict[reduced_gmn_filename].begin_time)
                         in list_of_corrected_laps)):
                 self.pickle_file_is_modified = True
                 gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)
                 gfile = gsum.read_file()
                 if gfile:
-                    self.summary_md5_dict[reduced_gmn_filename] = gsum
+                    self.cache_summary_list.append(gsum)
+                    self.cache_summary_file_dict[reduced_gmn_filename] = gsum
+                    self.cache_summary_md5_dict[gmn_md5sum] = gsum
                     self.write_cached_gfile(garminfile=gfile)
                 else:
                     print 'file %s not loaded for some reason' % reduced_gmn_filename
             else:
-                gsum = self.summary_file_dict[reduced_gmn_filename]
-            self.summary_list.append(gsum)
-            self.summary_file_dict[reduced_gmn_filename] = gsum
-            self.summary_md5_dict[gmn_md5sum] = gsum
+                gsum = self.cache_summary_file_dict[reduced_gmn_filename]
+            summary_list.append(gsum)
         
         if type(directory) == str:
             if os.path.isdir(directory):
@@ -144,8 +147,8 @@ class GarminCache(object):
                     add_file(d)
 
         if self.pickle_file_is_modified:
-            self.write_pickle_object_to_file(self.summary_list)
-        return self.summary_list
+            self.write_pickle_object_to_file(self.cache_summary_list)
+        return summary_list
         
 
 

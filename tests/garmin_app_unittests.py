@@ -273,7 +273,7 @@ class TestGarminApp(unittest.TestCase):
         
     def test_garmin_cache_get_summary_list(self):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/cache' % CURDIR)
-        sl = gc.get_summary_list(directory='%s/tests' % CURDIR)
+        sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
         output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline')
         m = hashlib.md5()
         m.update(output)
@@ -289,6 +289,13 @@ class TestGarminApp(unittest.TestCase):
         gfile_new = gc.read_cached_gfile(gfname)
         test2 = '%s' % gfile_new
         self.assertEqual(test1, test2)
+
+    def test_summary_report(self):
+        gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/cache' % CURDIR)
+        sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
+        rp = garmin_report.GarminReport(cache_obj=gc)
+        options = {'do_plot': False, 'do_year': False, 'do_month': False, 'do_week': False, 'do_day': False, 'do_file': False, 'do_sport': None, 'do_update': False, 'do_average': False}
+        rp.summary_report(sl, **options)
 
 if __name__ == '__main__':
     unittest.main()
