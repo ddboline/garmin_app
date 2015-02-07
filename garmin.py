@@ -13,12 +13,7 @@ from garmin_app.garmin_utils import compare_with_remote, garmin_parse_arg_list,\
     BASEURL, SPORT_TYPES
 from garmin_app.garmin_daemon import GarminServer
 
-try:
-    from util import run_command
-except ImportError:
-    if os.path.exists('%s/scripts' % os.getenv('HOME')):
-        os.sys.path.append('%s/scripts' % os.getenv('HOME'))
-        from util import run_command
+from garmin_app.util import run_command
 
 def garmin_arg_parse():
     help_text = 'usage: ./garmin.py <get|build|sync|backup|year|(file)|(directory)|(year(-month(-day)))|(sport)|occur|update>'
