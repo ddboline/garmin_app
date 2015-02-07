@@ -29,6 +29,7 @@ except ImportError:
         os.sys.path.append('%s/scripts' % os.getenv('HOME'))
         from util import run_command
 
+from garmin_app.garmin_corrections import list_of_corrected_laps
 from garmin_app.garmin_file import GarminSummary, GarminFile, GarminLap, GarminPoint
 from garmin_app.garmin_utils import get_md5_full
 
@@ -41,6 +42,7 @@ class GarminCache(object):
         self.cache_summary_md5_dict = {}
         self.cache_summary_file_dict = {}
         self.pickle_file_is_modified = False
+        self.do_update = False
         if cache_directory:
             if not os.path.exists(cache_directory):
                 os.makedirs(cache_directory)
@@ -91,9 +93,9 @@ class GarminCache(object):
 
     def get_cache_summary_list(self, directory, **options):
         ''' '''
-        do_update = False
+        self.do_update = False
         if 'update' in options and options['update']:
-            do_update = True
+            self.do_update = True
         summary_list = []
         
         self.pickle_file_is_modified = False
@@ -120,7 +122,7 @@ class GarminCache(object):
 
             if ((reduced_gmn_filename not in self.cache_summary_file_dict) or
                     (self.cache_summary_file_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
-                    (do_update and print_date_string(self.cache_summary_md5_dict[reduced_gmn_filename].begin_time)
+                    (self.do_update and print_date_string(self.cache_summary_md5_dict[reduced_gmn_filename].begin_time)
                         in list_of_corrected_laps)):
                 self.pickle_file_is_modified = True
                 gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)

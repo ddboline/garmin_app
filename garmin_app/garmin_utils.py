@@ -190,6 +190,7 @@ def compare_with_remote(script_path):
 def read_garmin_file(fname, msg_q=None, **options):
     from garmin_app.garmin_cache import GarminCache
     from garmin_app.garmin_report import GarminReport
+    from garmin_app.garmin_parse import GarminParse
     script_path = options['script_path']
     _pickle_file = '%s/run/garmin.pkl.gz' % script_path
     _cache_dir = '%s/run/cache' % script_path
