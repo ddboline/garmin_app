@@ -187,7 +187,7 @@ def compare_with_remote(script_path):
         print('missing files', s3_files_not_in_local)
     return
 
-def read_garmin_file(fname, **options):
+def read_garmin_file(fname, msg_q=None, **options):
     from garmin_app.garmin_cache import GarminCache
     from garmin_app.garmin_report import GarminReport
     script_path = options['script_path']
@@ -204,12 +204,12 @@ def read_garmin_file(fname, **options):
         _cache.write_cached_gfile(garminfile=_gfile)
     else:
         return False
-    _report = GarminReport(cache_obj=_cache)
+    _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
     print(_report.file_report_txt(_gfile))
     _report.file_report_html(_gfile, **options)
     return True
 
-def do_summary(directory_, **options):
+def do_summary(directory_, msg_q=None, **options):
     from garmin_app.garmin_cache import GarminCache
     from garmin_app.garmin_report import GarminReport
     script_path = options['script_path']
@@ -221,11 +221,11 @@ def do_summary(directory_, **options):
     _summary_list = _cache.get_cache_summary_list(directory=directory_)
     if not _summary_list:
         return None
-    _report = GarminReport(cache_obj=_cache)
+    _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
     print(_report.summary_report(_summary_list, **options))
     return True
 
-def garmin_parse_arg_list(args, **options):
+def garmin_parse_arg_list(args, msg_q=None, **options):
     script_path = options['script_path']
 
     gdir = []
@@ -283,6 +283,6 @@ def garmin_parse_arg_list(args, **options):
 
     
     if len(gdir) == 1 and os.path.isfile(gdir[0]):
-        return read_garmin_file(gdir[0], **options)
+        return read_garmin_file(gdir[0], msg_q, **options)
     else:
-        return do_summary(gdir, **options)
+        return do_summary(gdir, msg_q, **options)
