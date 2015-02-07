@@ -303,7 +303,7 @@ class GarminReport(object):
                     for i in range(0, len(day_set)+1):
                         if occur_map[i] > 0:
                             retval.append(i, occur_map[i])
-        outstr = re.sub('\n+', '\n', '\n'.join(retval))
+        outstr = re.sub('\n\n+', '\n', '\n'.join(retval))
         
         htmlostr = []
         for o in retval:
@@ -313,9 +313,9 @@ class GarminReport(object):
             if cmd_args:
                 c = cmd_args.pop(0)
                 if c:
-                    htmlostr[-1] = '<button type="submit" onclick="send_command(\'%s\');">%s</button> %s' % (c, c, o)
+                    htmlostr[-1] = '<button type="submit" onclick="send_command(\'%s\');">%s</button> %s' % (c, c, o.strip())
 
-        htmlostr = re.sub('\n+', '\n', '\n'.join(htmlostr))
+        htmlostr = re.sub('\n\n+', '<br>\n', '\n'.join(htmlostr))
         curpath = options['script_path']
         if not os.path.exists('%s/html' % curpath):
             os.makedirs('%s/html' % curpath)
