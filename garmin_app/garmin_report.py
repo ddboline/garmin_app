@@ -15,6 +15,16 @@ from garmin_app.garmin_utils import print_date_string, print_h_m_s, run_command,
      days_in_month, days_in_year,\
      METERS_PER_MILE, MARATHON_DISTANCE_MI, WEEKDAY_NAMES, MONTH_NAMES, SPORT_TYPES
 
+def print_history_buttons(history_list):
+    if not history_list:
+        return
+    retval = []
+    for h in history_list:
+        if h == 'year':
+            continue
+        retval.append('<button type="submit" onclick="send_command(\'prev %s\');"> %s </button>' % (h, h))
+    return '\n'.join(retval)
+
 class GarminReport(object):
     '''
         Class to produce reports, to stdout, and to html
@@ -22,8 +32,9 @@ class GarminReport(object):
             individual files
             summaries of files, days, weeks, months and years
     '''
-    def __init__(self, cache_obj=None):
+    def __init__(self, cache_obj=None, msg_q=None):
         self.cache_obj = cache_obj
+        self.msg_q = msg_q
 
     def summary_report(self, summary_list, **options):
         ''' get summary of files in directory '''
@@ -312,6 +323,13 @@ class GarminReport(object):
             for line in open('%s/templates/GARMIN_TEMPLATE.html' % curpath, 'r'):
                 if 'INSERTTEXTHERE' in line:
                     htmlfile.write(htmlostr)
+                elif 'SPORTTITLEDATE' in line:
+                    newtitle = 'Garmin Summary'
+                    htmlfile.write(line.replace('SPORTTITLEDATE',newtitle))
+                elif 'HISTORYBUTTONS' in line:
+                    histlist = []
+                    if self.msg_q:
+                        htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
                 else:
                     htmlfile.write(line)
 
@@ -386,15 +404,21 @@ class GarminReport(object):
         alt_vals = []
         alt_values = []
         vertical_climb = 0
-        speed_values = filter(lambda x: x[1] < 20, [[d/4., 4*t/60.] for d, t in get_splits(gfile, 400., do_heart_rate=False)])
+        speed_values = get_splits(gfile, 400., do_heart_rate=False)
+        if speed_values:
+            speed_values = filter(lambda x: x[1] < 20, [[d/4., 4*t/60.] for d, t in speed_values])
         mph_speed_values = []
         avg_speed_values = []
         avg_mph_speed_values = []
         lat_vals = []
         lon_vals = []
         graphs = []
-        mile_split_vals = [[d, t/60.] for d, t in get_splits(gfile, METERS_PER_MILE, do_heart_rate=False)]
+        mile_split_vals = get_splits(gfile, METERS_PER_MILE, do_heart_rate=False)
+        if mile_split_vals:
+            mile_split_vals = [[d, t/60.] for d, t in mile_split_vals]
         for point in gfile.points:
+            if point.distance == None:
+                continue
             if use_time:
                 xval = point.duration_from_begin
             else:
@@ -468,8 +492,12 @@ class GarminReport(object):
                                 break
                     elif 'INSERTTABLESHERE' in line:
                         htmlfile.write('%s\n' % get_file_html(gfile))
-                        htmlfile.write('<br><br>%s\n' % get_html_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi'))
-                        htmlfile.write('<br><br>%s\n' % get_html_splits(gfile, split_distance_in_meters=5000., label='km'))
+                        _tmp = get_html_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi')
+                        if _tmp != None:
+                            htmlfile.write('<br><br>%s\n' % _tmp)
+                        _tmp = get_html_splits(gfile, split_distance_in_meters=5000., label='km')
+                        if _tmp != None:
+                            htmlfile.write('<br><br>%s\n' % _tmp)
                     elif 'INSERTMAPSEGMENTSHERE' in line:
                         for idx in range(0, len(lat_vals)):
                             htmlfile.write('new google.maps.LatLng(%f,%f),\n' % (lat_vals[idx], lon_vals[idx]))
@@ -480,10 +508,31 @@ class GarminReport(object):
                     elif 'INSERTOTHERIMAGESHERE' in line:
                         for f in graphs:
                             htmlfile.write('<p>\n<img src="%s">\n</p>' % f)
+                    elif 'HISTORYBUTTONS' in line:
+                        histlist = []
+                        if self.msg_q:
+                            htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
                     else:
                         htmlfile.write(line)
             else:
-                htmlfile.write('<!DOCTYPE HTML>\n<html>\n<body>\n')
+                for line in open('%s/templates/GARMIN_TEMPLATE.html' % curpath, 'r'):
+                    if 'INSERTTEXTHERE' in line:
+                        htmlfile.write('%s\n' % get_file_html(gfile))
+                        _tmp = get_html_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi')
+                        if _tmp != None:
+                            htmlfile.write('<br><br>%s\n' % _tmp)
+                        _tmp = get_html_splits(gfile, split_distance_in_meters=5000., label='km')
+                        if _tmp != None:
+                            htmlfile.write('<br><br>%s\n' % _tmp)
+                    elif 'SPORTTITLEDATE' in line:
+                        newtitle = 'Garmin Event %s on %s' % (gfile.sport.title(), gfile.begin_datetime)
+                        htmlfile.write(line.replace('SPORTTITLEDATE',newtitle))
+                    elif 'HISTORYBUTTONS' in line:
+                        histlist = []
+                        if self.msg_q:
+                            htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
+                    else:
+                        htmlfile.write(line.replace('<pre>', '<div>').replace('</pre>', '</div>'))
         os.chdir(curpath)
         if os.path.exists('%s/html' % curpath) and os.path.exists('%s/public_html/garmin' % os.getenv('HOME')):
             if os.path.exists('%s/public_html/garmin/html' % os.getenv('HOME')):
@@ -678,6 +727,8 @@ class GarminReport(object):
 
 def print_lap_string(glap, sport):
     ''' print nice output for a lap '''
+    if not glap.lap_number:
+        return ''
     outstr = ['%s lap %i %.2f mi %s %s calories %.2f min' % (sport, glap.lap_number, glap.lap_distance / METERS_PER_MILE, print_h_m_s(glap.lap_duration), glap.lap_calories, glap.lap_duration / 60.)]
     if sport == 'running':
         if glap.lap_distance > 0:
@@ -690,7 +741,8 @@ def print_lap_string(glap, sport):
 
 def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi', do_heart_rate=True):
     ''' get splits for given split distance '''
-    if len(gfile.points) == 0: return None
+    if len(gfile.points) < 3: return []
+    #print '\n'.join('%s' % p for p in gfile.points)
     last_point_me = 0
     last_point_time = 0
     prev_split_me = 0
@@ -733,10 +785,12 @@ def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi', do_h
 
 def print_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi', print_out=True):
     ''' print split time for given split distance '''
-    if len(gfile.points) == 0: return None
+    if len(gfile.points) == 0: return ''
 
     retval = []
     split_vector = get_splits(gfile, split_distance_in_meters, label)
+    if not split_vector:
+        return ''
     for d, t, h in split_vector:
         retval.append('%i %s \t %s \t %s / mi \t %s / km \t %s \t %i bpm avg'
             % (d,
@@ -812,7 +866,7 @@ def get_file_html(gfile):
                   print_h_m_s(min_mile*60/METERS_PER_MILE*1000., False)
                ]
     else:
-        labels = ['total', 'Disatnce', 'Calories', 'Time', 'Pace mph']
+        labels = ['total', 'Distance', 'Calories', 'Time', 'Pace mph']
         values = ['',
                   '%.2f mi' % (gfile.total_distance/METERS_PER_MILE),
                   gfile.total_calories,
@@ -844,9 +898,9 @@ def get_lap_html(glap, sport):
               glap.lap_calories,
               '%.2f min' % (glap.lap_duration/60.),
               '%s / mi' % print_h_m_s(glap.lap_duration / (glap.lap_distance / METERS_PER_MILE), False),
-              '%s / km' % print_h_m_s(glap.lap_duration / (glap.lap_distance / 1000.), False),
-              '%i bpm' % glap.lap_avg_hr
-            ]
+              '%s / km' % print_h_m_s(glap.lap_duration / (glap.lap_distance / 1000.), False),]
+    if glap.lap_avg_hr:
+        values.append('%i bpm' % glap.lap_avg_hr)
 
     return ['<td>%s</td>' % v for v in values]
 
