@@ -189,7 +189,7 @@ class TestGarminApp(unittest.TestCase):
                     # ['mile_splits.png', '367951ddf6b5c7e221bc6056feeb3703'],
                     # ['speed_minpermi.png', 'd46baa636523321781975d24c51ea1c4'],
                     # ['speed_mph.png', 'ca248a6119d8886136023c4e5efe8935'],
-                    ['index.html', '8ac686227c4defb7501d48fa9c509443']]
+                    ['index.html', '3d4ef3b462266754e4ab00d9cd7a53bc']]
         for f, fmd5 in file_md5:
             md5 = garmin_utils.get_md5_full('%s/%s' % (html_path, f))
             self.assertEqual(md5, fmd5)
@@ -269,7 +269,7 @@ class TestGarminApp(unittest.TestCase):
     def test_garmin_cache_get_summary_list(self):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
-        output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline')
+        output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline').replace('/root', '/home/ddboline')
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
