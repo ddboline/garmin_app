@@ -34,8 +34,8 @@ except ImportError:
 class TestGarminApp(unittest.TestCase):
 
     def setUp(self):
-        if not os.path.exists('%s/cache' % CURDIR):
-            os.makedirs('%s/cache' % CURDIR)
+        if not os.path.exists('%s/run/cache' % CURDIR):
+            os.makedirs('%s/run/cache' % CURDIR)
         pass
 
     def tearDown(self):
@@ -44,7 +44,7 @@ class TestGarminApp(unittest.TestCase):
                 os.remove(f)
         if os.path.exists('temp.pkl.gz'):
             os.remove('temp.pkl.gz')
-        for f in glob.glob('%s/cache/*' % CURDIR):
+        for f in glob.glob('%s/run/cache/test.*' % CURDIR):
             if os.path.exists(f):
                 os.remove(f)
         pass
@@ -123,7 +123,7 @@ class TestGarminApp(unittest.TestCase):
             gdf = garmin_cache.GarminDataFrame(garmin_file.GarminLap, gfile.laps).dataframe
             gdf.to_csv('temp.xml.lap.csv', index=False)
             md5 = run_command('cat temp.xml.lap.csv | md5sum', do_popen=True).read().split()[0]
-            self.assertEqual(md5, 'dff5e558bced3ac4ca69927b6aed7858')
+            self.assertEqual(md5, '1a18d3b5b06368a13efb6e00dd0a718c')
 
     def test_cache_dataframe_tcx(self):
         gfile = garmin_parse.GarminParse(TCXFILE)
@@ -152,7 +152,7 @@ class TestGarminApp(unittest.TestCase):
     def test_pickle_fit(self):
         gfile = garmin_parse.GarminParse(FITFILE)
         gfile.read_file()
-        gcache = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/cache' % CURDIR)
+        gcache = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         gcache.write_pickle_object_to_file(gfile)
         del gfile
 
@@ -215,7 +215,7 @@ class TestGarminApp(unittest.TestCase):
         output = gr.day_summary_report_txt(gsum, sport='running')
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), 'd3278847989cf8f98bd78508ebbc4ace')
+        self.assertEqual(m.hexdigest(), 'aaf6eba320c60ea26b9a7e54f33a240f')
 
     def test_garmin_day_average_report_txt(self):
         gsum = garmin_file.GarminSummary(FITFILE)
@@ -233,7 +233,7 @@ class TestGarminApp(unittest.TestCase):
         output = gr.week_summary_report_txt(gsum, sport='running')
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), 'dc98b31a3017cfeea53d5bb120aeaab7')
+        self.assertEqual(m.hexdigest(), '5b591617cb26db3bb8375f64115b152e')
 
     def test_garmin_week_average_report_txt(self):
         gsum = garmin_file.GarminSummary(FITFILE)
@@ -251,7 +251,7 @@ class TestGarminApp(unittest.TestCase):
         output = gr.month_summary_report_txt(gsum, sport='running')
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), 'c9e8b1092c4946b332723ef0cc1b0f7f')
+        self.assertEqual(m.hexdigest(), 'cb63ba479fffb19c79e1f22b845bd830')
 
     def test_garmin_month_average_report_txt(self):
         gsum = garmin_file.GarminSummary(FITFILE)
@@ -269,18 +269,18 @@ class TestGarminApp(unittest.TestCase):
         output = gr.year_summary_report_txt(gsum, sport='running')
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), '03eef0de50152dd79a9ab65594882563')
+        self.assertEqual(m.hexdigest(), '13495fa84ad5008c599d441707370d05')
         
     def test_garmin_cache_get_summary_list(self):
-        gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/cache' % CURDIR)
+        gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
         output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline')
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), 'f84070c7362bf3f613f91a24ce85e71f')
+        self.assertEqual(m.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
 
     def test_cached_gfile(self):
-        gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/cache' % CURDIR)
+        gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         gsum = garmin_file.GarminSummary(FITFILE)
         gfile = gsum.read_file()
         test1 = '%s' % gfile
@@ -291,10 +291,12 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(test1, test2)
 
     def test_summary_report(self):
-        gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/cache' % CURDIR)
+        gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
         rp = garmin_report.GarminReport(cache_obj=gc)
         options = {'do_plot': False, 'do_year': False, 'do_month': False, 'do_week': False, 'do_day': False, 'do_file': False, 'do_sport': None, 'do_update': False, 'do_average': False}
+        script_path = CURDIR
+        options['script_path'] = script_path
         rp.summary_report(sl, **options)
 
 if __name__ == '__main__':
