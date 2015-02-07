@@ -177,7 +177,7 @@ class TestGarminApp(unittest.TestCase):
         output = gr.file_report_txt(gfile)
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), 'dc49eed73bf44c1b5d5c2444a59bec96')
+        self.assertEqual(m.hexdigest(), '0929c060b23cb192f706d6964ffd75d6')
         
     def test_garmin_file_report_html(self):
         gfile = garmin_parse.GarminParse(FITFILE)
@@ -194,7 +194,7 @@ class TestGarminApp(unittest.TestCase):
                     # ['mile_splits.png', '367951ddf6b5c7e221bc6056feeb3703'],
                     # ['speed_minpermi.png', 'd46baa636523321781975d24c51ea1c4'],
                     # ['speed_mph.png', 'ca248a6119d8886136023c4e5efe8935'],
-                    ['index.html', '8d1e6904cc1f375a3366f9efe6237afd']]
+                    ['index.html', '8ac686227c4defb7501d48fa9c509443']]
         for f, fmd5 in file_md5:
             md5 = garmin_utils.get_md5_full('%s/%s' % (html_path, f))
             self.assertEqual(md5, fmd5)
