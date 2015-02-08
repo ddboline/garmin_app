@@ -26,7 +26,7 @@ list_of_mislabeled_times = {'biking':
                             'snowshoeing':
                                 ['2013-12-25T19:34:06Z'],
                             'skiing':
-                                ['2013-12-26T21:24:38Z'],
+                                ['2010-12-24T14:04:58Z', '2013-12-26T21:24:38Z'],
                            }
 
 list_of_corrected_laps = {
