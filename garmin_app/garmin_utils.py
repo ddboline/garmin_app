@@ -227,8 +227,12 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
     gdir = []
     for arg in args:
         if arg == 'build':
+            if msg_q != None:
+                return
             options['build'] = True
         elif arg == 'backup':
+            if msg_q != None:
+                return
             fname = '%s/garmin_data_%s.tar.gz' % (script_path, datetime.date.today().strftime('%Y%m%d'))
             run_command('cd %s/run/ ; tar zcvf %s 2* garmin.pkl* cache/' % (script_path, fname))
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
