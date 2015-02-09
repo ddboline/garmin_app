@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    module will hold functions to read and write
+    functions to read and write
     GarminFile, GarminSummary objects to and from cache
     
     desired caches:
@@ -26,7 +26,7 @@ from garmin_app.util import run_command
 
 from garmin_app.garmin_corrections import list_of_corrected_laps
 from garmin_app.garmin_file import GarminSummary, GarminFile, GarminLap, GarminPoint
-from garmin_app.garmin_utils import get_md5_full
+from garmin_app.garmin_utils import get_md5
 
 class GarminCache(object):
     ''' class to manage caching objects '''
@@ -113,7 +113,7 @@ class GarminCache(object):
             if not any(a in gmn_filename.lower() for a in ['.gmn', '.tcx', '.fit', '.txt']):
                 return
             reduced_gmn_filename = os.path.basename(gmn_filename)
-            gmn_md5sum = get_md5_full(gmn_filename)
+            gmn_md5sum = get_md5(gmn_filename)
 
             if ((reduced_gmn_filename not in self.cache_summary_file_dict) or
                     (self.cache_summary_file_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or

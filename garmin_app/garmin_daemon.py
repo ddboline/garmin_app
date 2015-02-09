@@ -1,5 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+'''
+    Daemon for garmin_app
+'''
+
 from __future__ import print_function
 
 import os, glob

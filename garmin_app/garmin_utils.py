@@ -114,7 +114,7 @@ def convert_gmn_to_xml(gmn_filename):
     run_command('mv /tmp/.temp.xml /tmp/temp.xml')
     return '/tmp/temp.xml'
 
-def get_md5_full(fname):
+def get_md5(fname):
     if not os.path.exists(fname):
         return None
     m = hashlib.md5()
@@ -203,6 +203,7 @@ def read_garmin_file(fname, msg_q=None, **options):
     _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
     print(_report.file_report_txt(_gfile))
     _report.file_report_html(_gfile, **options)
+    convert_gmn_to_gpx(fname)
     return True
 
 def do_summary(directory_, msg_q=None, **options):

@@ -191,7 +191,7 @@ class TestGarminApp(unittest.TestCase):
                     # ['speed_mph.png', 'ca248a6119d8886136023c4e5efe8935'],
                     ['index.html', '3d4ef3b462266754e4ab00d9cd7a53bc']]
         for f, fmd5 in file_md5:
-            md5 = garmin_utils.get_md5_full('%s/%s' % (html_path, f))
+            md5 = garmin_utils.get_md5('%s/%s' % (html_path, f))
             self.assertEqual(md5, fmd5)
 
     def test_garmin_total_summary_report_txt(self):

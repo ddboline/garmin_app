@@ -12,7 +12,7 @@
 import os
 
 from garmin_app.garmin_utils import convert_date_string, convert_time_string,\
-    get_md5_full, expected_calories, METERS_PER_MILE, SPORT_TYPES
+    get_md5, expected_calories, METERS_PER_MILE, SPORT_TYPES
 
 from garmin_app.util import datetimefromstring
 
@@ -237,7 +237,7 @@ class GarminSummary(object):
         if md5sum:
             self.md5sum = md5sum
         elif self.filename != '':
-            self.md5sum = get_md5_full(self.filename)
+            self.md5sum = get_md5(self.filename)
 
     def __repr__(self):
         return 'GarminSummary<%s>' % ', '.join(

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    module to hold corrections for errors in original garmin files (by which I mean human errors)
+    corrections for errors in original garmin files (by which I mean human errors)
 '''
 
 list_of_mislabeled_files = {'biking':

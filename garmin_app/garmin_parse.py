@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    module will hold parsers to read txt, xml, tcx formatted files
+    parsers to read txt, xml, tcx formatted files
 '''
 
 import datetime

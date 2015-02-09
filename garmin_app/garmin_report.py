@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-    module will hold functions to generate reports either to STDOUT or html
+    functions to generate reports either to STDOUT or html
 '''
 
 import os
