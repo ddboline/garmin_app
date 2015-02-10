@@ -279,7 +279,7 @@ class TestGarminApp(unittest.TestCase):
     def test_garmin_cache_get_summary_list(self):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
-        output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline').replace('/root', '/home/ddboline')
+        output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline').replace('/root', '/home/ddboline/setup_files/build')
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')

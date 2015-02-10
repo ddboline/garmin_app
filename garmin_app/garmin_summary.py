@@ -7,7 +7,8 @@
 
 import os
 
-from garmin_app.garmin_utils import get_md5, SPORT_TYPES
+from garmin_app.garmin_utils import get_md5, expected_calories,\
+                                    SPORT_TYPES, METERS_PER_MILE
 
 class GarminSummary(object):
     ''' summary class for a file '''
