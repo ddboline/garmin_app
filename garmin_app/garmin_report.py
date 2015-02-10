@@ -9,7 +9,7 @@ import os
 import re
 import datetime
 
-from garmin_app.garmin_file import GarminSummary
+from garmin_app.garmin_summary import GarminSummary
 from garmin_app.garmin_cache import GarminCache
 from garmin_app.garmin_utils import print_date_string, print_h_m_s, run_command,\
      days_in_month, days_in_year,\
