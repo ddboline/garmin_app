@@ -22,7 +22,8 @@ from garmin_app import garmin_utils,\
                        garmin_file,\
                        garmin_parse,\
                        garmin_cache,\
-                       garmin_report
+                       garmin_report,\
+                       garmin_summary
 
 from garmin_app.util import run_command, datetimefromstring
 
@@ -158,7 +159,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(md5, '31a1ec7ed186440c28ff6ff052da13f3')
 
     def test_garmin_summary(self):
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gfile = gsum.read_file()
         output = gsum.__repr__()
         m = hashlib.md5()
@@ -195,7 +196,7 @@ class TestGarminApp(unittest.TestCase):
             self.assertEqual(md5, fmd5)
 
     def test_garmin_total_summary_report_txt(self):
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         gr = garmin_report.GarminReport()
         output = gr.total_summary_report_txt(gsum, sport='running')
@@ -204,16 +205,16 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(m.hexdigest(), '9f5aa437a6e8bbe6ecd25a088b634018')
         
     def test_garmin_day_summary_report_txt(self):
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         gr = garmin_report.GarminReport()
-        output = gr.day_summary_report_txt(gsum, sport='running')
+        output = gr.day_summary_report_txt(gsum, sport='running', cur_date=gsum.begin_datetime.date())
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), 'aaf6eba320c60ea26b9a7e54f33a240f')
+        self.assertEqual(m.hexdigest(), 'b05ddcddc03a64b650a75ad397037d00')
 
     def test_garmin_day_average_report_txt(self):
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         gr = garmin_report.GarminReport()
         output = gr.day_average_report_txt(gsum, sport='running', number_days=1)
@@ -222,16 +223,20 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(m.hexdigest(), '59c50d1eff34a78619e9f37e45445535')
 
     def test_garmin_week_summary_report_txt(self):
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         gr = garmin_report.GarminReport()
-        output = gr.week_summary_report_txt(gsum, sport='running')
+        ic = gsum.begin_datetime.isocalendar()
+        output = gr.week_summary_report_txt(gsum, sport='running',
+                                            isoyear=ic[0], isoweek=ic[1], 
+                                            number_in_week=1, 
+                                            date=gsum.begin_datetime)
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), '5b591617cb26db3bb8375f64115b152e')
+        self.assertEqual(m.hexdigest(), 'e538e1b1abd954083c9cc19e14d04315')
 
     def test_garmin_week_average_report_txt(self):
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         gr = garmin_report.GarminReport()
         output = gr.week_average_report_txt(gsum, sport='running', number_of_weeks=1)
@@ -240,16 +245,19 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(m.hexdigest(), '4b649d4c617128138a1540c9dc2e1a09')
 
     def test_garmin_month_summary_report_txt(self):
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         gr = garmin_report.GarminReport()
-        output = gr.month_summary_report_txt(gsum, sport='running')
+        output = gr.month_summary_report_txt(gsum, sport='running',
+                                             year=gsum.begin_datetime.year,
+                                             month=gsum.begin_datetime.month,
+                                             number_in_month=1)
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), 'cb63ba479fffb19c79e1f22b845bd830')
+        self.assertEqual(m.hexdigest(), 'd2a1204e0374c7e83c450a1ae4ce3981')
 
     def test_garmin_month_average_report_txt(self):
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         gr = garmin_report.GarminReport()
         output = gr.month_average_report_txt(gsum, sport='running', number_of_months=1)
@@ -258,25 +266,28 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(m.hexdigest(), '08a90d3c2e16ba2aafb4403e3ed69824')
 
     def test_garmin_year_summary_report_txt(self):
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         gr = garmin_report.GarminReport()
-        output = gr.year_summary_report_txt(gsum, sport='running')
+        d = gsum.begin_datetime
+        output = gr.year_summary_report_txt(gsum, sport='running',
+                                            year=d.year, number_in_year=1)
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), '13495fa84ad5008c599d441707370d05')
+        self.assertEqual(m.hexdigest(), 'b7ab537ea3090fc44276b15bc61577b5')
         
     def test_garmin_cache_get_summary_list(self):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
         output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline').replace('/root', '/home/ddboline')
+        print output
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
 
     def test_cached_gfile(self):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
-        gsum = garmin_file.GarminSummary(FITFILE)
+        gsum = garmin_summary.GarminSummary(FITFILE)
         gfile = gsum.read_file()
         test1 = '%s' % gfile
         gfname = os.path.basename(gfile.orig_filename)
