@@ -7,7 +7,7 @@ sudo apt-get install -y python-pandas python-lockfile python-dateutil
 
 if [ -z $1 ] ; then
     true
-elif [ $1 == "html" ] ; then
+elif [ $1 = "html" ] ; then
     CURDIR=`pwd`
     cd ${HOME}
     git clone -b CLOUDVERSION https://github.com/ddboline/ddboline_html.git public_html
@@ -18,7 +18,7 @@ elif [ $1 == "html" ] ; then
 fi
 
 ### This is a bit of a hack...
-if [ $USER == "root" ] ; then
+if [ $USER = "root" ] ; then
     echo "America/New_York" > timezone
     sudo mv timezone /etc/timezone
     sudo rm /etc/localtime
