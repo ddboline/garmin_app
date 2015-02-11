@@ -18,8 +18,7 @@ elif [ $1 == "html" ] ; then
 fi
 
 ### This is a bit of a hack...
-if [ "$PWD" == "/root/garmin_app" ];
-then
+if [ `pwd` == "/root/garmin_app" ]; then
     echo "America/New_York" > timezone
     sudo mv timezone /etc/timezone
     sudo rm /etc/localtime
