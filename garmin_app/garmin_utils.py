@@ -39,9 +39,9 @@ def days_in_month(month=datetime.date.today().month, year=datetime.date.today().
     return (datetime.date(year=y1, month=m1, day=1)-datetime.date(year=year, month=month, day=1)).days
 
 ### maybe change output to datetime object?
-def convert_date_string(date_str):
+def convert_date_string(date_str, ignore_tz=True):
     ''' convert date string to datetime object '''
-    return datetimefromstring(date_str, ignore_tz=True)
+    return datetimefromstring(date_str, ignore_tz=ignore_tz)
 
 def expected_calories(weight=175, pace_min_per_mile=10.0, distance=1.0):
     ''' return expected calories for running at a given pace '''

@@ -16,3 +16,12 @@ elif [ $1 == "html" ] ; then
     mkdir garmin
     cd $CURDIR
 fi
+
+### This is a bit of a hack...
+if [ "$PWD" == "/root/garmin_app" ];
+then
+    echo "America/New_York" > timezone
+    sudo mv timezone /etc/timezone
+    sudo rm /etc/localtime
+    sudo ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
+fi

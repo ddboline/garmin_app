@@ -280,7 +280,6 @@ class TestGarminApp(unittest.TestCase):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
         output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline').replace('/root', '/home/ddboline/setup_files/build')
-        print output
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
@@ -304,7 +303,6 @@ class TestGarminApp(unittest.TestCase):
         script_path = CURDIR
         options['script_path'] = script_path
         output = rp.summary_report(sl, copy_to_public_html=False, **options)
-        print output
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), '022c8b604d32c9297195ad80aef5b73c')
