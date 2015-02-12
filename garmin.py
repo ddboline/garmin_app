@@ -39,7 +39,7 @@ def garmin_arg_parse():
                 run_command('mkdir -p %s/run/' % script_path)
                 os.chdir('%s/run' % script_path)
                 run_command('wget --no-check-certificate %s/backup/garmin_data.tar.gz' % BASEURL)
-                run_command('tar zxvf garmin_data.tar.gz ; rm garmin_data.tar.gz')
+                run_command('tar zxf garmin_data.tar.gz 2>&1 > /dev/null; rm garmin_data.tar.gz')
             exit(0)
 
         if arg == 'sync':
