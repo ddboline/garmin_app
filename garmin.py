@@ -6,6 +6,8 @@ import os
 import glob
 import argparse
 
+from urllib2 import urlopen
+
 from garmin_app.garmin_cache import GarminCache
 from garmin_app.garmin_parse import GarminParse
 from garmin_app.garmin_report import GarminReport
@@ -38,8 +40,16 @@ def garmin_arg_parse():
             if not os.path.exists('%s/run' % script_path):
                 run_command('mkdir -p %s/run/' % script_path)
                 os.chdir('%s/run' % script_path)
-                run_command('wget --no-check-certificate %s/backup/garmin_data.tar.gz' % BASEURL)
-                run_command('tar zxf garmin_data.tar.gz 2>&1 > /dev/null; rm garmin_data.tar.gz')
+                outfile = open('temp.tar.gz', 'wb')
+                urlout = urlopen('%s/backup/garmin_data.tar.gz' % BASEURL)
+                if urlout.getcode() != 200:
+                    print('something bad happened %d' % urlout.getcode())
+                    exit(0)
+                for line in urlout:
+                    outfile.write(line)
+                outfile.close()
+                run_command('tar zxf temp.tar.gz 2>&1 > /dev/null')
+                os.remove('temp.tar.gz')
             exit(0)
 
         if arg == 'sync':
