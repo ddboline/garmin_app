@@ -114,7 +114,7 @@ def convert_gmn_to_xml(gmn_filename):
     run_command('mv /tmp/.temp.xml /tmp/temp.xml')
     return '/tmp/temp.xml'
 
-def get_md5(fname):
+def get_md5_old(fname):
     if not os.path.exists(fname):
         return None
     m = hashlib.md5()
@@ -122,6 +122,12 @@ def get_md5(fname):
         for line in infile:
             m.update(line)
     return m.hexdigest()
+
+def get_md5(fname):
+    if not os.path.exists(fname):
+        return None
+    output = run_command('md5sum %s' % fname, do_popen=True).read().split()[0]
+    return output
 
 def compare_with_remote(script_path):
     from urllib2 import urlopen
