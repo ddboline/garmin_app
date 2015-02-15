@@ -126,7 +126,7 @@ def get_md5_old(fname):
 def get_md5(fname):
     if not os.path.exists(fname):
         return None
-    output = run_command('md5sum %s' % fname, do_popen=True).read().split()[0]
+    output = run_command('md5sum "%s"' % fname, do_popen=True).read().split()[0]
     return output
 
 def compare_with_remote(script_path):
