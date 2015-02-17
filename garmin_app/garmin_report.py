@@ -304,7 +304,7 @@ class GarminReport(object):
                         if occur_map[i] > 0:
                             retval.append(i, occur_map[i])
         outstr = re.sub('\n\n+', '\n', '\n'.join(retval))
-        
+
         htmlostr = []
         for o in retval:
             htmlostr.append(o)
@@ -338,7 +338,7 @@ class GarminReport(object):
             if os.path.exists('%s/public_html/garmin/html' % os.getenv('HOME')):
                 run_command('rm -rf %s/public_html/garmin/html' % os.getenv('HOME'))
             run_command('mv %s/html %s/public_html/garmin' % (curpath, os.getenv('HOME')))
-        
+
         return outstr
 
     def file_report_txt(self, gfile):
@@ -367,7 +367,7 @@ class GarminReport(object):
         retval.append(print_splits(gfile, METERS_PER_MILE))
         retval.append('')
         retval.append(print_splits(gfile, 5000., 'km'))
-        
+
         avg_hr = 0
         sum_time = 0
         hr_vals = []
@@ -394,7 +394,7 @@ class GarminReport(object):
         retval.append('')
 
         return '\n'.join(retval)
-    
+
     def file_report_html(self, gfile, use_time=False, copy_to_public_html=True, **options):
         ''' create pretty plots '''
         avg_hr = 0
@@ -454,25 +454,51 @@ class GarminReport(object):
             os.makedirs('%s/html' % curpath)
 
         if len(mile_split_vals) > 0:
-            options = {'plotopt': {'marker': 'o'}}
-            graphs.append(plot_graph(name='mile_splits', title='Pace per Mile every mi', data=mile_split_vals, **options))
+            options = {'plotopt': {'marker': 'o'}, 'xlabel': 'mi', 'ylabel': 'min/mi'}
+            graphs.append(plot_graph(name='mile_splits',
+                                     title='Pace per Mile every mi',
+                                     data=mile_split_vals, **options))
 
         if len(hr_values) > 0:
-            graphs.append(plot_graph(name='heart_rate', title='Heart Rate %2.2f avg %2.2f max' % (avg_hr, max_hr), data=hr_values))
+            options = {'xlabel': 'mi', 'ylabel': 'bpm'}
+            graphs.append(plot_graph(name='heart_rate',
+                                     title='Heart Rate %2.2f avg %2.2f max'
+                                           % (avg_hr, max_hr), data=hr_values,
+                                           **options))
         if len(alt_values) > 0:
-            graphs.append(plot_graph(name='altitude', title='Altitude', data=alt_values))
+            options = {'xlabel': 'mi', 'ylabel': 'height [m]'}
+            graphs.append(plot_graph(name='altitude', title='Altitude',
+                                     data=alt_values, **options))
         if len(speed_values) > 0:
-            graphs.append(plot_graph(name='speed_minpermi', title='Speed min/mi every 1/4 mi', data=speed_values))
-            graphs.append(plot_graph(name='speed_mph', title='Speed mph', data=mph_speed_values))
+            options = {'xlabel': 'mi', 'ylabel': 'min/mi'}
+            graphs.append(plot_graph(name='speed_minpermi',
+                                     title='Speed min/mi every 1/4 mi',
+                                     data=speed_values,
+                                     **options))
+            options = {'xlabel': 'mi', 'ylabel': 'mph'}
+            graphs.append(plot_graph(name='speed_mph', title='Speed mph',
+                                     data=mph_speed_values,
+                                     **options))
 
         if len(avg_speed_values) > 0:
             avg_speed_value_min = int(avg_speed_values[-1][1])
             avg_speed_value_sec = int((avg_speed_values[-1][1] - avg_speed_value_min) * 60.)
-            graphs.append(plot_graph(name='avg_speed_minpermi', title='Avg Speed %i:%02i min/mi' % (avg_speed_value_min, avg_speed_value_sec), data=avg_speed_values))
+            options = {'xlabel': 'mi', 'ylabel': 'mph'}
+            graphs.append(plot_graph(name='avg_speed_minpermi',
+                                     title='Avg Speed %i:%02i min/mi'
+                                     % (avg_speed_value_min,
+                                        avg_speed_value_sec),
+                                     data=avg_speed_values,
+                                     **options))
 
         if len(avg_mph_speed_values) > 0:
             avg_mph_speed_value = avg_mph_speed_values[-1][1]
-            graphs.append(plot_graph(name='avg_speed_mph', title='Avg Speed %.2f mph' % avg_mph_speed_value, data=avg_mph_speed_values))
+            options = {'xlabel': 'mi', 'ylabel': 'min/mi'}
+            graphs.append(plot_graph(name='avg_speed_mph',
+                                     title='Avg Speed %.2f mph'
+                                     % avg_mph_speed_value,
+                                     data=avg_mph_speed_values,
+                                     **options))
 
         with open('html/index.html', 'w') as htmlfile:
             if len(lat_vals) > 0 and len(lon_vals) > 0 and len(lat_vals) == len(lon_vals):
@@ -802,9 +828,7 @@ def print_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi', pr
                print_h_m_s(t/(split_distance_in_meters/1000.), False),
                print_h_m_s(
                    t/(split_distance_in_meters/METERS_PER_MILE)
-                   *MARATHON_DISTANCE_MI),
-               h)
-           )
+                   *MARATHON_DISTANCE_MI), h))
     return '\n'.join(retval)
 
 def plot_graph(name=None, title=None, data=None, **opts):
@@ -813,7 +837,7 @@ def plot_graph(name=None, title=None, data=None, **opts):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as pl
-    
+
     popts = {}
     if 'plotopt' in opts:
         popts = opts['plotopt']
@@ -826,6 +850,10 @@ def plot_graph(name=None, title=None, data=None, **opts):
     xmin, ymin = map(lambda z: z - 0.1 * abs(z), [xmin, ymin])
     xmax, ymax = map(lambda z: z + 0.1 * abs(z), [xmax, ymax])
     pl.axis([xmin, xmax, ymin, ymax])
+    if 'xlabel' in opts:
+        pl.xlabel(opts['xlabel'], horizontalalignment='right')
+    if 'ylabel' in opts:
+        pl.ylabel(opts['ylabel'], verticalalignment='top')
     pl.title(title)
     pl.savefig('html/%s.png' % name)
     return '%s.png' % name
@@ -865,16 +893,14 @@ def get_file_html(gfile):
                   gfile.total_calories,
                   print_h_m_s(gfile.total_duration),
                   print_h_m_s(min_mile*60, False),
-                  print_h_m_s(min_mile*60/METERS_PER_MILE*1000., False)
-               ]
+                  print_h_m_s(min_mile*60/METERS_PER_MILE*1000., False)]
     else:
         labels = ['total', 'Distance', 'Calories', 'Time', 'Pace mph']
         values = ['',
                   '%.2f mi' % (gfile.total_distance/METERS_PER_MILE),
                   gfile.total_calories,
                   print_h_m_s(gfile.total_duration),
-                  mi_per_hr
-               ]
+                  mi_per_hr]
     if gfile.total_hr_dur > 0:
         labels.append('Heart Rate')
         values.append('%i bpm' % (gfile.total_hr_dur / gfile.total_hr_dis))
@@ -917,14 +943,12 @@ def get_html_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi')
 
     split_vector = get_splits(gfile, split_distance_in_meters, label)
     for d, t, h in split_vector:
-        tmp_vector = [
-                        '%i %s' % (d, label),
-                        print_h_m_s(t),
-                        print_h_m_s(t/(split_distance_in_meters/METERS_PER_MILE), False),
-                        print_h_m_s(t/(split_distance_in_meters/1000.), False),
-                        print_h_m_s(t/(split_distance_in_meters/METERS_PER_MILE)*MARATHON_DISTANCE_MI),
-                        '%i bpm' % h
-                  ]
+        tmp_vector = ['%i %s' % (d, label),
+                      print_h_m_s(t),
+                      print_h_m_s(t/(split_distance_in_meters/METERS_PER_MILE), False),
+                      print_h_m_s(t/(split_distance_in_meters/1000.), False),
+                      print_h_m_s(t/(split_distance_in_meters/METERS_PER_MILE)*MARATHON_DISTANCE_MI),
+                      '%i bpm' % h]
         values.append(tmp_vector)
 
     retval = []
