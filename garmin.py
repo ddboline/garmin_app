@@ -38,7 +38,7 @@ def garmin_arg_parse():
             exit(0)
         elif arg == 'get':
             if not os.path.exists('%s/run' % script_path):
-                run_command('mkdir -p %s/run/' % script_path)
+                os.makedirs('%s/run/' % script_path)
                 os.chdir('%s/run' % script_path)
                 outfile = open('temp.tar.gz', 'wb')
                 urlout = urlopen('%s/backup/garmin_data.tar.gz' % BASEURL)
