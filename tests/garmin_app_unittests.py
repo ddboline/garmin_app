@@ -110,8 +110,8 @@ class TestGarminApp(unittest.TestCase):
 
     def test_cache_dataframe_xml(self):
         if datetime.datetime.now(dateutil.tz.tzlocal()).tzname() == 'EST':
-            gfile = garmin_parse.GarminParse(GMNFILE)
-            gfile.read_file()
+            gsum = garmin_summary.GarminSummary(GMNFILE)
+            gfile = gsum.read_file()
             gdf = garmin_cache.GarminDataFrame(garmin_file.GarminPoint, gfile.points).dataframe
             gdf.to_csv('temp.xml.point.csv', index=False)
             md5 = run_command('cat temp.xml.point.csv | md5sum', do_popen=True).read().split()[0]
@@ -120,10 +120,14 @@ class TestGarminApp(unittest.TestCase):
             gdf.to_csv('temp.xml.lap.csv', index=False)
             md5 = run_command('cat temp.xml.lap.csv | md5sum', do_popen=True).read().split()[0]
             self.assertEqual(md5, '1a18d3b5b06368a13efb6e00dd0a718c')
+            gdf = garmin_cache.GarminDataFrame(garmin_summary.GarminSummary, [gsum]).dataframe
+            gdf.to_csv('temp.fit.sum.csv', index=False)
+            md5 = run_command('cat temp.fit.sum.csv | md5sum', do_popen=True).read().split()[0]
+            self.assertEqual(md5, 'b83e146680aa2583f9f1650c5a709b6a')
 
     def test_cache_dataframe_tcx(self):
-        gfile = garmin_parse.GarminParse(TCXFILE)
-        gfile.read_file()
+        gsum = garmin_summary.GarminSummary(TCXFILE)
+        gfile = gsum.read_file()
         gdf = garmin_cache.GarminDataFrame(garmin_file.GarminPoint, gfile.points).dataframe
         gdf.to_csv('temp.tcx.point.csv', index=False)
         md5 = run_command('cat temp.tcx.point.csv | md5sum', do_popen=True).read().split()[0]
@@ -132,10 +136,14 @@ class TestGarminApp(unittest.TestCase):
         gdf.to_csv('temp.tcx.lap.csv', index=False)
         md5 = run_command('cat temp.tcx.lap.csv | md5sum', do_popen=True).read().split()[0]
         self.assertEqual(md5, '982ea8e4949c75f17926cec705882de1')
+        gdf = garmin_cache.GarminDataFrame(garmin_summary.GarminSummary, [gsum]).dataframe
+        gdf.to_csv('temp.fit.sum.csv', index=False)
+        md5 = run_command('cat temp.fit.sum.csv | md5sum', do_popen=True).read().split()[0]
+        self.assertEqual(md5, '26856b7d8c53ba8f11e75f49295c5311')
 
     def test_cache_dataframe_fit(self):
-        gfile = garmin_parse.GarminParse(FITFILE)
-        gfile.read_file()
+        gsum = garmin_summary.GarminSummary(FITFILE)
+        gfile = gsum.read_file()
         gdf = garmin_cache.GarminDataFrame(garmin_file.GarminPoint, gfile.points).dataframe
         gdf.to_csv('temp.fit.point.csv', index=False)
         md5 = run_command('cat temp.fit.point.csv | md5sum', do_popen=True).read().split()[0]
@@ -144,6 +152,10 @@ class TestGarminApp(unittest.TestCase):
         gdf.to_csv('temp.fit.lap.csv', index=False)
         md5 = run_command('cat temp.fit.lap.csv | md5sum', do_popen=True).read().split()[0]
         self.assertEqual(md5, '7597faf3ade359c193e7fb07607693c7')
+        gdf = garmin_cache.GarminDataFrame(garmin_summary.GarminSummary, [gsum]).dataframe
+        gdf.to_csv('temp.fit.sum.csv', index=False)
+        md5 = run_command('cat temp.fit.sum.csv | md5sum', do_popen=True).read().split()[0]
+        self.assertEqual(md5, 'a70326f6c022c149f2c20ad070d24130')
 
     def test_pickle_fit(self):
         gfile = garmin_parse.GarminParse(FITFILE)

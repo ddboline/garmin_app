@@ -9,7 +9,6 @@
         python pickle
         SQL
         amazon S3
-        
 '''
 
 import os
