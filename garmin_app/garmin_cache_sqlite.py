@@ -11,60 +11,46 @@
         amazon S3
 '''
 
-import os
-import gzip
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
-import pandas as pd
-
-from garmin_app.util import run_command
-
-from garmin_app.garmin_corrections import list_of_corrected_laps
-from garmin_app.garmin_file import GarminFile, GarminLap, GarminPoint
-from garmin_app.garmin_summary import GarminSummary
-from garmin_app.garmin_utils import get_md5
 
 class GarminCache(object):
     ''' class to manage caching objects '''
-    def __init__(self, pickle_file='', cache_directory=''):
-        self.pickle_file = pickle_file
+    def __init__(self, sqlite_file='', cache_directory=''):
+        self.sqlite_file = sqlite_file
         self.cache_directory = cache_directory
         self.cache_summary_list = []
         self.cache_summary_md5_dict = {}
         self.cache_summary_file_dict = {}
-        self.pickle_file_is_modified = False
+        self.sqlite_file_is_modified = False
         self.do_update = False
         if cache_directory:
             if not os.path.exists(cache_directory):
                 os.makedirs(cache_directory)
-    
-    def read_pickle_object_in_file(self, pickle_file=''):
-        ''' read python object from gzipped pickle file '''
-        if not pickle_file:
-            if not self.pickle_file:
+
+    def read_sqlite_object_in_file(self, sqlite_file=''):
+        ''' read python object from sqlite file '''
+        if not sqlite_file:
+            if not self.sqlite_file:
                 return None
             else:
-                pickle_file = self.pickle_file
+                sqlite_file = self.sqlite_file
+        
+    
         outobj = None
-        if os.path.exists(pickle_file):
-            with gzip.open(pickle_file, 'rb') as pkl_file:
+        if os.path.exists(sqlite_file):
+            with gzip.open(sqlite_file, 'rb') as pkl_file:
                 outobj = pickle.load(pkl_file)
         return outobj
         
-    def write_pickle_object_to_file(self, inpobj, pickle_file=''):
+    def write_pickle_object_to_file(self, inpobj, sqlite_file=''):
         ''' write python object to gzipped pickle file '''
-        if not pickle_file:
-            if not self.pickle_file:
+        if not sqlite_file:
+            if not self.sqlite_file:
                 return False
             else:
-                pickle_file = self.pickle_file
-        with gzip.open('%s.tmp' % pickle_file, 'wb') as pkl_file:
+                sqlite_file = self.sqlite_file
+        with gzip.open('%s.tmp' % sqlite_file, 'wb') as pkl_file:
             pickle.dump(inpobj, pkl_file, pickle.HIGHEST_PROTOCOL)
-        run_command('mv %s.tmp %s' % (pickle_file, pickle_file))
+        run_command('mv %s.tmp %s' % (sqlite_file, sqlite_file))
         return True
 
     def read_cached_gfile(self, gfbasename=''):
@@ -73,7 +59,7 @@ class GarminCache(object):
         if not os.path.exists('%s/%s.pkl.gz' % (self.cache_directory, gfbasename)):
             return False
         else:
-            gfile = self.read_pickle_object_in_file(pickle_file='%s/%s.pkl.gz' % (self.cache_directory, gfbasename))
+            gfile = self.read_pickle_object_in_file(sqlite_file='%s/%s.pkl.gz' % (self.cache_directory, gfbasename))
             if gfile:
                 return gfile
             else:
@@ -84,7 +70,7 @@ class GarminCache(object):
             return False
         gfbasename = os.path.basename(garminfile.orig_filename)
         pfname = '%s/%s.pkl.gz' % (self.cache_directory, gfbasename)
-        return self.write_pickle_object_to_file(garminfile, pickle_file=pfname)
+        return self.write_pickle_object_to_file(garminfile, sqlite_file=pfname)
 
     def get_cache_summary_list(self, directory, **options):
         ''' '''
@@ -93,7 +79,7 @@ class GarminCache(object):
             self.do_update = True
         summary_list = []
         
-        self.pickle_file_is_modified = False
+        self.sqlite_file_is_modified = False
         temp_list = self.read_pickle_object_in_file()
         if temp_list and type(temp_list) == list:
             self.cache_summary_list = temp_list
@@ -119,7 +105,7 @@ class GarminCache(object):
                     (self.cache_summary_file_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
                     (self.do_update and print_date_string(self.cache_summary_md5_dict[reduced_gmn_filename].begin_time)
                         in list_of_corrected_laps)):
-                self.pickle_file_is_modified = True
+                self.sqlite_file_is_modified = True
                 gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)
                 gfile = gsum.read_file()
                 if gfile:
@@ -145,24 +131,6 @@ class GarminCache(object):
                 elif os.path.isfile(d):
                     add_file(d)
 
-        if self.pickle_file_is_modified:
+        if self.sqlite_file_is_modified:
             self.write_pickle_object_to_file(self.cache_summary_list)
         return summary_list
-
-
-class GarminDataFrame(object):
-    ''' dump list of garmin_points to pandas.DataFrame '''
-    def __init__(self, garmin_class=None, garmin_list=None):
-        self.dataframe = None
-        if garmin_class and garmin_list:
-            self.fill_dataframe(garmin_class.__slots__, garmin_list)
-
-    def fill_dataframe(self, attrs, arr):
-        inp_array = []
-        for it in arr:
-            tmp_array = []
-            for attr in attrs:
-                tmp_array.append(getattr(it, attr))
-            inp_array.append(tmp_array)
-        self.dataframe = pd.DataFrame(inp_array, columns=attrs)
-
