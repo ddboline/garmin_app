@@ -28,49 +28,17 @@ class GarminCache(object):
 
     def read_sqlite_object_in_file(self, sqlite_file=''):
         ''' read python object from sqlite file '''
-        if not sqlite_file:
-            if not self.sqlite_file:
-                return None
-            else:
-                sqlite_file = self.sqlite_file
-        
-    
-        outobj = None
-        if os.path.exists(sqlite_file):
-            with gzip.open(sqlite_file, 'rb') as pkl_file:
-                outobj = pickle.load(pkl_file)
-        return outobj
+        return
         
     def write_pickle_object_to_file(self, inpobj, sqlite_file=''):
         ''' write python object to gzipped pickle file '''
-        if not sqlite_file:
-            if not self.sqlite_file:
-                return False
-            else:
-                sqlite_file = self.sqlite_file
-        with gzip.open('%s.tmp' % sqlite_file, 'wb') as pkl_file:
-            pickle.dump(inpobj, pkl_file, pickle.HIGHEST_PROTOCOL)
-        run_command('mv %s.tmp %s' % (sqlite_file, sqlite_file))
         return True
 
     def read_cached_gfile(self, gfbasename=''):
-        if not gfbasename or not self.cache_directory:
-            return False
-        if not os.path.exists('%s/%s.pkl.gz' % (self.cache_directory, gfbasename)):
-            return False
-        else:
-            gfile = self.read_pickle_object_in_file(sqlite_file='%s/%s.pkl.gz' % (self.cache_directory, gfbasename))
-            if gfile:
-                return gfile
-            else:
-                return False
-
+        return
+        
     def write_cached_gfile(self, garminfile=None):
-        if not garminfile or not self.cache_directory:
-            return False
-        gfbasename = os.path.basename(garminfile.orig_filename)
-        pfname = '%s/%s.pkl.gz' % (self.cache_directory, gfbasename)
-        return self.write_pickle_object_to_file(garminfile, sqlite_file=pfname)
+        return
 
     def get_cache_summary_list(self, directory, **options):
         ''' '''
