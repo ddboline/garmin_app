@@ -319,5 +319,14 @@ class TestGarminApp(unittest.TestCase):
         m.update(output)
         self.assertEqual(m.hexdigest(), '022c8b604d32c9297195ad80aef5b73c')
 
+    def test_cache_dataframe(self):
+        import gzip
+        _cache = garmin_cache.GarminCache(pickle_file='/home/ddboline/setup_files/build/garmin_app/run/garmin.pkl.gz', cache_directory='/home/ddboline/setup_files/build/garmin_app/run/cache/')
+        _summary_list = _cache.get_cache_summary_list(directory='/home/ddboline/setup_files/build/garmin_app/run')
+        
+        gdf = garmin_cache.GarminDataFrame(garmin_summary.GarminSummary, _summary_list)
+        gdf.dataframe.to_csv(gzip.open('temp_sum.csv.gz', 'w'), index=False)
+        gdf.dataframe.to_hdf('temp.hdf', key='garmin_summary', mode='w', complevel=9, complib='zlib')
+
 if __name__ == '__main__':
     unittest.main()

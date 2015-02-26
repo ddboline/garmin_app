@@ -154,15 +154,24 @@ class GarminDataFrame(object):
     ''' dump list of garmin_points to pandas.DataFrame '''
     def __init__(self, garmin_class=None, garmin_list=None):
         self.dataframe = None
+        self.garminclass = garmin_class
         if garmin_class and garmin_list:
-            self.fill_dataframe(garmin_class.__slots__, garmin_list)
+            self.fill_dataframe(garmin_list)
 
-    def fill_dataframe(self, attrs, arr):
+    def fill_dataframe(self, arr):
         inp_array = []
         for it in arr:
             tmp_array = []
-            for attr in attrs:
+            for attr in self.garminclass.__slots__:
                 tmp_array.append(getattr(it, attr))
             inp_array.append(tmp_array)
-        self.dataframe = pd.DataFrame(inp_array, columns=attrs)
+        self.dataframe = pd.DataFrame(inp_array, columns=self.garminclass.__slots__)
 
+    def fill_list(self):
+        output = []
+        for row in self.dataframe.iterrows():
+            tmpobj = self.garminclass()
+            for attr in self.garminclass.__slots__:
+                setattr(tmpobj, attr, row[attr])
+            output.append(tmpobj)
+        return output
