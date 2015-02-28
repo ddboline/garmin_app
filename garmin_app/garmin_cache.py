@@ -3,12 +3,7 @@
 
 '''
     functions to read and write
-    GarminFile, GarminSummary objects to and from cache
-    
-    desired caches:
-        python pickle
-        SQL
-        amazon S3
+    GarminFile, GarminSummary objects to and from pickle cache
 '''
 
 import os
@@ -36,7 +31,7 @@ class GarminCache(object):
         self.cache_summary_list = []
         self.cache_summary_md5_dict = {}
         self.cache_summary_file_dict = {}
-        self.pickle_file_is_modified = False
+        self.cache_file_is_modified = False
         self.do_update = False
         if cache_directory:
             if not os.path.exists(cache_directory):
@@ -93,7 +88,7 @@ class GarminCache(object):
             self.do_update = True
         summary_list = []
         
-        self.pickle_file_is_modified = False
+        self.cache_file_is_modified = False
         temp_list = self.read_pickle_object_in_file()
         if temp_list and type(temp_list) == list:
             self.cache_summary_list = temp_list
@@ -119,7 +114,7 @@ class GarminCache(object):
                     (self.cache_summary_file_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
                     (self.do_update and print_date_string(self.cache_summary_md5_dict[reduced_gmn_filename].begin_time)
                         in list_of_corrected_laps)):
-                self.pickle_file_is_modified = True
+                self.cache_file_is_modified = True
                 gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)
                 gfile = gsum.read_file()
                 if gfile:
@@ -145,7 +140,7 @@ class GarminCache(object):
                 elif os.path.isfile(d):
                     add_file(d)
 
-        if self.pickle_file_is_modified:
+        if self.cache_file_is_modified:
             self.write_pickle_object_to_file(self.cache_summary_list)
         return summary_list
 
