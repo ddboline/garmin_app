@@ -15,12 +15,18 @@ import os
 
 import pandas as pd
 
-from garmin_app.util import run_command
+import gzip
 
+from garmin_app.util import run_command
 from garmin_app.garmin_corrections import list_of_corrected_laps
 from garmin_app.garmin_file import GarminFile, GarminLap, GarminPoint
 from garmin_app.garmin_summary import GarminSummary
 from garmin_app.garmin_utils import get_md5
+
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
 class GarminCache(object):
     ''' class to manage caching objects '''
@@ -48,7 +54,7 @@ class GarminCache(object):
             with gzip.open(pickle_file, 'rb') as pkl_file:
                 outobj = pickle.load(pkl_file)
         return outobj
-        
+    
     def write_pickle_object_to_file(self, inpobj, pickle_file=''):
         ''' write python object to gzipped pickle file '''
         if not pickle_file:

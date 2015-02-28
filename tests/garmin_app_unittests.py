@@ -328,5 +328,6 @@ class TestGarminApp(unittest.TestCase):
         gdf.dataframe.to_csv(gzip.open('temp_sum.csv.gz', 'w'), index=False)
         gdf.dataframe.to_hdf('temp.hdf', key='garmin_summary', mode='w', complevel=9, complib='zlib')
 
+
 if __name__ == '__main__':
     unittest.main()
