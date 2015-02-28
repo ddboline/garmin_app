@@ -169,3 +169,4 @@ class GarminDataFrame(object):
                 setattr(tmpobj, attr, row[attr])
             output.append(tmpobj)
         return output
+
