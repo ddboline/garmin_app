@@ -4,6 +4,10 @@
 '''
     corrections for errors in original garmin files (by which I mean human errors)
 '''
+from __future__ import print_function
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 list_of_mislabeled_files = {'biking':
                                 ['20101120T135534.gmn', '20110507T144308.gmn', '20110829T171218.gmn', '20111220T134356.gmn'],

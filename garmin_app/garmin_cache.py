@@ -5,6 +5,10 @@
     functions to read and write
     GarminFile, GarminSummary objects to and from pickle cache
 '''
+from __future__ import print_function
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
 
@@ -123,7 +127,7 @@ class GarminCache(object):
                     self.cache_summary_md5_dict[gmn_md5sum] = gsum
                     self.write_cached_gfile(garminfile=gfile)
                 else:
-                    print 'file %s not loaded for some reason' % reduced_gmn_filename
+                    print('file %s not loaded for some reason' % reduced_gmn_filename)
             else:
                 gsum = self.cache_summary_file_dict[reduced_gmn_filename]
             summary_list.append(gsum)

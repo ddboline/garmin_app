@@ -4,6 +4,10 @@
 '''
     module holds GarminSummary class
 '''
+from __future__ import print_function
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
 
@@ -59,7 +63,7 @@ class GarminSummary(object):
         if self.total_calories < 3:
             return temp_gfile
         if self.sport not in SPORT_TYPES:
-            print '%s not supported' % self.sport
+            print('%s not supported' % self.sport)
             return False
 
         return temp_gfile

@@ -4,6 +4,10 @@
 '''
     functions to generate reports either to STDOUT or html
 '''
+from __future__ import print_function
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
 import re
@@ -292,11 +296,11 @@ class GarminReport(object):
                 try:
                     occur_map[(day_set[-1]-last_date).days + 1] += 1
                 except KeyError:
-                    print day_set[-1], last_date
-                    print (day_set[-1]-last_date).days + 1
-                    print occur_map
-                    print day_set
-                    print 'key error'
+                    print(day_set[-1], last_date)
+                    print((day_set[-1]-last_date).days + 1)
+                    print(occur_map)
+                    print(day_set)
+                    print('key error')
                     exit(1)
 
                 if not do_sport:
@@ -770,7 +774,6 @@ def print_lap_string(glap, sport):
 def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi', do_heart_rate=True):
     ''' get splits for given split distance '''
     if len(gfile.points) < 3: return []
-    #print '\n'.join('%s' % p for p in gfile.points)
     last_point_me = 0
     last_point_time = 0
     prev_split_me = 0
@@ -787,7 +790,7 @@ def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi', do_h
             try:
                 avg_hrt_rate += point.heart_rate * (cur_point_time - last_point_time)
             except Exception as exc:
-                print 'Exception:', exc, point.heart_rate, cur_point_time, last_point_me
+                print('Exception:', exc, point.heart_rate, cur_point_time, last_point_me)
                 exit(0)
         nmiles = int(cur_point_me/split_distance_in_meters) - int(last_point_me/split_distance_in_meters)
         if nmiles > 0:
