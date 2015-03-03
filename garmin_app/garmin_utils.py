@@ -221,8 +221,8 @@ def do_summary(directory_, msg_q=None, **options):
     _cache_dir = '%s/run/cache' % script_path
     _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir)
     if 'build' in options and options['build']:
-        return _cache.get_cache_summary_list(directory='%s/run' % script_path)
-    _summary_list = _cache.get_cache_summary_list(directory=directory_)
+        return _cache.get_cache_summary_list(directory='%s/run' % script_path, **options)
+    _summary_list = _cache.get_cache_summary_list(directory=directory_, **options)
     if not _summary_list:
         return None
     _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
@@ -287,7 +287,6 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
     if not gdir:
         gdir.append('%s/run' % script_path)
 
-    
     if len(gdir) == 1 and os.path.isfile(gdir[0]):
         return read_garmin_file(gdir[0], msg_q, **options)
     else:
