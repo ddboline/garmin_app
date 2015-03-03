@@ -29,6 +29,12 @@ def garmin_arg_parse():
     #print(os.sys.argv)
     script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
 
+    options = {'do_plot': False, 'do_year': False, 'do_month': False, 'do_week': False, 'do_day': False, 'do_file': False, 'do_sport': None, 'do_update': False, 'do_average': False}
+    options['script_path'] = script_path
+
+    if 'do_%s' % arg in options:
+        options['do_%s' % arg] = True
+
     if '%s/bin' % script_path not in os.getenv('PATH'):
         os.putenv('PATH', '%s:%s/bin' % (os.getenv('PATH'), script_path))
 
@@ -59,9 +65,6 @@ def garmin_arg_parse():
     if not os.path.exists('%s/run' % script_path):
         print('need to download files first')
         exit(0)
-
-    options = {'do_plot': False, 'do_year': False, 'do_month': False, 'do_week': False, 'do_day': False, 'do_file': False, 'do_sport': None, 'do_update': False, 'do_average': False}
-    options['script_path'] = script_path
     
     if getattr(args, 'daemon'):
         g = GarminServer()
