@@ -113,7 +113,6 @@ class GarminCache(object):
                 return
             reduced_gmn_filename = os.path.basename(gmn_filename)
             gmn_md5sum = get_md5(gmn_filename)
-
             if ((reduced_gmn_filename not in self.cache_summary_file_dict) or
                     (self.cache_summary_file_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
                     (self.do_update and print_date_string(self.cache_summary_file_dict[reduced_gmn_filename].begin_datetime)
@@ -132,7 +131,7 @@ class GarminCache(object):
                 gsum = self.cache_summary_file_dict[reduced_gmn_filename]
             summary_list.append(gsum)
         
-        if type(directory) == str:
+        if type(directory) in (str, unicode):
             if os.path.isdir(directory):
                 os.path.walk(directory, process_files, None)
             elif os.path.isfile(directory):

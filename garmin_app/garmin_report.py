@@ -52,7 +52,6 @@ class GarminReport(object):
         week_set = list(set((x.begin_datetime.isocalendar()[0]*100+x.begin_datetime.isocalendar()[1]) for x in summary_list))
         day_set = list(set(x.begin_datetime.date() for x in summary_list))
         sport_set = list(set(x.sport for x in summary_list))
-
         for item in year_set, month_set, week_set, day_set, sport_set:
             item.sort()
 
