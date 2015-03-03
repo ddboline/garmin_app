@@ -1,13 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 '''
     functions to generate reports either to STDOUT or html
 '''
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import re
@@ -323,18 +319,19 @@ class GarminReport(object):
         if not os.path.exists('%s/html' % curpath):
             os.makedirs('%s/html' % curpath)
         with open('%s/html/index.html' % curpath, 'w') as htmlfile:
-            for line in open('%s/templates/GARMIN_TEMPLATE.html' % curpath, 'r'):
-                if 'INSERTTEXTHERE' in line:
-                    htmlfile.write(htmlostr)
-                elif 'SPORTTITLEDATE' in line:
-                    newtitle = 'Garmin Summary'
-                    htmlfile.write(line.replace('SPORTTITLEDATE',newtitle))
-                elif 'HISTORYBUTTONS' in line:
-                    histlist = []
-                    if self.msg_q:
-                        htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
-                else:
-                    htmlfile.write(line)
+            with open('%s/templates/GARMIN_TEMPLATE.html' % curpath, 'r') as _f:
+                for line in _f:
+                    if 'INSERTTEXTHERE' in line:
+                        htmlfile.write(htmlostr)
+                    elif 'SPORTTITLEDATE' in line:
+                        newtitle = 'Garmin Summary'
+                        htmlfile.write(line.replace('SPORTTITLEDATE',newtitle))
+                    elif 'HISTORYBUTTONS' in line:
+                        histlist = []
+                        if self.msg_q:
+                            htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
+                    else:
+                        htmlfile.write(line)
 
         if (os.path.exists('%s/html' % curpath) and os.path.exists('%s/public_html/garmin' % os.getenv('HOME')))\
                 and copy_to_public_html:
@@ -410,7 +407,7 @@ class GarminReport(object):
         vertical_climb = 0
         speed_values = get_splits(gfile, 400., do_heart_rate=False)
         if speed_values:
-            speed_values = filter(lambda x: x[1] < 20, [[d/4., 4*t/60.] for d, t in speed_values])
+            speed_values = [[d/4., 4*t/60.] for d, t in speed_values if 4*t/60. < 20]
         mph_speed_values = []
         avg_speed_values = []
         avg_mph_speed_values = []
@@ -511,39 +508,40 @@ class GarminReport(object):
                 central_lon = (maxlon + minlon)/2.
                 latlon_min = max((maxlat-minlat), (maxlon-minlon))
                 latlon_thresholds = [[15, 0.015], [14, 0.038], [13, 0.07], [12, 0.12], [11, 0.20], [10, 0.4]]
-                for line in open('%s/templates/MAP_TEMPLATE.html' % curpath, 'r'):
-                    if 'SPORTTITLEDATE' in line:
-                        newtitle = 'Garmin Event %s on %s' % (gfile.sport.title(), gfile.begin_datetime)
-                        htmlfile.write(line.replace('SPORTTITLEDATE',newtitle))
-                    elif 'ZOOMVALUE' in line:
-                        for zoom, thresh in latlon_thresholds:
-                            if latlon_min < thresh or zoom == 10:
-                                htmlfile.write(line.replace('ZOOMVALUE','%d' % zoom))
-                                break
-                    elif 'INSERTTABLESHERE' in line:
-                        htmlfile.write('%s\n' % get_file_html(gfile))
-                        _tmp = get_html_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi')
-                        if _tmp != None:
-                            htmlfile.write('<br><br>%s\n' % _tmp)
-                        _tmp = get_html_splits(gfile, split_distance_in_meters=5000., label='km')
-                        if _tmp != None:
-                            htmlfile.write('<br><br>%s\n' % _tmp)
-                    elif 'INSERTMAPSEGMENTSHERE' in line:
-                        for idx in range(0, len(lat_vals)):
-                            htmlfile.write('new google.maps.LatLng(%f,%f),\n' % (lat_vals[idx], lon_vals[idx]))
-                    elif 'MINLAT' in line or 'MAXLAT' in line or 'MINLON' in line or 'MAXLON' in line:
-                        htmlfile.write(line.replace('MINLAT', '%s' % minlat).replace('MAXLAT', '%s' % maxlat).replace('MINLON', '%s' % minlon).replace('MAXLON', '%s' % maxlon))
-                    elif 'CENTRALLAT' in line or 'CENTRALLON' in line:
-                        htmlfile.write(line.replace('CENTRALLAT', '%s' % central_lat).replace('CENTRALLON', '%s' % central_lon))
-                    elif 'INSERTOTHERIMAGESHERE' in line:
-                        for f in graphs:
-                            htmlfile.write('<p>\n<img src="%s">\n</p>' % f)
-                    elif 'HISTORYBUTTONS' in line:
-                        histlist = []
-                        if self.msg_q:
-                            htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
-                    else:
-                        htmlfile.write(line)
+                with open('%s/templates/MAP_TEMPLATE.html' % curpath, 'r') as _f:
+                    for line in _f:
+                        if 'SPORTTITLEDATE' in line:
+                            newtitle = 'Garmin Event %s on %s' % (gfile.sport.title(), gfile.begin_datetime)
+                            htmlfile.write(line.replace('SPORTTITLEDATE',newtitle))
+                        elif 'ZOOMVALUE' in line:
+                            for zoom, thresh in latlon_thresholds:
+                                if latlon_min < thresh or zoom == 10:
+                                    htmlfile.write(line.replace('ZOOMVALUE','%d' % zoom))
+                                    break
+                        elif 'INSERTTABLESHERE' in line:
+                            htmlfile.write('%s\n' % get_file_html(gfile))
+                            _tmp = get_html_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi')
+                            if _tmp != None:
+                                htmlfile.write('<br><br>%s\n' % _tmp)
+                            _tmp = get_html_splits(gfile, split_distance_in_meters=5000., label='km')
+                            if _tmp != None:
+                                htmlfile.write('<br><br>%s\n' % _tmp)
+                        elif 'INSERTMAPSEGMENTSHERE' in line:
+                            for idx in range(0, len(lat_vals)):
+                                htmlfile.write('new google.maps.LatLng(%f,%f),\n' % (lat_vals[idx], lon_vals[idx]))
+                        elif 'MINLAT' in line or 'MAXLAT' in line or 'MINLON' in line or 'MAXLON' in line:
+                            htmlfile.write(line.replace('MINLAT', '%s' % minlat).replace('MAXLAT', '%s' % maxlat).replace('MINLON', '%s' % minlon).replace('MAXLON', '%s' % maxlon))
+                        elif 'CENTRALLAT' in line or 'CENTRALLON' in line:
+                            htmlfile.write(line.replace('CENTRALLAT', '%s' % central_lat).replace('CENTRALLON', '%s' % central_lon))
+                        elif 'INSERTOTHERIMAGESHERE' in line:
+                            for f in graphs:
+                                htmlfile.write('<p>\n<img src="%s">\n</p>' % f)
+                        elif 'HISTORYBUTTONS' in line:
+                            histlist = []
+                            if self.msg_q:
+                                htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
+                        else:
+                            htmlfile.write(line)
             else:
                 for line in open('%s/templates/GARMIN_TEMPLATE.html' % curpath, 'r'):
                     if 'INSERTTEXTHERE' in line:

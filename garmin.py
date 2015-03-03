@@ -1,15 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import glob
 import argparse
 
-from urllib2 import urlopen
+from urllib.request import urlopen
 
 from garmin_app.garmin_cache import GarminCache
 from garmin_app.garmin_parse import GarminParse

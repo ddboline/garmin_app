@@ -1,14 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 '''
     functions to read and write
     GarminFile, GarminSummary objects to and from pickle cache
 '''
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 
@@ -131,17 +127,21 @@ class GarminCache(object):
                 gsum = self.cache_summary_file_dict[reduced_gmn_filename]
             summary_list.append(gsum)
         
-        if type(directory) in (str, unicode):
-            if os.path.isdir(directory):
-                os.path.walk(directory, process_files, None)
-            elif os.path.isfile(directory):
-                add_file(directory)
+        def walk_directory(_dir, _cback, _arg):
+            for _dirpath, _dirnames, _filenames in os.walk(top=_dir):
+                _cback(_arg, _dir, _filenames)
+        
         if type(directory) == list:
             for d in directory:
                 if os.path.isdir(d):
-                    os.path.walk(d, process_files, None)
+                    walk_directory(d, process_files, None)
                 elif os.path.isfile(d):
                     add_file(d)
+        else:
+            if os.path.isdir(directory):
+                walk_directory(directory, process_files, None)
+            elif os.path.isfile(directory):
+                add_file(directory)
 
         if self.cache_file_is_modified:
             self.write_pickle_object_to_file(self.cache_summary_list)

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 '''
@@ -7,10 +7,6 @@
         gmn to xml
         fit to tcx
 '''
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import glob
@@ -112,8 +108,9 @@ def convert_gmn_to_xml(gmn_filename):
         return gmn_filename
     with open('/tmp/.temp.xml', 'w') as xml_file:
         xml_file.write('<root>\n')
-        for line in run_command('garmin_dump %s' % gmn_filename, do_popen=True):
-            xml_file.write(line)
+        with run_command('garmin_dump %s' % gmn_filename, do_popen=True) as f:
+            for line in f:
+                xml_file.write(line)
         xml_file.write('</root>\n')
     run_command('mv /tmp/.temp.xml /tmp/temp.xml')
     return '/tmp/temp.xml'
@@ -130,7 +127,8 @@ def get_md5_old(fname):
 def get_md5(fname):
     if not os.path.exists(fname):
         return None
-    output = run_command('md5sum "%s"' % fname, do_popen=True).read().split()[0]
+    with run_command('md5sum "%s"' % fname, do_popen=True) as f:
+        output = f.read().split()[0]
     return output
 
 def compare_with_remote(script_path):
@@ -265,7 +263,7 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
         elif 'do_%s' % arg in options:
             options['do_%s' % arg] = True
         else:
-            spts = filter(lambda x: arg in x, list(SPORT_TYPES))
+            spts = [x for x in list(SPORT_TYPES) if arg in x]
             if len(spts) > 0:
                 options['do_sport'] = spts[0]
             elif arg == 'bike':
@@ -279,7 +277,7 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
                     month = '*'
                 files = glob.glob('%s/run/%s/%s/%s*' % (script_path, year, month, arg)) + glob.glob('%s/run/%s/%s/%s*' % (script_path, year, month, ''.join(ent)))
                 basenames = [f.split('/')[-1] for f in sorted(files)]
-                if len(filter(lambda x: x[:10] == basenames[0][:10], basenames)) == len(basenames):
+                if len([x for x in basenames if x[:10] == basenames[0][:10]]) == len(basenames):
                     for f in basenames:
                         print(f)
                 gdir += files
