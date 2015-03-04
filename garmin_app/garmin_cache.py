@@ -5,6 +5,10 @@
     functions to read and write
     GarminFile, GarminSummary objects to and from pickle cache
 '''
+from __future__ import print_function
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
 
@@ -16,7 +20,7 @@ from garmin_app.util import run_command
 from garmin_app.garmin_corrections import list_of_corrected_laps
 from garmin_app.garmin_file import GarminFile, GarminLap, GarminPoint
 from garmin_app.garmin_summary import GarminSummary
-from garmin_app.garmin_utils import get_md5
+from garmin_app.garmin_utils import get_md5, print_date_string
 
 try:
     import cPickle as pickle
@@ -84,7 +88,7 @@ class GarminCache(object):
     def get_cache_summary_list(self, directory, **options):
         ''' '''
         self.do_update = False
-        if 'update' in options and options['update']:
+        if 'do_update' in options and options['do_update']:
             self.do_update = True
         summary_list = []
         
@@ -109,10 +113,9 @@ class GarminCache(object):
                 return
             reduced_gmn_filename = os.path.basename(gmn_filename)
             gmn_md5sum = get_md5(gmn_filename)
-
             if ((reduced_gmn_filename not in self.cache_summary_file_dict) or
                     (self.cache_summary_file_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
-                    (self.do_update and print_date_string(self.cache_summary_md5_dict[reduced_gmn_filename].begin_time)
+                    (self.do_update and print_date_string(self.cache_summary_file_dict[reduced_gmn_filename].begin_datetime)
                         in list_of_corrected_laps)):
                 self.cache_file_is_modified = True
                 gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)
@@ -123,12 +126,12 @@ class GarminCache(object):
                     self.cache_summary_md5_dict[gmn_md5sum] = gsum
                     self.write_cached_gfile(garminfile=gfile)
                 else:
-                    print 'file %s not loaded for some reason' % reduced_gmn_filename
+                    print('file %s not loaded for some reason' % reduced_gmn_filename)
             else:
                 gsum = self.cache_summary_file_dict[reduced_gmn_filename]
             summary_list.append(gsum)
         
-        if type(directory) == str:
+        if type(directory) in (str, unicode):
             if os.path.isdir(directory):
                 os.path.walk(directory, process_files, None)
             elif os.path.isfile(directory):
