@@ -48,6 +48,7 @@ def garmin_arg_parse():
                 for line in urlout:
                     outfile.write(line)
                 outfile.close()
+                print('downloaded file')
                 run_command('tar zxf temp.tar.gz 2>&1 > /dev/null')
                 os.remove('temp.tar.gz')
             exit(0)
