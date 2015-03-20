@@ -242,6 +242,7 @@ list_of_corrected_laps = {
      '2015-01-17T13:21:42Z': {0: 10.0},
      '2015-03-01T13:30:53Z': {0: FIVEK_DIST, 1:FIVEK_DIST, 2:FIVEK_DIST, 3:FIVEK_DIST,
                               4:FIVEK_DIST, 5:FIVEK_DIST, 6:FIVEK_DIST, 7:FIVEK_DIST,
-                              8:1.14, 9:(FIVEK_DIST-1.14), 10:FIVEK_DIST},}
+                              8:1.14, 9:(FIVEK_DIST-1.14), 10:FIVEK_DIST},
+     '2015-03-20T13:59:53Z': {0: 6.5},}
     # 'time_string': {lap_no: [dist, time_in_sec]},
 
