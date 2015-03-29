@@ -31,7 +31,7 @@ class GarminParse(GarminFile):
             self.filetype = filetype
         else:
             self.determine_file_type()
-    
+
     def determine_file_type(self):
         if '.tcx' in self.filename.lower():
             self.filetype = 'tcx'

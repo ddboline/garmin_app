@@ -66,7 +66,7 @@ def garmin_arg_parse():
 
     options = {'do_plot': False, 'do_year': False, 'do_month': False, 'do_week': False, 'do_day': False, 'do_file': False, 'do_sport': None, 'do_update': False, 'do_average': False}
     options['script_path'] = script_path
-    
+
     if getattr(args, 'daemon'):
         g = GarminServer()
         g.start_server()

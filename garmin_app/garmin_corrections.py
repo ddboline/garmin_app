@@ -21,7 +21,7 @@ list_of_mislabeled_files = {'biking':
                                 ['20120428T112809.gmn', '20120519T103538.gmn', '20120519T104029.gmn', '20121231T154005.gmn'],
                             'stairs':
                                 ['20120208T204305.gmn'],
-                           }
+                          }
 
 list_of_mislabeled_times = {'biking':
                                 ['2010-11-20T14:55:34Z', '2011-05-07T15:43:08Z', '2011-08-29T18:12:18Z', '2011-12-20T13:43:56Z', '2011-08-06T13:59:30Z'],
@@ -35,7 +35,7 @@ list_of_mislabeled_times = {'biking':
                                 ['2013-12-25T19:34:06Z'],
                             'skiing':
                                 ['2010-12-24T14:04:58Z', '2013-12-26T21:24:38Z'],
-                           }
+                          }
 
 list_of_corrected_laps = {
      '2011-07-04T08:58:27Z': {0: FIVEK_DIST,},
@@ -249,4 +249,3 @@ list_of_corrected_laps = {
      '2015-03-25T11:30:07Z': {0: 6.5},
      'DUMMY': {0:0.0},}
     # 'time_string': {lap_no: [dist, time_in_sec]},
-

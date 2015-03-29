@@ -40,7 +40,7 @@ class GarminCache(object):
         if cache_directory:
             if not os.path.exists(cache_directory):
                 os.makedirs(cache_directory)
-    
+
     def read_pickle_object_in_file(self, pickle_file=''):
         ''' read python object from gzipped pickle file '''
         if not pickle_file:
@@ -53,7 +53,7 @@ class GarminCache(object):
             with gzip.open(pickle_file, 'rb') as pkl_file:
                 outobj = pickle.load(pkl_file)
         return outobj
-    
+
     def write_pickle_object_to_file(self, inpobj, pickle_file=''):
         ''' write python object to gzipped pickle file '''
         if not pickle_file:
@@ -91,7 +91,7 @@ class GarminCache(object):
         if 'do_update' in options and options['do_update']:
             self.do_update = True
         summary_list = []
-        
+
         self.cache_file_is_modified = False
         temp_list = self.read_pickle_object_in_file()
         if temp_list and type(temp_list) == list:
@@ -130,7 +130,7 @@ class GarminCache(object):
             else:
                 gsum = self.cache_summary_file_dict[reduced_gmn_filename]
             summary_list.append(gsum)
-        
+
         if type(directory) in (str, unicode):
             if os.path.isdir(directory):
                 os.path.walk(directory, process_files, None)
@@ -173,4 +173,3 @@ class GarminDataFrame(object):
                 setattr(tmpobj, attr, row[attr])
             output.append(tmpobj)
         return output
-

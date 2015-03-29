@@ -26,7 +26,7 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
         server_thread, listens for commands, sends back responses.
     '''
     script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
-    
+
     if os.path.exists(socketfile):
         os.remove(socketfile)
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -50,14 +50,14 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
         isprev = False
         if not args:
             continue
-        
+
         if args[0] == 'prev':
             isprev = True
             args.pop(0)
 
         if msg_q != None:
             print(msg_q)
-            
+
         if msg_q != None and isprev:
             _tmp = ' '.join(args)
             if _tmp in msg_q:
@@ -71,7 +71,7 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
             if _tmp == 'year':
                 while len(msg_q) > 0:
                     msg_q.pop(-1)
-        
+
         gdir = []
         options = {'do_plot': False, 'do_year': False, 'do_month': False, 'do_week': False, 'do_day': False, 'do_file': False, 'do_sport': None, 'do_update': False, 'do_average': False}
         options['script_path'] = script_path

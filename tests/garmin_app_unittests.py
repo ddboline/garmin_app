@@ -189,7 +189,7 @@ class TestGarminApp(unittest.TestCase):
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), '0929c060b23cb192f706d6964ffd75d6')
-        
+
     def test_garmin_file_report_html(self):
         gfile = garmin_parse.GarminParse(FITFILE)
         gfile.read_file()
@@ -218,7 +218,7 @@ class TestGarminApp(unittest.TestCase):
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), '9f5aa437a6e8bbe6ecd25a088b634018')
-        
+
     def test_garmin_day_summary_report_txt(self):
         gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
@@ -243,8 +243,8 @@ class TestGarminApp(unittest.TestCase):
         gr = garmin_report.GarminReport()
         ic = gsum.begin_datetime.isocalendar()
         output = gr.week_summary_report_txt(gsum, sport='running',
-                                            isoyear=ic[0], isoweek=ic[1], 
-                                            number_in_week=1, 
+                                            isoyear=ic[0], isoweek=ic[1],
+                                            number_in_week=1,
                                             date=gsum.begin_datetime)
         m = hashlib.md5()
         m.update(output)
@@ -290,7 +290,7 @@ class TestGarminApp(unittest.TestCase):
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), 'b7ab537ea3090fc44276b15bc61577b5')
-        
+
     def test_garmin_cache_get_summary_list(self):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
@@ -326,7 +326,7 @@ class TestGarminApp(unittest.TestCase):
         #import gzip
         #_cache = garmin_cache.GarminCache(pickle_file='/home/ddboline/setup_files/build/garmin_app/run/garmin.pkl.gz', cache_directory='/home/ddboline/setup_files/build/garmin_app/run/cache/')
         #_summary_list = _cache.get_cache_summary_list(directory='/home/ddboline/setup_files/build/garmin_app/run')
-        
+
         #gdf = garmin_cache.GarminDataFrame(garmin_summary.GarminSummary, _summary_list)
         #gdf.dataframe.to_csv(gzip.open('temp_sum.csv.gz', 'w'), index=False)
         #gdf.dataframe.to_hdf('temp.hdf', key='garmin_summary', mode='w', complevel=9, complib='zlib')
