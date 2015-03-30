@@ -152,10 +152,8 @@ def run_fix_pvr(turn_on_commands=True, unload_module=True):
 
     return
 
-oops_messages = [
-    'BUG: unable to handle kernel paging request at',
-    'general protection fault',
-]
+oops_messages = ['BUG: unable to handle kernel paging request at',
+                 'general protection fault',]
 
 def check_dmesg_for_ooops():
     for l in os.popen('dmesg').readlines():

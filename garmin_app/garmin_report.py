@@ -758,7 +758,7 @@ class GarminReport(object):
 
 def print_lap_string(glap, sport):
     ''' print nice output for a lap '''
-    if not glap.lap_number:
+    if glap.lap_number == None:
         return ''
     outstr = ['%s lap %i %.2f mi %s %s calories %.2f min' % (sport, glap.lap_number, glap.lap_distance / METERS_PER_MILE, print_h_m_s(glap.lap_duration), glap.lap_calories, glap.lap_duration / 60.)]
     if sport == 'running':
