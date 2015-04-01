@@ -189,7 +189,7 @@ class TestGarminApp(unittest.TestCase):
         print(output)
         m = hashlib.md5()
         m.update(output)
-        self.assertEqual(m.hexdigest(), '0929c060b23cb192f706d6964ffd75d6')
+        self.assertEqual(m.hexdigest(), 'dc49eed73bf44c1b5d5c2444a59bec96')
 
     def test_garmin_file_report_html(self):
         gfile = garmin_parse.GarminParse(FITFILE)
