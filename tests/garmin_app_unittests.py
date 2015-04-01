@@ -186,7 +186,6 @@ class TestGarminApp(unittest.TestCase):
         gfile.read_file()
         gr = garmin_report.GarminReport()
         output = gr.file_report_txt(gfile)
-        print(output)
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), 'dc49eed73bf44c1b5d5c2444a59bec96')
@@ -295,8 +294,7 @@ class TestGarminApp(unittest.TestCase):
     def test_garmin_cache_get_summary_list(self):
         gc = garmin_cache.GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, cache_directory='%s/run/cache' % CURDIR)
         sl = gc.get_cache_summary_list(directory='%s/tests' % CURDIR)
-        output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline').replace('/root', '/home/ddboline/setup_files/build')
-        print(output)
+        output = ('\n'.join('%s' % s for s in sorted(sl, key=lambda x: x.filename))).replace('ubuntu', 'ddboline').replace('/root', '/home/ddboline/setup_files/build').replace('/home/ddboline/Downloads/backup','/home/ddboline/setup_files/build')
         m = hashlib.md5()
         m.update(output)
         self.assertEqual(m.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
