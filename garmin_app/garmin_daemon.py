@@ -9,10 +9,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import os, glob
-import datetime
+import os
+import time
 from garmin_app.garmin_utils import garmin_parse_arg_list
-from garmin_app.util import run_command
 import multiprocessing
 import socket
 
@@ -40,9 +39,7 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
     print('socket open')
     s.listen(0)
 
-    net_pid = -1
     while True:
-        outstring = []
         c, a = s.accept()
         d = c.recv(1024)
 
@@ -72,8 +69,9 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
                 while len(msg_q) > 0:
                     msg_q.pop(-1)
 
-        gdir = []
-        options = {'do_plot': False, 'do_year': False, 'do_month': False, 'do_week': False, 'do_day': False, 'do_file': False, 'do_sport': None, 'do_update': False, 'do_average': False}
+        options = {'do_plot': False, 'do_year': False, 'do_month': False,
+                   'do_week': False, 'do_day': False, 'do_file': False,
+                   'do_sport': None, 'do_update': False, 'do_average': False}
         options['script_path'] = script_path
 
         garmin_parse_arg_list(args, msg_q, **options)

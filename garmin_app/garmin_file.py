@@ -12,12 +12,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import os
-
 from garmin_app.garmin_utils import convert_date_string, convert_time_string,\
-    get_md5, expected_calories, METERS_PER_MILE, SPORT_TYPES
-
-from garmin_app.util import datetimefromstring
+    METERS_PER_MILE
 
 class GarminPoint(object):
     '''

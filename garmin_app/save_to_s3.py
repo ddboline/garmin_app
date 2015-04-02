@@ -21,9 +21,7 @@ from __future__ import unicode_literals
 
 # Import the SDK
 import boto
-import uuid
 import os
-import time
 import glob
 
 # read aws credentials from file, then stick into global variables...

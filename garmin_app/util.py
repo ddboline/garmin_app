@@ -45,9 +45,9 @@ def send_command(ostr, host='localhost', portno=10888, socketfile=None):
     retval = ''
     s = socket.socket(net_type, stm_type)
     try:
-        err = s.connect(addr_obj)
-    except Exception:
-        print('failed to open socket')
+        s.connect(addr_obj)
+    except Exception as e:
+        print('failed to open socket %s' % e)
         return False
 
     s.send('%s\n' % ostr)

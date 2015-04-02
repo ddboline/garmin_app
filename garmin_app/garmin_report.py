@@ -14,10 +14,11 @@ import re
 import datetime
 
 from garmin_app.garmin_summary import GarminSummary
-from garmin_app.garmin_cache import GarminCache
-from garmin_app.garmin_utils import print_date_string, print_h_m_s, run_command,\
-     days_in_month, days_in_year,\
-     METERS_PER_MILE, MARATHON_DISTANCE_MI, WEEKDAY_NAMES, MONTH_NAMES, SPORT_TYPES
+from garmin_app.garmin_utils import print_date_string, print_h_m_s, \
+                                    run_command, days_in_month, \
+                                    days_in_year, METERS_PER_MILE, \
+                                    MARATHON_DISTANCE_MI, WEEKDAY_NAMES, \
+                                    MONTH_NAMES, SPORT_TYPES
 
 def print_history_buttons(history_list):
     if not history_list:
@@ -330,7 +331,6 @@ class GarminReport(object):
                     newtitle = 'Garmin Summary'
                     htmlfile.write(line.replace('SPORTTITLEDATE',newtitle))
                 elif 'HISTORYBUTTONS' in line:
-                    histlist = []
                     if self.msg_q:
                         htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
                 else:
@@ -539,7 +539,6 @@ class GarminReport(object):
                         for f in graphs:
                             htmlfile.write('<p>\n<img src="%s">\n</p>' % f)
                     elif 'HISTORYBUTTONS' in line:
-                        histlist = []
                         if self.msg_q:
                             htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
                     else:
@@ -558,7 +557,6 @@ class GarminReport(object):
                         newtitle = 'Garmin Event %s on %s' % (gfile.sport.title(), gfile.begin_datetime)
                         htmlfile.write(line.replace('SPORTTITLEDATE',newtitle))
                     elif 'HISTORYBUTTONS' in line:
-                        histlist = []
                         if self.msg_q:
                             htmlfile.write(line.replace('HISTORYBUTTONS', print_history_buttons(self.msg_q)))
                     else:
@@ -775,7 +773,6 @@ def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi', do_h
     if len(gfile.points) < 3: return []
     last_point_me = 0
     last_point_time = 0
-    prev_split_me = 0
     prev_split_time = 0
     avg_hrt_rate = 0
     split_vector = []
@@ -805,7 +802,6 @@ def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi', do_h
                 tmp_vector.append(avg_hrt_rate / (cur_split_time - prev_split_time))
             split_vector.append(tmp_vector)
 
-            prev_split_me = cur_split_me
             prev_split_time = cur_split_time
             avg_hrt_rate = 0
         last_point_me = cur_point_me
@@ -834,7 +830,6 @@ def print_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi', pr
     return '\n'.join(retval)
 
 def plot_graph(name=None, title=None, data=None, **opts):
-    import pandas as pd
     import numpy as np
     import matplotlib
     matplotlib.use('Agg')

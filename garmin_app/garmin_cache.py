@@ -18,7 +18,6 @@ import gzip
 
 from garmin_app.util import run_command
 from garmin_app.garmin_corrections import list_of_corrected_laps
-from garmin_app.garmin_file import GarminFile, GarminLap, GarminPoint
 from garmin_app.garmin_summary import GarminSummary
 from garmin_app.garmin_utils import get_md5, print_date_string
 

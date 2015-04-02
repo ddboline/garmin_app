@@ -12,11 +12,11 @@ from __future__ import unicode_literals
 import datetime
 
 from garmin_app.garmin_file import GarminFile, GarminLap, GarminPoint
-from garmin_app.garmin_utils import METERS_PER_MILE, MARATHON_DISTANCE_M,\
-     MARATHON_DISTANCE_MI, SPORT_TYPES, MONTH_NAMES, WEEKDAY_NAMES,\
+from garmin_app.garmin_utils import METERS_PER_MILE, \
      convert_time_string, print_date_string,\
      convert_fit_to_tcx, convert_gmn_to_xml, expected_calories
-from garmin_app.garmin_corrections import list_of_mislabeled_times, list_of_corrected_laps
+from garmin_app.garmin_corrections import list_of_mislabeled_times, \
+                                          list_of_corrected_laps
 
 from garmin_app.util import run_command
 
@@ -138,8 +138,6 @@ class GarminParse(GarminFile):
         return None
 
     def read_file_tcx(self):
-        is_bad_run = False
-        is_bad_bike = False
         cur_lap = None
         cur_point = None
         temp_points = []

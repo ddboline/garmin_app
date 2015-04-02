@@ -28,7 +28,7 @@ from garmin_app import garmin_utils,\
                        garmin_report,\
                        garmin_summary
 
-from garmin_app.util import run_command, datetimefromstring
+from garmin_app.util import run_command
 
 class TestGarminApp(unittest.TestCase):
 
@@ -175,7 +175,7 @@ class TestGarminApp(unittest.TestCase):
 
     def test_garmin_summary(self):
         gsum = garmin_summary.GarminSummary(FITFILE)
-        gfile = gsum.read_file()
+        gsum.read_file()
         output = gsum.__repr__()
         m = hashlib.md5()
         m.update(output)

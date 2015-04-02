@@ -6,16 +6,16 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import glob
+#import glob
 import argparse
 
 from urllib2 import urlopen
 
-from garmin_app.garmin_cache import GarminCache
-from garmin_app.garmin_parse import GarminParse
-from garmin_app.garmin_report import GarminReport
+#from garmin_app.garmin_cache import GarminCache
+#from garmin_app.garmin_parse import GarminParse
+#from garmin_app.garmin_report import GarminReport
 from garmin_app.garmin_utils import compare_with_remote, garmin_parse_arg_list,\
-    BASEURL, SPORT_TYPES
+    BASEURL
 from garmin_app.garmin_daemon import GarminServer
 
 from garmin_app.util import run_command
