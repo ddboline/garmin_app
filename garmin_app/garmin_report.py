@@ -28,8 +28,8 @@ def print_history_buttons(history_list):
     for hist in history_list:
         if hist == 'year':
             continue
-        retval.append('<button type="submit" onclick="send_command(\'prev %s'
-                      '\');"> %s </button>' % (hist, hist))
+        retval.append('<button type="submit" onclick="send_command(\'prev ' +
+                      '%s\');"> %s </button>' % (hist, hist))
     return '\n'.join(retval)
 
 class GarminReport(object):

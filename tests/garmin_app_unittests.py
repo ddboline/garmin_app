@@ -229,7 +229,7 @@ class TestGarminApp(unittest.TestCase):
         options = {'script_path': script_path}
         html_path = gr.file_report_html(gfile, copy_to_public_html=False,
                                         **options)
-        file_md5 = [['index.html', '3d4ef3b462266754e4ab00d9cd7a53bc']]
+        file_md5 = [['index.html', '1c1abe181f36a85949974a222cc874df']]
         for f, fmd5 in file_md5:
             md5 = garmin_utils.get_md5('%s/%s' % (html_path, f))
             self.assertEqual(md5, fmd5)
