@@ -57,7 +57,11 @@ def send_command(ostr, host='localhost', portno=10888, socketfile=None):
 
 def cleanup_path(orig_path):
     ''' cleanup path string using escape character '''
-    return orig_path.replace(' ', '\ ').replace('(', '\(').replace(')', '\)').replace('\'', '\\\'').replace('[', '\[').replace(']', '\]').replace('"', '\"').replace("'", "\'").replace('&', '\&').replace(',', '\,').replace('!', '\!').replace(';', '\;').replace('$', '\$')
+    return orig_path.replace(' ', '\ ').replace('(', '\(').replace(')', '\)')\
+                    .replace('\'', '\\\'').replace('[', '\[')\
+                    .replace(']', '\]').replace('"', '\"').replace("'", "\'")\
+                    .replace('&', '\&').replace(',', '\,').replace('!', '\!')\
+                    .replace(';', '\;').replace('$', '\$')
 
 def convert_date(input_date):
     import datetime
@@ -89,7 +93,9 @@ def get_random_hex_string(n):
     from binascii import b2a_hex
     return int(b2a_hex(os.urandom(n)), 16)
 
-def make_thumbnails(prefix='test_roku', input_file='', begin_time=0, output_dir='%s/public_html/videos/thumbnails' % HOMEDIR, use_mplayer=True):
+def make_thumbnails(prefix='test_roku', input_file='', begin_time=0,
+                    output_dir='%s/public_html/videos/thumbnails' % HOMEDIR,
+                    use_mplayer=True):
     ''' write out thumbnail images from running recording at specified time '''
     TMPDIR = '%s_%06x' % (output_dir, get_random_hex_string(3))
 
@@ -100,9 +106,13 @@ def make_thumbnails(prefix='test_roku', input_file='', begin_time=0, output_dir=
         return -1
     run_command('mkdir -p %s' % output_dir)
     if use_mplayer:
-        run_command('mplayer -ao null -vo jpeg:outdir=%s -frames 10 -ss %s %s 2> /dev/null > /dev/null' % (TMPDIR, begin_time, input_file))
+        run_command('mplayer -ao null -vo jpeg:outdir=%s ' % TMPDIR +
+                    '-frames 10 -ss %s ' % begin_time +
+                    '%s 2> /dev/null > /dev/null' % input_file)
     else:
-        run_command('mpv --ao=null --vo=image:format=jpg:outdir=%s --frames=10 --start=%s %s 2> /dev/null > /dev/null' % (TMPDIR, begin_time, input_file))
+        run_command('mpv --ao=null --vo=image:format=jpg:outdir=%s ' % TMPDIR +
+                    '--frames=10 --start=%s ' % begin_time +
+                    '%s 2> /dev/null > /dev/null' % input_file)
     run_command('mv %s/* %s/ 2> /dev/null > /dev/null' % (TMPDIR, output_dir))
     run_command('rm -rf %s' % TMPDIR)
     return begin_time
@@ -125,12 +135,16 @@ def print_m_s(second):
         return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
 def run_fix_pvr(turn_on_commands=True, unload_module=True):
-    ''' unload pvrusb2, wait 10s, reload it, fix permissions in /sys/class/pvrusb2, hope the kernel doesn't ooops '''
+    '''
+        unload pvrusb2, wait 10s, reload it,
+        fix permissions in /sys/class/pvrusb2,
+        hope the kernel doesn't ooops
+    '''
     import time
     from get_dev import is_module_loaded
     if unload_module:
-        # run_command('sudo modprobe -r usbserial', turn_on_commands=turn_on_commands)
-        run_command('sudo modprobe -r pvrusb2', turn_on_commands=turn_on_commands)
+        run_command('sudo modprobe -r pvrusb2',
+                    turn_on_commands=turn_on_commands)
         time.sleep(10)
         while is_module_loaded('pvrusb2'):
             time.sleep(10)
@@ -138,8 +152,12 @@ def run_fix_pvr(turn_on_commands=True, unload_module=True):
         time.sleep(20)
         while not is_module_loaded('pvrusb2'):
             time.sleep(10)
-    run_command('sudo chown -R ddboline:ddboline /sys/class/pvrusb2/sn-5370885/', turn_on_commands=turn_on_commands)
-    run_command('sudo chown ddboline:ddboline /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor', turn_on_commands=turn_on_commands)
+    run_command(
+        'sudo chown -R ddboline:ddboline /sys/class/pvrusb2/sn-5370885/',
+        turn_on_commands=turn_on_commands)
+    run_command('sudo chown ddboline:ddboline ' +
+                '/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor',
+                turn_on_commands=turn_on_commands)
 
     sdir = '/sys/class/pvrusb2/sn-5370885'
 
@@ -182,11 +200,10 @@ def dateTimeString(d):
 
 def datetimefromstring(tstr, ignore_tz=False):
     import dateutil.parser
-    #tstr = tstr.replace('-05:00', '-0500').replace('-04:00', '-0400')
-    #print(tstr)
     return dateutil.parser.parse(tstr, ignoretz=ignore_tz)
 
-def make_audio_analysis_plots(infile, make_plots=True, do_fft=True, prefix='temp'):
+def make_audio_analysis_plots(infile, make_plots=True, do_fft=True,
+                              prefix='temp'):
     import numpy as np
     from scipy import fftpack
     import matplotlib
@@ -223,11 +240,13 @@ def make_audio_analysis_plots(infile, make_plots=True, do_fft=True, prefix='temp
         pl.plot(np.log(np.abs(samp_freq1)+1e-9), np.abs(sig_fft1))
         pl.xlim(np.log(10), np.log(40e3))
         xtickarray = np.log(np.array([20, 1e2, 3e2, 1e3, 3e3, 10e3, 30e3]))
-        pl.xticks(xtickarray, ['20Hz', '100Hz', '300Hz', '1kHz', '3kHz', '10kHz', '30kHz'])
+        pl.xticks(xtickarray, ['20Hz', '100Hz', '300Hz', '1kHz', '3kHz',
+                               '10kHz', '30kHz'])
         pl.savefig('%s/%s_fft.png' % (HOMEDIR, prefix))
         pl.clf()
 
-        run_command('mv %s/%s_time.png %s/%s_fft.png %s/public_html/videos/' % (HOMEDIR, prefix, HOMEDIR, prefix, HOMEDIR))
+        run_command('mv %s/%s_time.png %s/%s_fft.png %s/public_html/videos/'
+                    % (HOMEDIR, prefix, HOMEDIR, prefix, HOMEDIR))
     return float(np.sum(np.abs(sig_fft0)))
 
 def make_time_series_plot(input_file='', prefix='temp'):
@@ -239,8 +258,11 @@ def make_time_series_plot(input_file='', prefix='temp'):
     length_of_file = get_length_of_mpg(input_file)
     audio_vals = []
     for t in range(0,length_of_file, 60):
-        run_command('mpv --start=%d --length=10 --ao=pcm:fast:file=%s/%s.wav --no-video %s 2> /dev/null > /dev/null' % (t, HOMEDIR, prefix, input_file))
-        aud_int = make_audio_analysis_plots('%s/%s.wav' % (HOMEDIR, prefix), make_plots=False, do_fft=False)
+        run_command('mpv --start=%d --length=10 ' % t +
+                    '--ao=pcm:fast:file=%s/%s.wav ' % (HOMEDIR, prefix) +
+                    '--no-video %s 2> /dev/null > /dev/null' % input_file)
+        aud_int = make_audio_analysis_plots('%s/%s.wav' % (HOMEDIR, prefix),
+                                            make_plots=False, do_fft=False)
         audio_vals.append(aud_int)
     #print(audio_vals)
     x = np.arange(0, length_of_file, 60)
@@ -249,5 +271,6 @@ def make_time_series_plot(input_file='', prefix='temp'):
     pl.plot(x/60., y)
     pl.savefig('%s/%s_time.png' % (HOMEDIR, prefix))
     pl.clf()
-    run_command('mv %s/%s_time.png %s/public_html/videos/' % (HOMEDIR, prefix, HOMEDIR))
+    run_command('mv %s/%s_time.png %s/public_html/videos/' % (HOMEDIR, prefix,
+                                                              HOMEDIR))
     return 'Done'

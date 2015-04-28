@@ -27,20 +27,26 @@ MARATHON_DISTANCE_M = 42195 # meters
 MARATHON_DISTANCE_MI = MARATHON_DISTANCE_M / METERS_PER_MILE # meters
 
 ### explicitly specify available types...
-SPORT_TYPES = ('running', 'biking', 'walking', 'ultimate', 'elliptical', 'stairs', 'lifting', 'swimming', 'other', 'snowshoeing', 'skiing')
-MONTH_NAMES = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+SPORT_TYPES = ('running', 'biking', 'walking', 'ultimate', 'elliptical',
+               'stairs', 'lifting', 'swimming', 'other', 'snowshoeing',
+               'skiing')
+MONTH_NAMES = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+               'Oct', 'Nov', 'Dec')
 WEEKDAY_NAMES = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
 
 def days_in_year(year=datetime.date.today().year):
     ''' return number of days in a given year '''
-    return (datetime.date(year=year+1, month=1, day=1)-datetime.date(year=year, month=1, day=1)).days
+    return (datetime.date(year=year+1, month=1, day=1)
+            - datetime.date(year=year, month=1, day=1)).days
 
-def days_in_month(month=datetime.date.today().month, year=datetime.date.today().year):
+def days_in_month(month=datetime.date.today().month,
+                  year=datetime.date.today().year):
     ''' return number of days in a given month '''
     y1, m1 = year, month + 1
     if m1 == 13:
         y1, m1 = y1 + 1, 1
-    return (datetime.date(year=y1, month=m1, day=1)-datetime.date(year=year, month=month, day=1)).days
+    return (datetime.date(year=y1, month=m1, day=1)
+            - datetime.date(year=year, month=month, day=1)).days
 
 ### maybe change output to datetime object?
 def convert_date_string(date_str, ignore_tz=True):
@@ -49,7 +55,11 @@ def convert_date_string(date_str, ignore_tz=True):
 
 def expected_calories(weight=175, pace_min_per_mile=10.0, distance=1.0):
     ''' return expected calories for running at a given pace '''
-    cal_per_mi = weight * (0.0395 + 0.00327 * (60./pace_min_per_mile) + 0.000455 * (60./pace_min_per_mile)**2 + 0.000801 * (weight/154) * 0.425 / weight * (60./pace_min_per_mile)**3) * 60. / (60./pace_min_per_mile)
+    cal_per_mi = weight * (0.0395 + 0.00327 * (60./pace_min_per_mile)
+                           + 0.000455 * (60./pace_min_per_mile)**2
+                           + 0.000801 * ((weight/154) * 0.425 / weight
+                                         * (60./pace_min_per_mile)**3)
+                                         * 60. / (60./pace_min_per_mile))
     return cal_per_mi * distance
 
 def print_date_string(d):
@@ -112,7 +122,8 @@ def convert_gmn_to_xml(gmn_filename):
         return gmn_filename
     with open('/tmp/.temp.xml', 'w') as xml_file:
         xml_file.write('<root>\n')
-        for line in run_command('garmin_dump %s' % gmn_filename, do_popen=True):
+        for line in run_command('garmin_dump %s' % gmn_filename,
+                                do_popen=True):
             xml_file.write(line)
         xml_file.write('</root>\n')
     run_command('mv /tmp/.temp.xml /tmp/temp.xml')
@@ -130,7 +141,8 @@ def get_md5_old(fname):
 def get_md5(fname):
     if not os.path.exists(fname):
         return None
-    output = run_command('md5sum "%s"' % fname, do_popen=True).read().split()[0]
+    output = run_command('md5sum "%s"' % fname,
+                         do_popen=True).read().split()[0]
     return output
 
 def compare_with_remote(script_path):
@@ -167,12 +179,18 @@ def compare_with_remote(script_path):
 
     for fn in remote_file_chksum.keys():
         if fn not in local_file_chksum.keys():
-            print('download:', fn, remote_file_chksum[fn], remote_file_path[fn], script_path)
-            if not os.path.exists('%s/run/%s/' % (script_path, remote_file_path[fn])):
+            print('download:', fn, remote_file_chksum[fn],
+                  remote_file_path[fn], script_path)
+            if not os.path.exists('%s/run/%s/' % (script_path,
+                                                  remote_file_path[fn])):
                 os.makedirs('%s/run/%s/' % (script_path, remote_file_path[fn]))
-            if not os.path.exists('%s/run/%s/%s' % (script_path, remote_file_path[fn], fn)):
-                outfile = open('%s/run/%s/%s' % (script_path, remote_file_path[fn], fn), 'wb')
-                urlout = urlopen('%s/garmin/files/%s/%s' % (BASEURL, remote_file_path[fn], fn))
+            if not os.path.exists('%s/run/%s/%s' % (script_path,
+                                                    remote_file_path[fn], fn)):
+                outfile = open('%s/run/%s/%s' % (script_path,
+                                                 remote_file_path[fn],
+                                                 fn), 'wb')
+                urlout = urlopen('%s/garmin/files/%s/%s'
+                                 % (BASEURL, remote_file_path[fn], fn))
                 if urlout.getcode() != 200:
                     print('something bad happened %d' % urlout.getcode())
                     exit(0)
@@ -181,11 +199,13 @@ def compare_with_remote(script_path):
                 urlout.close()
                 outfile.close()
 
-    local_files_not_in_s3 = ['%s/run/%s/%s' % (script_path, remote_file_path[fn], fn)
+    local_files_not_in_s3 = ['%s/run/%s/%s' % (script_path,
+                                               remote_file_path[fn], fn)
                              for fn in local_file_chksum
                              if fn not in s3_file_chksum]
 
-    s3_files_not_in_local = [fn for fn in s3_file_chksum if fn not in local_file_chksum]
+    s3_files_not_in_local = [fn for fn in s3_file_chksum
+                             if fn not in local_file_chksum]
     if local_files_not_in_s3:
         print('\n'.join(local_files_not_in_s3))
         s3_file_chksum = save_to_s3.save_to_s3(filelist=local_files_not_in_s3)
@@ -225,8 +245,10 @@ def do_summary(directory_, msg_q=None, **options):
     _cache_dir = '%s/run/cache' % script_path
     _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir)
     if 'build' in options and options['build']:
-        return _cache.get_cache_summary_list(directory='%s/run' % script_path, **options)
-    _summary_list = _cache.get_cache_summary_list(directory=directory_, **options)
+        return _cache.get_cache_summary_list(directory='%s/run' % script_path,
+                                             **options)
+    _summary_list = _cache.get_cache_summary_list(directory=directory_,
+                                                  **options)
     if not _summary_list:
         return None
     _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
@@ -245,12 +267,16 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
         elif arg == 'backup':
             if msg_q != None:
                 return
-            fname = '%s/garmin_data_%s.tar.gz' % (script_path, datetime.date.today().strftime('%Y%m%d'))
-            run_command('cd %s/run/ ; tar zcvf %s 2* garmin.pkl* cache/' % (script_path, fname))
+            fname = '%s/garmin_data_%s.tar.gz'\
+                     % (script_path, datetime.date.today().strftime('%Y%m%d'))
+            run_command('cd %s/run/ ; tar zcvf %s 2* garmin.pkl* cache/'
+                         % (script_path, fname))
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
-                run_command('cp %s %s/public_html/backup/garmin_data.tar.gz' % (fname, os.getenv('HOME')))
+                run_command('cp %s %s/public_html/backup/garmin_data.tar.gz'
+                             % (fname, os.getenv('HOME')))
             if os.path.exists('%s/public_html/garmin/tar' % os.getenv('HOME')):
-                run_command('mv %s %s/public_html/garmin/tar' % (fname, os.getenv('HOME')))
+                run_command('mv %s %s/public_html/garmin/tar'
+                             % (fname, os.getenv('HOME')))
             exit(0)
         elif arg == 'occur':
             options['occur'] = True
@@ -277,9 +303,13 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
                     month = ent[1]
                 else:
                     month = '*'
-                files = glob.glob('%s/run/%s/%s/%s*' % (script_path, year, month, arg)) + glob.glob('%s/run/%s/%s/%s*' % (script_path, year, month, ''.join(ent)))
+                files = glob.glob('%s/run/%s/%s/%s*' % (script_path, year,
+                                                        month, arg))\
+                        + glob.glob('%s/run/%s/%s/%s*' % (script_path, year,
+                                                          month, ''.join(ent)))
                 basenames = [f.split('/')[-1] for f in sorted(files)]
-                if len(filter(lambda x: x[:10] == basenames[0][:10], basenames)) == len(basenames):
+                if len([x for x in basenames if x[:10] == basenames[0][:10]])\
+                        == len(basenames):
                     for f in basenames:
                         print(f)
                 gdir += files

@@ -52,9 +52,16 @@ class GarminSummary(object):
         self.total_hr_dis = temp_gfile.total_hr_dis
         self.number_of_items += 1
 
-        if self.total_calories == 0 and self.sport == 'running' and self.total_distance > 0.0:
-            self.total_calories = int(expected_calories(weight=175, pace_min_per_mile=(self.total_duration / 60.) / (self.total_distance / METERS_PER_MILE), distance=self.total_distance / METERS_PER_MILE))
-        elif self.total_calories == 0 and self.sport == 'stairs' and self.total_duration > 0:
+        if self.total_calories == 0 and self.sport == 'running'\
+                and self.total_distance > 0.0:
+            _ppermile = (self.total_duration / 60.) / (self.total_distance
+                                                        / METERS_PER_MILE)
+            self.total_calories = int(
+                expected_calories(weight=175, pace_min_per_mile=_ppermile,
+                                  distance=self.total_distance
+                                           / METERS_PER_MILE))
+        elif self.total_calories == 0 and self.sport == 'stairs'\
+                and self.total_duration > 0:
             self.total_calories = 325 * (self.total_duration / 1100.89)
         elif self.total_calories == 0:
             return temp_gfile

@@ -37,7 +37,8 @@ def read_keys():
 AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY = read_keys()
 
 def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=[]):
-    s3 = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    s3 = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
+                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     bucket = s3.create_bucket(bucket_name=bname)
     list_of_keys = {}
     for k in bucket.list():

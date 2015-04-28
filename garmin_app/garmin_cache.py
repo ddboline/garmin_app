@@ -68,10 +68,13 @@ class GarminCache(object):
     def read_cached_gfile(self, gfbasename=''):
         if not gfbasename or not self.cache_directory:
             return False
-        if not os.path.exists('%s/%s.pkl.gz' % (self.cache_directory, gfbasename)):
+        if not os.path.exists('%s/%s.pkl.gz' % (self.cache_directory,
+                                                gfbasename)):
             return False
         else:
-            gfile = self.read_pickle_object_in_file(pickle_file='%s/%s.pkl.gz' % (self.cache_directory, gfbasename))
+            gfile = self.read_pickle_object_in_file(pickle_file='%s/%s.pkl.gz'
+                                                    % (self.cache_directory,
+                                                       gfbasename))
             if gfile:
                 return gfile
             else:
@@ -95,8 +98,10 @@ class GarminCache(object):
         temp_list = self.read_pickle_object_in_file()
         if temp_list and type(temp_list) == list:
             self.cache_summary_list = temp_list
-        self.cache_summary_file_dict = {os.path.basename(x.filename): x for x in self.cache_summary_list}
-        self.cache_summary_md5_dict = {x.md5sum: x for x in self.cache_summary_list}
+        self.cache_summary_file_dict = {os.path.basename(x.filename):
+                                        x for x in self.cache_summary_list}
+        self.cache_summary_md5_dict = {x.md5sum:
+                                       x for x in self.cache_summary_list}
 
         def process_files(arg, dirname, names):
             for name in names:
@@ -108,13 +113,18 @@ class GarminCache(object):
                 add_file(gmn_filename)
 
         def add_file(gmn_filename):
-            if not any(a in gmn_filename.lower() for a in ['.gmn', '.tcx', '.fit', '.txt']):
+            if not any(a in gmn_filename.lower() for a in ['.gmn', '.tcx',
+                                                           '.fit', '.txt']):
                 return
             reduced_gmn_filename = os.path.basename(gmn_filename)
             gmn_md5sum = get_md5(gmn_filename)
             if ((reduced_gmn_filename not in self.cache_summary_file_dict) or
-                    (self.cache_summary_file_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
-                    (self.do_update and print_date_string(self.cache_summary_file_dict[reduced_gmn_filename].begin_datetime)
+                    (self.cache_summary_file_dict[reduced_gmn_filename].md5sum
+                     != gmn_md5sum) or
+                    (self.do_update
+                     and print_date_string(
+                         self.cache_summary_file_dict[reduced_gmn_filename]\
+                             .begin_datetime)
                         in list_of_corrected_laps)):
                 self.cache_file_is_modified = True
                 gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)
@@ -125,7 +135,8 @@ class GarminCache(object):
                     self.cache_summary_md5_dict[gmn_md5sum] = gsum
                     self.write_cached_gfile(garminfile=gfile)
                 else:
-                    print('file %s not loaded for some reason' % reduced_gmn_filename)
+                    print('file %s not loaded for some reason'
+                          % reduced_gmn_filename)
             else:
                 gsum = self.cache_summary_file_dict[reduced_gmn_filename]
             summary_list.append(gsum)
@@ -162,7 +173,8 @@ class GarminDataFrame(object):
             for attr in self.garminclass.__slots__:
                 tmp_array.append(getattr(it, attr))
             inp_array.append(tmp_array)
-        self.dataframe = pd.DataFrame(inp_array, columns=self.garminclass.__slots__)
+        self.dataframe = pd.DataFrame(inp_array,
+                                      columns=self.garminclass.__slots__)
 
     def fill_list(self):
         output = []

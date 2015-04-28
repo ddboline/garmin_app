@@ -98,7 +98,9 @@ class GarminServer(object):
     def start_server(self):
         manager = multiprocessing.Manager()
         self.msg_q = manager.list([])
-        self.net = multiprocessing.Process(target=server_thread, args=(GARMIN_SOCKET_FILE, self.msg_q))
+        self.net = multiprocessing.Process(target=server_thread,
+                                           args=(GARMIN_SOCKET_FILE,
+                                                 self.msg_q))
         self.net.start()
         self.net.join()
 

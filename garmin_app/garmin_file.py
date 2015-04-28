@@ -78,9 +78,11 @@ class GarminPoint(object):
                 if len(ent) > 2:
                     if 'Speed' in ent[2]:
                         self.speed_mps = float(ent[2].split('=')[1])
-                        self.speed_mph = self.speed_mps * 3600. / METERS_PER_MILE
+                        self.speed_mph = self.speed_mps * 3600.\
+                                         / METERS_PER_MILE
                         if self.speed_mps > 0.:
-                            self.speed_permi = METERS_PER_MILE / self.speed_mps / 60.
+                            self.speed_permi = METERS_PER_MILE\
+                                               / self.speed_mps / 60.
 
 class GarminLap(object):
     '''
@@ -193,7 +195,9 @@ class GarminFile(object):
                                             if x not in ['points', 'laps'])
 
     def calculate_speed(self):
-        ''' calculate instantaneous speed (could maybe be a bit more elaborate?) '''
+        '''
+            calculate instantaneous speed (could maybe be a bit more elaborate)
+        '''
         for idx in range(1, len(self.points)):
             jdx = idx - 1
             t1 = self.points[idx].time
@@ -205,13 +209,19 @@ class GarminFile(object):
             totdur = (t1 - t0).total_seconds() # seconds
             totdis = d1 - d0 # meters
             if totdis > 0 and not self.points[idx].speed_permi:
-                self.points[idx].speed_permi = (totdur/60.) / (totdis/METERS_PER_MILE)
+                self.points[idx].speed_permi = (totdur/60.)\
+                                                / (totdis/METERS_PER_MILE)
             if totdur > 0 and not self.points[idx].speed_mph:
-                self.points[idx].speed_mph = (totdis/METERS_PER_MILE) / (totdur/60./60.)
+                self.points[idx].speed_mph = (totdis/METERS_PER_MILE)\
+                                              / (totdur/60./60.)
             if totdur > 0 and not self.points[idx].speed_mps:
                 self.points[idx].speed_mps = totdis / totdur
             if d1 > 0:
-                self.points[idx].avg_speed_value_permi = ((t1 - self.points[0].time).total_seconds()/60.) / (d1/METERS_PER_MILE)
+                self.points[idx].avg_speed_value_permi = \
+                    ((t1 - self.points[0].time).total_seconds()/60.)\
+                     / (d1/METERS_PER_MILE)
             if (t1 - self.points[0].time).total_seconds() > 0:
-                self.points[idx].avg_speed_value_mph = (self.points[idx].distance/METERS_PER_MILE) / ((t1 - self.points[0].time).total_seconds()/60./60.)
+                self.points[idx].avg_speed_value_mph = \
+                    (self.points[idx].distance/METERS_PER_MILE)\
+                     / ((t1 - self.points[0].time).total_seconds()/60./60.)
         return None
