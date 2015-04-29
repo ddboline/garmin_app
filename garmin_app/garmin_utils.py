@@ -191,8 +191,10 @@ def compare_with_remote(script_path):
                 outfile = open('%s/run/%s/%s' % (script_path,
                                                  remote_file_path[fn],
                                                  fn), 'wb')
+                gcontext = SSLContext(PROTOCOL_TLSv1)
                 urlout = urlopen('%s/garmin/files/%s/%s'
-                                 % (BASEURL, remote_file_path[fn], fn))
+                                 % (BASEURL, remote_file_path[fn], fn),
+                                 context=gcontext)
                 if urlout.getcode() != 200:
                     print('something bad happened %d' % urlout.getcode())
                     exit(0)
