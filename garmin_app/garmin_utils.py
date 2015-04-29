@@ -146,7 +146,7 @@ def get_md5(fname):
     return output
 
 def compare_with_remote(script_path):
-    from ssl import SSLContext
+    from ssl import SSLContext, PROTOCOL_TLSv1
     from urllib2 import urlopen
     from garmin_app import save_to_s3
     s3_file_chksum = save_to_s3.save_to_s3()
