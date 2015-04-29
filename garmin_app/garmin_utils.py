@@ -146,12 +146,14 @@ def get_md5(fname):
     return output
 
 def compare_with_remote(script_path):
+    from ssl import SSLContext
     from urllib2 import urlopen
     from garmin_app import save_to_s3
     s3_file_chksum = save_to_s3.save_to_s3()
     remote_file_chksum = {}
     remote_file_path = {}
-    for line in urlopen('%s/garmin/files/garmin.list' % BASEURL):
+    gcontext = SSLContext(PROTOCOL_TLSv1)
+    for line in urlopen('%s/garmin/files/garmin.list' % BASEURL, context=gcontext):
         md5sum, fname = line.split()[0:2]
         fn = fname.split('/')[-1]
         if fn not in remote_file_chksum:
