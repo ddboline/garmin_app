@@ -12,9 +12,6 @@ import os
 #import glob
 import argparse
 
-from ssl import SSLContext, PROTOCOL_TLSv1
-from urllib2 import urlopen
-
 #from garmin_app.garmin_cache import GarminCache
 #from garmin_app.garmin_parse import GarminParse
 #from garmin_app.garmin_report import GarminReport
@@ -22,7 +19,7 @@ from garmin_app.garmin_utils import compare_with_remote,\
      garmin_parse_arg_list, BASEURL
 from garmin_app.garmin_daemon import GarminServer
 
-from garmin_app.util import run_command
+from garmin_app.util import run_command, openurl
 
 def garmin_arg_parse():
     """ parse command line arguments """
@@ -53,8 +50,7 @@ def garmin_arg_parse():
                 os.makedirs('%s/run/' % script_path)
                 os.chdir('%s/run' % script_path)
                 outfile = open('temp.tar.gz', 'wb')
-                gcontext = SSLContext(PROTOCOL_TLSv1)
-                urlout = urlopen('%s/backup/garmin_data.tar.gz' % BASEURL, context=gcontext)
+                urlout = openurl('%s/backup/garmin_data.tar.gz' % BASEURL)
                 if urlout.getcode() != 200:
                     print('something bad happened %d' % urlout.getcode())
                     exit(0)

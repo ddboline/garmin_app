@@ -17,7 +17,7 @@ import glob
 import hashlib
 import datetime
 
-from garmin_app.util import run_command, datetimefromstring
+from garmin_app.util import run_command, datetimefromstring, openurl
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 
@@ -146,14 +146,12 @@ def get_md5(fname):
     return output
 
 def compare_with_remote(script_path):
-    from ssl import SSLContext, PROTOCOL_TLSv1
-    from urllib2 import urlopen
     from garmin_app import save_to_s3
     s3_file_chksum = save_to_s3.save_to_s3()
     remote_file_chksum = {}
     remote_file_path = {}
     gcontext = SSLContext(PROTOCOL_TLSv1)
-    for line in urlopen('%s/garmin/files/garmin.list' % BASEURL, context=gcontext):
+    for line in openurl('%s/garmin/files/garmin.list' % BASEURL):
         md5sum, fname = line.split()[0:2]
         fn = fname.split('/')[-1]
         if fn not in remote_file_chksum:
@@ -192,9 +190,8 @@ def compare_with_remote(script_path):
                                                  remote_file_path[fn],
                                                  fn), 'wb')
                 gcontext = SSLContext(PROTOCOL_TLSv1)
-                urlout = urlopen('%s/garmin/files/%s/%s'
-                                 % (BASEURL, remote_file_path[fn], fn),
-                                 context=gcontext)
+                urlout = openurl('%s/garmin/files/%s/%s'
+                                 % (BASEURL, remote_file_path[fn], fn))
                 if urlout.getcode() != 200:
                     print('something bad happened %d' % urlout.getcode())
                     exit(0)

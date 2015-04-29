@@ -274,3 +274,17 @@ def make_time_series_plot(input_file='', prefix='temp'):
     run_command('mv %s/%s_time.png %s/public_html/videos/' % (HOMEDIR, prefix,
                                                               HOMEDIR))
     return 'Done'
+
+def openurl(url_):
+    try:
+        from ssl import SSLContext, PROTOCOL_TLSv1
+    except ImportError:
+        SSLContext = None
+        PROTOCOL_TLSv1 = None
+    from urllib2 import urlopen
+    
+    if SSLContext is None:
+        return urlopen(url_)
+    else:
+        gcontext = SSLContext(PROTOCOL_TLSv1)
+        return urlopen(url_, context=gcontext)
