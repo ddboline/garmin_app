@@ -12,6 +12,7 @@ import os
 #import glob
 import argparse
 
+import ssl
 from urllib2 import urlopen
 
 #from garmin_app.garmin_cache import GarminCache
@@ -52,7 +53,8 @@ def garmin_arg_parse():
                 os.makedirs('%s/run/' % script_path)
                 os.chdir('%s/run' % script_path)
                 outfile = open('temp.tar.gz', 'wb')
-                urlout = urlopen('%s/backup/garmin_data.tar.gz' % BASEURL)
+                gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+                urlout = urlopen('%s/backup/garmin_data.tar.gz' % BASEURL, context=gcontext)
                 if urlout.getcode() != 200:
                     print('something bad happened %d' % urlout.getcode())
                     exit(0)
