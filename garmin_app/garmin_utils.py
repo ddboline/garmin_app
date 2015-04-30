@@ -150,7 +150,6 @@ def compare_with_remote(script_path):
     s3_file_chksum = save_to_s3.save_to_s3()
     remote_file_chksum = {}
     remote_file_path = {}
-    gcontext = SSLContext(PROTOCOL_TLSv1)
     for line in openurl('%s/garmin/files/garmin.list' % BASEURL):
         md5sum, fname = line.split()[0:2]
         fn = fname.split('/')[-1]
@@ -189,7 +188,6 @@ def compare_with_remote(script_path):
                 outfile = open('%s/run/%s/%s' % (script_path,
                                                  remote_file_path[fn],
                                                  fn), 'wb')
-                gcontext = SSLContext(PROTOCOL_TLSv1)
                 urlout = openurl('%s/garmin/files/%s/%s'
                                  % (BASEURL, remote_file_path[fn], fn))
                 if urlout.getcode() != 200:
