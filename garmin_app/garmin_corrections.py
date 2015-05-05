@@ -287,5 +287,6 @@ list_of_corrected_laps = {
      '2015-04-26T13:18:43Z': {0: FIVEK_DIST*2},
      '2015-04-28T11:12:37Z': {0: 6.5},
      '2015-04-30T15:13:26Z': {0: 6.5},
+     '2015-05-02T11:01:04Z': {0: [50e3/METERS_PER_MILE, 29595]},
      'DUMMY': {0:0.0},}
     # 'time_string': {lap_no: [dist, time_in_sec]},
