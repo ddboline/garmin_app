@@ -8,7 +8,7 @@ Created on Sun May 17 07:14:20 2015
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
-from __future__ import unicode_literals
+#from __future__ import unicode_literals
 
 from distutils.core import setup
 
@@ -24,6 +24,5 @@ setup(
                       'pandas >= 0.13.0', 'numpy >= 1.8.0',
                       'dateutil', 'usb'],
     packages=['garmin_app'],
-#    package_dir={'garmin_app': 'garmin_app'},
-    scripts=['bin/garmin.py'],
+    package_dir={'garmin_app': 'garmin_app'},
 )
