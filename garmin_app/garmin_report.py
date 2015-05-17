@@ -411,8 +411,8 @@ class GarminReport(object):
         if not os.path.exists('%s/html' % curpath):
             os.makedirs('%s/html' % curpath)
         with open('%s/html/index.html' % curpath, 'w') as htmlfile:
-            for line in open('%s/templates/GARMIN_TEMPLATE.html' % curpath,
-                             'r'):
+            for line in open('%s/garmin_app/templates/GARMIN_TEMPLATE.html'
+                    % curpath, 'r'):
                 if 'INSERTTEXTHERE' in line:
                     htmlfile.write(htmlostr)
                 elif 'SPORTTITLEDATE' in line:
@@ -567,7 +567,7 @@ class GarminReport(object):
             avg_hr /= sum_time
             max_hr = max(hr_vals)
 
-        curpath = options['script_path'] + '/garmin_app'
+        curpath = options['script_path']
         if not os.path.exists('%s/html' % curpath):
             os.makedirs('%s/html' % curpath)
 
@@ -620,7 +620,7 @@ class GarminReport(object):
                                      data=avg_mph_speed_values,
                                      **options))
 
-        with open('html/index.html', 'w') as htmlfile:
+        with open('%s/html/index.html' % curpath, 'w') as htmlfile:
             if len(lat_vals) > 0 and len(lon_vals) > 0\
                     and len(lat_vals) == len(lon_vals):
                 minlat, maxlat = min(lat_vals), max(lat_vals)
@@ -630,8 +630,8 @@ class GarminReport(object):
                 latlon_min = max((maxlat-minlat), (maxlon-minlon))
                 latlon_thresholds = [[15, 0.015], [14, 0.038], [13, 0.07],
                                      [12, 0.12], [11, 0.20], [10, 0.4]]
-                for line in open('%s/templates/MAP_TEMPLATE.html' % curpath,
-                                 'r'):
+                for line in open('%s/garmin_app/templates/MAP_TEMPLATE.html'
+                        % curpath, 'r'):
                     if 'SPORTTITLEDATE' in line:
                         newtitle = 'Garmin Event %s on %s' % (
                                     gfile.sport.title(), gfile.begin_datetime)
@@ -681,8 +681,8 @@ class GarminReport(object):
                     else:
                         htmlfile.write(line)
             else:
-                for line in open(
-                        '%s/templates/GARMIN_TEMPLATE.html' % curpath, 'r'):
+                for line in open('%s/garmin_app/templates/GARMIN_TEMPLATE.html'
+                        % curpath, 'r'):
                     if 'INSERTTEXTHERE' in line:
                         htmlfile.write('%s\n' % get_file_html(gfile))
                         _tmp = get_html_splits(
