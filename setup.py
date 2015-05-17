@@ -14,7 +14,7 @@ from distutils.core import setup
 
 setup(
     name='garmin_app',
-    version='v00.00.01',
+    version='00.00.01',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='garmin_app',
