@@ -11,7 +11,8 @@ from __future__ import unicode_literals
 
 import os
 import time
-from garmin_app.garmin_utils import garmin_parse_arg_list
+if not 'garmin_app.garmin_utils' in os.sys.modules:
+    from garmin_app.garmin_utils import garmin_parse_arg_list
 import multiprocessing
 import socket
 
