@@ -26,7 +26,7 @@ BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
 
 if not os.path.exists(BASEDIR):
-    BASEDIR = os.path.abspath(garmin_app.__path__[0])
+    BASEDIR = os.path.abspath('../%s' % garmin_app.__path__[0])
 
 ### Useful constants
 METERS_PER_MILE = 1609.344 # meters
@@ -277,7 +277,7 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
             fname = '%s/garmin_data_%s.tar.gz'\
                      % (script_path, datetime.date.today().strftime('%Y%m%d'))
             run_command('cd %s/run/ ; tar zcvf %s 2* garmin.pkl* cache/'
-                         % (script_path, fname))
+                        % (script_path, fname))
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
                 run_command('cp %s %s/public_html/backup/garmin_data.tar.gz'
                              % (fname, os.getenv('HOME')))
