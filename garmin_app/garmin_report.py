@@ -567,7 +567,7 @@ class GarminReport(object):
             avg_hr /= sum_time
             max_hr = max(hr_vals)
 
-        curpath = options['script_path']
+        curpath = options['script_path'] + '/garmin_app'
         if not os.path.exists('%s/html' % curpath):
             os.makedirs('%s/html' % curpath)
 

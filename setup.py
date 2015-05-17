@@ -11,6 +11,7 @@ from __future__ import print_function
 #from __future__ import unicode_literals
 
 from distutils.core import setup
+from glob import glob
 
 setup(
     name='garmin_app',
@@ -23,5 +24,6 @@ setup(
 #    install_requires=['pandas >= 0.13.0', 'numpy >= 1.8.0'],
     packages=['garmin_app'],
     package_dir={'garmin_app': 'garmin_app'},
+    package_data={'garmin_app': glob('templates/*.html')},
     scripts=['garmin.py']
 )
