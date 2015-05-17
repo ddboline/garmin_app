@@ -20,7 +20,7 @@ setup(
     description='garmin_app',
     long_description='Garmin App',
     license='MIT',
-    install_requires=['pandas >= 0.13.0', 'numpy >= 1.8.0'],
+#    install_requires=['pandas >= 0.13.0', 'numpy >= 1.8.0'],
     packages=['garmin_app'],
     package_dir={'garmin_app': 'garmin_app'},
 )
