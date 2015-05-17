@@ -20,9 +20,13 @@ import datetime
 import argparse
 
 from garmin_app.garmin_daemon import GarminServer
-from garmin_app.util import run_command, datetimefromstring, openurl
+from garmin_app.util import run_command, datetimefromstring, openurl, HOMEDIR
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
+BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
+
+if not os.path.exists(BASEDIR):
+    BASEDIR = HOMEDIR
 
 ### Useful constants
 METERS_PER_MILE = 1609.344 # meters
@@ -344,7 +348,10 @@ def garmin_arg_parse():
     options = ['build', 'sync', 'backup']
 
     #print(os.sys.argv)
-    script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
+    script_path = BASEDIR
+    if not os.path.exists(script_path):
+        script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
+    
 
     if '%s/bin' % script_path not in os.getenv('PATH'):
         os.putenv('PATH', '%s:%s/bin' % (os.getenv('PATH'), script_path))
