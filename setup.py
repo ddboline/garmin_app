@@ -20,7 +20,7 @@ setup(
     description='garmin_app',
     long_description='Garmin App',
     license='MIT',
-    install_requires=['gpsbabel', 'garmin-forerunner-tools', 'xml2', 
+    install_requires=['gpsbabel', 'xml2', 
                       'pandas >= 0.13.0', 'numpy >= 1.8.0',
                       'dateutil', 'usb'],
     packages=['garmin_app'],
