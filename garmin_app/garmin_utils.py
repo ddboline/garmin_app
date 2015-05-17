@@ -195,7 +195,8 @@ def compare_with_remote(script_path):
                                  % (BASEURL, remote_file_path[fn], fn))
                 if urlout.getcode() != 200:
                     print('something bad happened %d' % urlout.getcode())
-                    exit(0)
+                    from urllib2 import HTTPError
+                    raise HTTPError
                 for line in urlout:
                     outfile.write(line)
                 urlout.close()
@@ -279,7 +280,7 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
             if os.path.exists('%s/public_html/garmin/tar' % os.getenv('HOME')):
                 run_command('mv %s %s/public_html/garmin/tar'
                              % (fname, os.getenv('HOME')))
-            exit(0)
+            return
         elif arg == 'occur':
             options['occur'] = True
         elif os.path.isfile(arg):
@@ -351,7 +352,7 @@ def garmin_arg_parse():
     for arg in getattr(args, 'command'):
         if any(arg == x for x in ['h', 'help', '-h', '--help']):
             print('usage: ./garmin.py <%s>' % '|'.join(commands))
-            exit(0)
+            return
         elif arg == 'get':
             if not os.path.exists('%s/run' % script_path):
                 os.makedirs('%s/run/' % script_path)
@@ -360,22 +361,23 @@ def garmin_arg_parse():
                 urlout = openurl('%s/backup/garmin_data.tar.gz' % BASEURL)
                 if urlout.getcode() != 200:
                     print('something bad happened %d' % urlout.getcode())
-                    exit(0)
+                    from urllib2 import HTTPError
+                    raise HTTPError
                 for line in urlout:
                     outfile.write(line)
                 outfile.close()
                 print('downloaded file')
                 run_command('tar zxf temp.tar.gz 2>&1 > /dev/null')
                 os.remove('temp.tar.gz')
-            exit(0)
+            return
 
         if arg == 'sync':
             compare_with_remote(script_path)
-            exit(0)
+            return
 
     if not os.path.exists('%s/run' % script_path):
         print('need to download files first')
-        exit(0)
+        return
 
     options = {'do_plot': False, 'do_year': False, 'do_month': False,
                'do_week': False, 'do_day': False, 'do_file': False,

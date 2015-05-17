@@ -387,7 +387,7 @@ class GarminReport(object):
                     print(occur_map)
                     print(day_set)
                     print('key error')
-                    exit(1)
+                    raise KeyError
 
                 if not do_sport:
                     for i in range(0, len(day_set)+1):
@@ -1113,7 +1113,7 @@ def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi',
             except ValueError as exc:
                 print('Exception:', exc, point.heart_rate, cur_point_time,
                       last_point_me)
-                exit(0)
+                raise exc
         nmiles = int(cur_point_me/split_distance_in_meters)\
                     - int(last_point_me/split_distance_in_meters)
         if nmiles > 0:

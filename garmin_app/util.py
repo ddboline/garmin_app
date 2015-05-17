@@ -180,7 +180,7 @@ def check_dmesg_for_ooops():
     return False
 
 def write_single_line_to_file(fname, line, turn_on_commands=True):
-    ''' convenience function, write single line to file then exit  '''
+    ''' convenience function, write single line to file then close  '''
     if turn_on_commands:
         f = open(fname, 'a')
         f.write(line)
