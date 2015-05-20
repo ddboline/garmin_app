@@ -11,8 +11,6 @@ from __future__ import unicode_literals
 
 import os
 import time
-if not 'garmin_app.garmin_utils' in os.sys.modules:
-    from garmin_app.garmin_utils import garmin_parse_arg_list
 import multiprocessing
 import socket
 
@@ -25,6 +23,8 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
     '''
         server_thread, listens for commands, sends back responses.
     '''
+    from garmin_app.garmin_utils import garmin_parse_arg_list
+
     script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
 
     if os.path.exists(socketfile):
