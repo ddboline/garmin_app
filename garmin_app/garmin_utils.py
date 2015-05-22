@@ -335,9 +335,9 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
 
 def garmin_arg_parse():
     """ parse command line arguments """
-    commands = ['get', 'build', 'sync', 'backup', 'year', '(file)',
+    commands = ('get', 'build', 'sync', 'backup', 'year', '(file)',
                 '(directory)', '(year(-month(-day)))', '(sport)', 'occur',
-                'update']
+                'update')
     help_text = 'usage: ./garmin.py <%s>' % '|'.join(commands)
     parser = argparse.ArgumentParser(description='garmin app')
     parser.add_argument('command', nargs='*', help=help_text)
