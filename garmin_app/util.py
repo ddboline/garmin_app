@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
+from subprocess import call, Popen, PIPE
 
 HOMEDIR = os.getenv('HOME')
 
@@ -15,9 +16,9 @@ def run_command(command, do_popen=False, turn_on_commands=True):
         print(command)
         return command
     elif do_popen:
-        return os.popen(command)
+        return Popen(command, shell=True, stdout=PIPE, close_fds=True).stdout
     else:
-        return os.system(command)
+        return call(command, shell=True)
 
 def convert_date(input_date):
     import datetime
@@ -25,11 +26,6 @@ def convert_date(input_date):
     _day = int(input_date[2:4])
     _year = 2000 + int(input_date[4:6])
     return datetime.date(_year, _month, _day)
-
-def get_random_hex_string(n):
-    ''' use os.urandom to create n byte random string, output integer '''
-    from binascii import b2a_hex
-    return int(b2a_hex(os.urandom(n)), 16)
 
 def print_h_m_s(second):
     ''' convert time from seconds to hh:mm:ss format '''
