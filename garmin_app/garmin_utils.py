@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 '''
@@ -40,6 +39,10 @@ SPORT_TYPES = ('running', 'biking', 'walking', 'ultimate', 'elliptical',
 MONTH_NAMES = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
                'Oct', 'Nov', 'Dec')
 WEEKDAY_NAMES = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
+
+COMMANDS = ('get', 'build', 'sync', 'backup', 'year', '(file)', '(directory)',
+            '(year(-month(-day)))', '(sport)', 'occur', 'update', 'correction')
+
 
 def days_in_year(year=datetime.date.today().year):
     ''' return number of days in a given year '''
@@ -262,6 +265,44 @@ def do_summary(directory_, msg_q=None, **options):
     print(_report.summary_report(_summary_list, **options))
     return True
 
+def add_correction(correction_str):
+    from dateutil.parser import parse
+    from garmin_app.garmin_corrections import list_of_corrected_laps,\
+                                              save_corrections
+    
+    ent = correction_str.split()
+    timestr = ent[0]
+    try:
+        parse(timestr)
+    except ValueError:
+        return
+    lapdict = {}
+    for idx, line in enumerate(ent[1:]):
+        ent = line.split()
+        tmp_ = []
+        if len(ent) == 0:
+            continue
+        if len(ent) > 0:
+            try:
+                lapdist = float(ent[0])
+            except ValueError:
+                continue
+            tmp_.append(lapdist)
+        if len(ent) > 1:
+            try:
+                laptime = float(ent[1])
+            except ValueError:
+                laptime = None
+            tmp_.append(laptime)
+        if len(tmp_) == 1:
+            lapdict[idx] = tmp_[0]
+        elif len(tmp_) > 1:
+            lapdict[idx] = tmp_
+    list_of_corrected_laps[timestr] = lapdict
+    save_corrections(list_of_corrected_laps)
+    return list_of_corrected_laps
+        
+
 def garmin_parse_arg_list(args, msg_q=None, **options):
     script_path = options['script_path']
 
@@ -293,6 +334,9 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
             gdir.append(arg)
         elif arg != 'run' and os.path.isdir('%s/run/%s' % (script_path, arg)):
             gdir.append('%s/run/%s' % (script_path, arg))
+        elif arg == 'correction':
+            add_correction(' '.join(args[1:]))
+            exit(0)
         elif arg in options:
             options[arg] = True
         elif 'do_%s' % arg in options:
@@ -335,10 +379,7 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
 
 def garmin_arg_parse():
     """ parse command line arguments """
-    commands = ('get', 'build', 'sync', 'backup', 'year', '(file)',
-                '(directory)', '(year(-month(-day)))', '(sport)', 'occur',
-                'update')
-    help_text = 'usage: ./garmin.py <%s>' % '|'.join(commands)
+    help_text = 'usage: ./garmin.py <%s>' % '|'.join(COMMANDS)
     parser = argparse.ArgumentParser(description='garmin app')
     parser.add_argument('command', nargs='*', help=help_text)
     parser.add_argument('--daemon', '-d', action='store_true',
@@ -358,7 +399,7 @@ def garmin_arg_parse():
 
     for arg in getattr(args, 'command'):
         if any(arg == x for x in ['h', 'help', '-h', '--help']):
-            print('usage: ./garmin.py <%s>' % '|'.join(commands))
+            print('usage: ./garmin.py <%s>' % '|'.join(COMMANDS))
             return
         elif arg == 'get':
             if not os.path.exists('%s/run' % script_path):
