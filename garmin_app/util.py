@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from __future__ import division
@@ -45,10 +44,12 @@ def print_m_s(second):
         return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
 def datetimefromstring(tstr, ignore_tz=False):
-    import dateutil.parser
-    return dateutil.parser.parse(tstr, ignoretz=ignore_tz)
+    """ wrapper around dateutil.parser.parse """
+    from dateutil.parser import parse
+    return parse(tstr, ignoretz=ignore_tz)
 
 def openurl(url_):
+    """ wrapper around urlopen """
     try:
         from ssl import SSLContext, PROTOCOL_TLSv1
     except ImportError:
