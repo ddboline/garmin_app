@@ -1,9 +1,8 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''
+"""
     parsers to read txt, xml, tcx formatted files
-'''
+"""
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
@@ -21,9 +20,9 @@ from garmin_app.garmin_corrections import list_of_mislabeled_times, \
 from garmin_app.util import run_command
 
 class GarminParse(GarminFile):
-    '''
+    """
         Parse garmin xml based formats
-    '''
+    """
     def __init__(self, filename, filetype=''):
         GarminFile.__init__(self, filename, filetype)
 
@@ -47,7 +46,7 @@ class GarminParse(GarminFile):
             self.filetype = 'gpx'
 
     def read_file(self):
-        ''' read file, use is_tcx/is_txt to decide which function to call '''
+        """ read file, use is_tcx/is_txt to decide which function to call """
         if self.filetype == 'tcx' or self.filetype == 'fit':
             self.read_file_tcx()
         elif self.filetype == 'txt':
@@ -215,7 +214,7 @@ class GarminParse(GarminFile):
         return None
 
     def read_file_txt(self):
-        ''' read txt file, these just contain summary information '''
+        """ read txt file, these just contain summary information """
         for line in open(self.filename, 'r'):
             if len(line.strip()) == 0:
                 continue

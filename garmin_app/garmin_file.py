@@ -1,12 +1,10 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-'''
+"""
     module holds classes:
         GarminPoint
         GarminLap
         GarminFile
-'''
+"""
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
@@ -16,9 +14,9 @@ from garmin_app.garmin_utils import convert_date_string, convert_time_string,\
     METERS_PER_MILE
 
 class GarminPoint(object):
-    '''
+    """
         point representing each gps point
-    '''
+    """
     __slots__ = ['time', 'latitude', 'longitude', 'altitude', 'distance',
                  'heart_rate', 'duration_from_last', 'duration_from_begin',
                  'speed_mps', 'speed_permi', 'speed_mph',
@@ -85,11 +83,11 @@ class GarminPoint(object):
                                                / self.speed_mps / 60.
 
 class GarminLap(object):
-    '''
+    """
         class representing each lap in xml file
             functions:
                 read_lap_xml(node), read_lap_tcx(node), print_lap_string(node)
-    '''
+    """
     __slots__ = ['lap_type', 'lap_index', 'lap_start', 'lap_duration',
                  'lap_distance', 'lap_trigger', 'lap_max_speed',
                  'lap_calories', 'lap_avg_hr', 'lap_max_hr', 'lap_intensity',
@@ -107,7 +105,7 @@ class GarminLap(object):
             '%s=%s' % (x, getattr(self, x)) for x in self.__slots__)
 
     def read_lap_xml(self, ent):
-        ''' read lap from xml file '''
+        """ read lap from xml file """
         for e in ent:
             if 'type' in e:
                 self.lap_type = e.split('=')[1]
@@ -162,12 +160,12 @@ class GarminLap(object):
 
 
 class GarminFile(object):
-    '''
+    """
         class representing a full xml file
             functions:
                 read_file(), read_file_tcx(), read_file_xml(),
                 print_file_string(), calculate_speed(), print_splits()
-    '''
+    """
     __slots__ = ['filename', 'orig_filename', 'filetype', 'begin_datetime',
                  'sport', 'total_calories', 'total_distance', 'total_duration',
                  'total_hr_dur', 'total_hr_dis', 'laps', 'points']
@@ -195,9 +193,9 @@ class GarminFile(object):
                                             if x not in ['points', 'laps'])
 
     def calculate_speed(self):
-        '''
+        """
             calculate instantaneous speed (could maybe be a bit more elaborate)
-        '''
+        """
         for idx in range(1, len(self.points)):
             jdx = idx - 1
             t1 = self.points[idx].time

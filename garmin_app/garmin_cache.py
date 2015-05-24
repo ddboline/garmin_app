@@ -1,10 +1,9 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''
+"""
     functions to read and write
     GarminFile, GarminSummary objects to and from pickle cache
-'''
+"""
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
@@ -27,7 +26,7 @@ except:
     import pickle
 
 class GarminCache(object):
-    ''' class to manage caching objects '''
+    """ class to manage caching objects """
     def __init__(self, pickle_file='', cache_directory=''):
         self.pickle_file = pickle_file
         self.cache_directory = cache_directory
@@ -41,7 +40,7 @@ class GarminCache(object):
                 os.makedirs(cache_directory)
 
     def read_pickle_object_in_file(self, pickle_file=''):
-        ''' read python object from gzipped pickle file '''
+        """ read python object from gzipped pickle file """
         if not pickle_file:
             if not self.pickle_file:
                 return None
@@ -54,7 +53,7 @@ class GarminCache(object):
         return outobj
 
     def write_pickle_object_to_file(self, inpobj, pickle_file=''):
-        ''' write python object to gzipped pickle file '''
+        """ write python object to gzipped pickle file """
         if not pickle_file:
             if not self.pickle_file:
                 return False
@@ -88,7 +87,7 @@ class GarminCache(object):
         return self.write_pickle_object_to_file(garminfile, pickle_file=pfname)
 
     def get_cache_summary_list(self, directory, **options):
-        ''' '''
+        """ """
         self.do_update = False
         if 'do_update' in options and options['do_update']:
             self.do_update = True
@@ -159,7 +158,7 @@ class GarminCache(object):
 
 
 class GarminDataFrame(object):
-    ''' dump list of garmin_points to pandas.DataFrame '''
+    """ dump list of garmin_points to pandas.DataFrame """
     def __init__(self, garmin_class=None, garmin_list=None):
         self.dataframe = None
         self.garminclass = garmin_class

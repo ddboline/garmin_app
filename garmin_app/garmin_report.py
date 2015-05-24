@@ -1,9 +1,8 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''
+"""
     functions to generate reports either to STDOUT or html
-'''
+"""
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
@@ -33,19 +32,19 @@ def print_history_buttons(history_list):
     return '\n'.join(retval)
 
 class GarminReport(object):
-    '''
+    """
         Class to produce reports, to stdout, and to html
         Reports are for:
             individual files
             summaries of files, days, weeks, months and years
-    '''
+    """
     def __init__(self, cache_obj=None, msg_q=None):
         self.cache_obj = cache_obj
         self.msg_q = msg_q
 
     def summary_report(self, summary_list, copy_to_public_html=True,
                        **options):
-        ''' get summary of files in directory '''
+        """ get summary of files in directory """
         opts = ['do_year', 'do_month', 'do_week', 'do_day',
                 'do_file', 'do_sport', 'do_average']
         do_year, do_month, do_week, do_day, do_file, do_sport, do_average = [
@@ -440,7 +439,7 @@ class GarminReport(object):
         return outstr
 
     def file_report_txt(self, gfile):
-        ''' nice output string for a file '''
+        """ nice output string for a file """
         retval = ['Start time %s' % print_date_string(gfile.begin_datetime)]
 
         for lap in gfile.laps:
@@ -511,7 +510,7 @@ class GarminReport(object):
 
     def file_report_html(self, gfile, use_time=False,
                          copy_to_public_html=True, **options):
-        ''' create pretty plots '''
+        """ create pretty plots """
         avg_hr = 0
         sum_time = 0
         max_hr = 0
@@ -726,7 +725,7 @@ class GarminReport(object):
 
     def total_summary_report_txt(self, gsum, sport=None, number_days=0,
                                  total_days=0):
-        ''' print summary of total information '''
+        """ print summary of total information """
         retval = ['%17s %10s \t %10s \t %10s \t' % (' ', sport,
                         '%4.2f mi' % (gsum.total_distance/METERS_PER_MILE),
                         '%i cal' % gsum.total_calories)]
@@ -764,7 +763,7 @@ class GarminReport(object):
 
     def day_summary_report_txt(self, gsum, sport=None,
                                cur_date=datetime.date.today()):
-        ''' print day summary information '''
+        """ print day summary information """
         retval = []
         week = cur_date.isocalendar()[1]
         weekdayname = WEEKDAY_NAMES[cur_date.weekday()]
@@ -802,7 +801,7 @@ class GarminReport(object):
         return ' '.join(retval)
 
     def day_average_report_txt(self, gsum, sport=None, number_days=0):
-        ''' print day average information '''
+        """ print day average information """
         retval = []
         if number_days == 0:
             return False
@@ -842,7 +841,7 @@ class GarminReport(object):
     def week_summary_report_txt(self, gsum, sport=None, isoyear=None,
                                 isoweek=None, number_in_week=0,
                                 date=datetime.datetime.today()):
-        ''' print week summary information '''
+        """ print week summary information """
         if not isoyear:
             isoyear = date.isocalendar()[0]
         if not isoweek:
@@ -895,7 +894,7 @@ class GarminReport(object):
 
     def week_average_report_txt(self, gsum, sport=None, number_days=0,
                                 number_of_weeks=0):
-        ''' print week average information '''
+        """ print week average information """
         if number_of_weeks == 0:
             return
         retval = []
@@ -941,7 +940,7 @@ class GarminReport(object):
                                  year=datetime.date.today().year,
                                  month=datetime.date.today().month,
                                  number_in_month=0):
-        ''' print month summary information '''
+        """ print month summary information """
         total_days = days_in_month(month=month, year=year)
         if datetime.datetime.today().year == year\
                 and datetime.datetime.today().month == month:
@@ -987,7 +986,7 @@ class GarminReport(object):
         return ' '.join(retval)
 
     def month_average_report_txt(self, gsum, sport=None, number_of_months=0):
-        ''' print month average information '''
+        """ print month average information """
         if number_of_months == 0:
             return False
         retval = []
@@ -1027,7 +1026,7 @@ class GarminReport(object):
     def year_summary_report_txt(self, gsum, sport=None,
                                 year=datetime.date.today().year,
                                 number_in_year=0):
-        ''' print year summary information '''
+        """ print year summary information """
         retval = []
         total_days = days_in_year(year)
         if datetime.datetime.today().year == year:
@@ -1069,7 +1068,7 @@ class GarminReport(object):
 
 
 def print_lap_string(glap, sport):
-    ''' print nice output for a lap '''
+    """ print nice output for a lap """
     if glap.lap_number == None:
         return ''
     outstr = [
@@ -1092,7 +1091,7 @@ def print_lap_string(glap, sport):
 
 def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi',
                do_heart_rate=True):
-    ''' get splits for given split distance '''
+    """ get splits for given split distance """
     if len(gfile.points) < 3:
         return []
     last_point_me = 0
@@ -1142,7 +1141,7 @@ def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi',
     return split_vector
 
 def print_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi'):
-    ''' print split time for given split distance '''
+    """ print split time for given split distance """
     if len(gfile.points) == 0:
         return ''
 
@@ -1190,7 +1189,7 @@ def plot_graph(name=None, title=None, data=None, **opts):
     return '%s.png' % name
 
 def get_file_html(gfile):
-    ''' nice output html for a file '''
+    """ nice output html for a file """
     retval = []
     retval.append('<table border="1" class="dataframe">')
     retval.append(
@@ -1276,7 +1275,7 @@ def get_lap_html(glap, sport):
 
 def get_html_splits(gfile, split_distance_in_meters=METERS_PER_MILE,
                     label='mi'):
-    ''' print split time for given split distance '''
+    """ print split time for given split distance """
     if len(gfile.points) == 0:
         return None
 

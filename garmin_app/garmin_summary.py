@@ -1,9 +1,8 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''
+"""
     module holds GarminSummary class
-'''
+"""
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
@@ -13,7 +12,7 @@ from garmin_app.garmin_utils import get_md5, expected_calories,\
                                     SPORT_TYPES, METERS_PER_MILE
 
 class GarminSummary(object):
-    ''' summary class for a file '''
+    """ summary class for a file """
     __slots__ = ['filename', 'begin_datetime', 'sport',
                  'total_calories', 'total_distance', 'total_duration',
                  'total_hr_dur', 'total_hr_dis', 'number_of_items',
@@ -39,7 +38,7 @@ class GarminSummary(object):
             '%s=%s' % (x, getattr(self, x)) for x in self.__slots__)
 
     def read_file(self):
-        '''  read the file, calculate some stuff '''
+        """  read the file, calculate some stuff """
         from garmin_app.garmin_parse import GarminParse
         temp_gfile = GarminParse(self.filename)
         temp_gfile.read_file()
@@ -75,7 +74,7 @@ class GarminSummary(object):
 
 
     def add(self, summary_to_add):
-        ''' add to totals '''
+        """ add to totals """
         self.total_calories += summary_to_add.total_calories
         self.total_distance += summary_to_add.total_distance
         self.total_duration += summary_to_add.total_duration

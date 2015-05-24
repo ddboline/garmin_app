@@ -10,7 +10,7 @@ from subprocess import call, Popen, PIPE
 HOMEDIR = os.getenv('HOME')
 
 def run_command(command, do_popen=False, turn_on_commands=True):
-    ''' wrapper around os.system '''
+    """ wrapper around os.system """
     if not turn_on_commands:
         print(command)
         return command
@@ -27,14 +27,14 @@ def convert_date(input_date):
     return datetime.date(_year, _month, _day)
 
 def print_h_m_s(second):
-    ''' convert time from seconds to hh:mm:ss format '''
+    """ convert time from seconds to hh:mm:ss format """
     hours = int(second / 3600)
     minutes = int(second / 60) - hours * 60
     seconds = int(second) - minutes * 60 - hours * 3600
     return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
 def print_m_s(second):
-    ''' convert time from seconds to mm:ss format '''
+    """ convert time from seconds to mm:ss format """
     hours = int(second / 3600)
     minutes = int(second / 60) - hours * 60
     seconds = int(second) - minutes * 60 - hours * 3600

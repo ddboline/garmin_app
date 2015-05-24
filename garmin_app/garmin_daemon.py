@@ -1,9 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-'''
+"""
     Daemon for garmin_app
-'''
+"""
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
@@ -14,15 +13,12 @@ import time
 import multiprocessing
 import socket
 
-#BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
-BASEURL = 'http://ddbolineinthecloud.mooo.com/~ubuntu'
-
 GARMIN_SOCKET_FILE = '/tmp/.garmin_test_socket'
 
 def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
-    '''
+    """
         server_thread, listens for commands, sends back responses.
-    '''
+    """
     from garmin_app.garmin_utils import garmin_parse_arg_list
 
     script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])

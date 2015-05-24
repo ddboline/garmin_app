@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-
-'''
+"""
     Utility functions to convert:
         gmn to gpx
         gmn to xml
         fit to tcx
-'''
+"""
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
@@ -45,13 +44,13 @@ COMMANDS = ('get', 'build', 'sync', 'backup', 'year', '(file)', '(directory)',
 
 
 def days_in_year(year=datetime.date.today().year):
-    ''' return number of days in a given year '''
+    """ return number of days in a given year """
     return (datetime.date(year=year+1, month=1, day=1)
             - datetime.date(year=year, month=1, day=1)).days
 
 def days_in_month(month=datetime.date.today().month,
                   year=datetime.date.today().year):
-    ''' return number of days in a given month '''
+    """ return number of days in a given month """
     y1, m1 = year, month + 1
     if m1 == 13:
         y1, m1 = y1 + 1, 1
@@ -60,11 +59,11 @@ def days_in_month(month=datetime.date.today().month,
 
 ### maybe change output to datetime object?
 def convert_date_string(date_str, ignore_tz=True):
-    ''' convert date string to datetime object '''
+    """ convert date string to datetime object """
     return datetimefromstring(date_str, ignore_tz=ignore_tz)
 
 def expected_calories(weight=175, pace_min_per_mile=10.0, distance=1.0):
-    ''' return expected calories for running at a given pace '''
+    """ return expected calories for running at a given pace """
     cal_per_mi = weight * (0.0395 + 0.00327 * (60./pace_min_per_mile)
                            + 0.000455 * (60./pace_min_per_mile)**2
                            + 0.000801 * ((weight/154) * 0.425 / weight
@@ -73,18 +72,18 @@ def expected_calories(weight=175, pace_min_per_mile=10.0, distance=1.0):
     return cal_per_mi * distance
 
 def print_date_string(d):
-    ''' datetime object to standardized string '''
+    """ datetime object to standardized string """
     return d.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 def convert_time_string(time_str):
-    ''' time string to seconds '''
+    """ time string to seconds """
     hour = int(time_str.split(':')[0])
     minute = int(time_str.split(':')[1])
     second = float(time_str.split(':')[2])
     return second + 60*(minute + 60 * (hour))
 
 def print_h_m_s(second, do_hours=True):
-    ''' seconds to hh:mm:ss string '''
+    """ seconds to hh:mm:ss string """
     hours = int(second / 3600)
     minutes = int(second / 60) - hours * 60
     seconds = int(second) - minutes * 60 - hours * 3600
@@ -98,7 +97,7 @@ def print_h_m_s(second, do_hours=True):
 
 
 def convert_gmn_to_gpx(gmn_filename):
-    ''' create temporary gpx file from gmn or tcx files '''
+    """ create temporary gpx file from gmn or tcx files """
     if '.fit' in gmn_filename.lower():
         tcx_filename = convert_fit_to_tcx(gmn_filename)
         run_command('gpsbabel -i gtrnctr -f %s -o gpx -F /tmp/temp.gpx '
@@ -113,7 +112,7 @@ def convert_gmn_to_gpx(gmn_filename):
     return '/tmp/temp.gpx'
 
 def convert_fit_to_tcx(fit_filename):
-    ''' fit files to tcx files '''
+    """ fit files to tcx files """
     if '.fit' in fit_filename.lower():
         if os.path.exists('%s/bin/fit2tcx' % os.getenv('HOME')):
             run_command('fit2tcx %s > /tmp/temp.tcx' % fit_filename)
@@ -124,9 +123,9 @@ def convert_fit_to_tcx(fit_filename):
     return '/tmp/temp.tcx'
 
 def convert_gmn_to_xml(gmn_filename):
-    '''
+    """
         create temporary xml file from gmn,
-    '''
+    """
     if any([a in gmn_filename
             for a in ('.tcx', '.TCX', '.fit', '.FIT', '.xml', '.txt')]):
         return gmn_filename
