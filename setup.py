@@ -11,7 +11,6 @@ from __future__ import print_function
 #from __future__ import unicode_literals
 
 from distutils.core import setup
-from glob import glob
 
 setup(
     name='garmin_app',
