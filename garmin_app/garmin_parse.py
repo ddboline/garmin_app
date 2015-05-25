@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
     parsers to read txt, xml, tcx formatted files
 """
@@ -24,6 +23,7 @@ class GarminParse(GarminFile):
         Parse garmin xml based formats
     """
     def __init__(self, filename, filetype=''):
+        """ Init Method """
         GarminFile.__init__(self, filename, filetype)
 
         if filetype in GarminFile.garmin_file_types:
@@ -32,6 +32,7 @@ class GarminParse(GarminFile):
             self.determine_file_type()
 
     def determine_file_type(self):
+        """ determine file type """
         if '.tcx' in self.filename.lower():
             self.filetype = 'tcx'
         elif '.txt' in self.filename.lower():
@@ -61,12 +62,13 @@ class GarminParse(GarminFile):
         self.calculate_speed()
 
     def read_file_xml(self):
+        """ read xml file """
         cur_lap = None
         cur_point = None
         last_ent = None
         temp_points = []
-        for l in run_command('xml2 < %s' % self.filename, do_popen=True):
-            ent = l.strip().split('/')
+        for line in run_command('xml2 < %s' % self.filename, do_popen=True):
+            ent = line.strip().split('/')
             if ent[2] == 'run':
                 if '@sport' in ent[3]:
                     self.sport = ent[3].split('=')[1]
@@ -134,23 +136,24 @@ class GarminParse(GarminFile):
                 if self.sport == 'biking':
                     self.total_calories = int(self.total_calories
                                               * (1701/26.26) / (3390/26.43))
-                    for l in self.laps:
-                        l.lap_calories = int(l.lap_calories * (1701/26.26)
+                    for lap in self.laps:
+                        lap.lap_calories = int(lap.lap_calories * (1701/26.26)
                                              / (3390/26.43))
                 if self.sport == 'running':
                     self.total_calories = int(self.total_calories
                                               * (3390/26.43) / (1701/26.26))
-                    for l in self.laps:
-                        l.lap_calories = int(l.lap_calories * (3390/26.43)
+                    for lap in self.laps:
+                        lap.lap_calories = int(lap.lap_calories * (3390/26.43)
                                              / (1701/26.26))
         return None
 
     def read_file_tcx(self):
+        """ read tcx file """
         cur_lap = None
         cur_point = None
         temp_points = []
-        for l in run_command('xml2 < %s' % self.filename, do_popen=True):
-            ent = l.strip().split('/')
+        for line in run_command('xml2 < %s' % self.filename, do_popen=True):
+            ent = line.strip().split('/')
             if len(ent) < 5:
                 continue
             elif 'Sport' in ent[4]:

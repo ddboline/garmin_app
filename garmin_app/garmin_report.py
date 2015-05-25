@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
     functions to generate reports either to STDOUT or html
 """
@@ -438,7 +437,8 @@ class GarminReport(object):
 
         return outstr
 
-    def file_report_txt(self, gfile):
+    @staticmethod
+    def file_report_txt(gfile):
         """ nice output string for a file """
         retval = ['Start time %s' % print_date_string(gfile.begin_datetime)]
 
@@ -518,7 +518,6 @@ class GarminReport(object):
         hr_values = []
         alt_vals = []
         alt_values = []
-        vertical_climb = 0
         speed_values = get_splits(gfile, 400., do_heart_rate=False)
         if speed_values:
             speed_values = [(d/4., 4*t/60.) for d, t in speed_values
@@ -547,8 +546,6 @@ class GarminReport(object):
                 hr_values.append([xval, point.heart_rate])
             if point.altitude > 0:
                 alt_vals.append(point.altitude)
-                if len(alt_vals) > 1 and alt_vals[-1] > alt_vals[-2]:
-                    vertical_climb += alt_vals[-1] - alt_vals[-2]
                 alt_values.append([xval, point.altitude])
             # if point.speed_permi > 0 and point.speed_permi < 20:
                 # speed_values.append([xval, point.speed_permi])
@@ -723,7 +720,8 @@ class GarminReport(object):
         else:
             return '%s/html' % curpath
 
-    def total_summary_report_txt(self, gsum, sport=None, number_days=0,
+    @staticmethod
+    def total_summary_report_txt(gsum, sport=None, number_days=0,
                                  total_days=0):
         """ print summary of total information """
         retval = ['%17s %10s \t %10s \t %10s \t' % (' ', sport,
@@ -761,9 +759,11 @@ class GarminReport(object):
                                                       total_days)))
         return ' '.join(retval)
 
-    def day_summary_report_txt(self, gsum, sport=None,
-                               cur_date=datetime.date.today()):
+    @staticmethod
+    def day_summary_report_txt(gsum, sport=None, cur_date=None):
         """ print day summary information """
+        if not cur_date:
+            cur_date = datetime.date.today()
         retval = []
         week = cur_date.isocalendar()[1]
         weekdayname = WEEKDAY_NAMES[cur_date.weekday()]
@@ -800,7 +800,8 @@ class GarminReport(object):
                     '%i bpm' % (gsum.total_hr_dur / gsum.total_hr_dis)))
         return ' '.join(retval)
 
-    def day_average_report_txt(self, gsum, sport=None, number_days=0):
+    @staticmethod
+    def day_average_report_txt(gsum, sport=None, number_days=0):
         """ print day average information """
         retval = []
         if number_days == 0:
@@ -838,10 +839,12 @@ class GarminReport(object):
                                         / gsum.total_hr_dis)))
         return ' '.join(retval)
 
-    def week_summary_report_txt(self, gsum, sport=None, isoyear=None,
-                                isoweek=None, number_in_week=0,
-                                date=datetime.datetime.today()):
+    @staticmethod
+    def week_summary_report_txt(gsum, sport=None, isoyear=None, isoweek=None,
+                                number_in_week=0, date=None):
         """ print week summary information """
+        if not date:
+            date = datetime.datetime.today()
         if not isoyear:
             isoyear = date.isocalendar()[0]
         if not isoweek:
@@ -892,7 +895,8 @@ class GarminReport(object):
             '%16s' % ('%i / %i days' % (number_in_week, total_days)))
         return ' '.join(retval)
 
-    def week_average_report_txt(self, gsum, sport=None, number_days=0,
+    @staticmethod
+    def week_average_report_txt(gsum, sport=None, number_days=0,
                                 number_of_weeks=0):
         """ print week average information """
         if number_of_weeks == 0:
@@ -936,11 +940,14 @@ class GarminReport(object):
             / number_of_weeks, 7)))
         return ' '.join(retval)
 
-    def month_summary_report_txt(self, gsum, sport=None,
-                                 year=datetime.date.today().year,
-                                 month=datetime.date.today().month,
+    @staticmethod
+    def month_summary_report_txt(gsum, sport=None, year=None, month=None,
                                  number_in_month=0):
         """ print month summary information """
+        if not year:
+            year = datetime.date.today().year
+        if not month:
+            month = datetime.date.today().month
         total_days = days_in_month(month=month, year=year)
         if datetime.datetime.today().year == year\
                 and datetime.datetime.today().month == month:
@@ -985,7 +992,8 @@ class GarminReport(object):
             '%16s' % ('%i / %i days' % (number_in_month, total_days)))
         return ' '.join(retval)
 
-    def month_average_report_txt(self, gsum, sport=None, number_of_months=0):
+    @staticmethod
+    def month_average_report_txt(gsum, sport=None, number_of_months=0):
         """ print month average information """
         if number_of_months == 0:
             return False
@@ -1023,10 +1031,11 @@ class GarminReport(object):
             retval.append(' %7s %2s' % (' ', ' '))
         return ' '.join(retval)
 
-    def year_summary_report_txt(self, gsum, sport=None,
-                                year=datetime.date.today().year,
-                                number_in_year=0):
+    @staticmethod
+    def year_summary_report_txt(gsum, sport=None, year=None, number_in_year=0):
         """ print year summary information """
+        if not year:
+            year = datetime.date.today().year
         retval = []
         total_days = days_in_year(year)
         if datetime.datetime.today().year == year:

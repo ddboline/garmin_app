@@ -48,13 +48,16 @@ def days_in_year(year=datetime.date.today().year):
     return (datetime.date(year=year+1, month=1, day=1)
             - datetime.date(year=year, month=1, day=1)).days
 
-def days_in_month(month=datetime.date.today().month,
-                  year=datetime.date.today().year):
+def days_in_month(month=None, year=None):
     """ return number of days in a given month """
-    y1, m1 = year, month + 1
-    if m1 == 13:
-        y1, m1 = y1 + 1, 1
-    return (datetime.date(year=y1, month=m1, day=1)
+    if not month:
+        month = datetime.date.today().month
+    if not year:
+        year = datetime.date.today().year
+    y1_, m1_ = year, month + 1
+    if m1_ == 13:
+        y1_, m1_ = y1_ + 1, 1
+    return (datetime.date(year=y1_, month=m1_, day=1)
             - datetime.date(year=year, month=month, day=1)).days
 
 ### maybe change output to datetime object?
@@ -71,9 +74,9 @@ def expected_calories(weight=175, pace_min_per_mile=10.0, distance=1.0):
                                          * 60. / (60./pace_min_per_mile))
     return cal_per_mi * distance
 
-def print_date_string(d):
+def print_date_string(dt_):
     """ datetime object to standardized string """
-    return d.strftime('%Y-%m-%dT%H:%M:%SZ')
+    return dt_.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 def convert_time_string(time_str):
     """ time string to seconds """
@@ -139,15 +142,17 @@ def convert_gmn_to_xml(gmn_filename):
     return '/tmp/temp.xml'
 
 def get_md5_old(fname):
+    """ md5 function using hashlib.md5 """
     if not os.path.exists(fname):
         return None
-    m = hashlib.md5()
+    md_ = hashlib.md5()
     with open(fname, 'r') as infile:
         for line in infile:
-            m.update(line)
-    return m.hexdigest()
+            md_.update(line)
+    return md_.hexdigest()
 
 def get_md5(fname):
+    """ md5 function using cli """
     if not os.path.exists(fname):
         return None
     output = run_command('md5sum "%s"' % fname,
@@ -155,50 +160,54 @@ def get_md5(fname):
     return output
 
 def compare_with_remote(script_path):
+    """ sync files at script_path with files at BASEURL """
     from garmin_app import save_to_s3
     s3_file_chksum = save_to_s3.save_to_s3()
     remote_file_chksum = {}
     remote_file_path = {}
     for line in openurl('%s/garmin/files/garmin.list' % BASEURL):
         md5sum, fname = line.split()[0:2]
-        fn = fname.split('/')[-1]
-        if fn not in remote_file_chksum:
-            remote_file_chksum[fn] = md5sum
-            remote_file_path[fn] = '/'.join(fname.split('/')[:-1])
+        fn_ = fname.split('/')[-1]
+        if fn_ not in remote_file_chksum:
+            remote_file_chksum[fn_] = md5sum
+            remote_file_path[fn_] = '/'.join(fname.split('/')[:-1])
         else:
-            print('duplicate?:', fname, md5sum, remote_file_chksum[fn])
+            print('duplicate?:', fname, md5sum, remote_file_chksum[fn_])
 
     local_file_chksum = {}
 
-    def process_files(arg, dirname, names):
-        for fn in names:
-            fname = '%s/%s' % (dirname, fn)
+    def process_files(_, dirname, names):
+        """ callback function for os.walk """
+        for fn_ in names:
+            fname = '%s/%s' % (dirname, fn_)
             if os.path.isdir(fname) or\
-                ('garmin.pkl' in fn) or\
-                ('garmin.list' in fn) or\
-                ('.pkl.gz' in fn):
+                ('garmin.pkl' in fn_) or\
+                ('garmin.list' in fn_) or\
+                ('.pkl.gz' in fn_):
                 continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True).read().split()[0]
-            if fn not in local_file_chksum:
-                local_file_chksum[fn] = md5sum
+            if fn_ not in local_file_chksum:
+                local_file_chksum[fn_] = md5sum
 
     os.path.walk('%s/run' % script_path, process_files, None)
 
-    for fn in remote_file_chksum.keys():
-        if fn not in local_file_chksum.keys():
-            print('download:', fn, remote_file_chksum[fn],
-                  remote_file_path[fn], script_path)
+    for fn_ in remote_file_chksum.keys():
+        if fn_ not in local_file_chksum.keys():
+            print('download:', fn_, remote_file_chksum[fn_],
+                  remote_file_path[fn_], script_path)
             if not os.path.exists('%s/run/%s/' % (script_path,
-                                                  remote_file_path[fn])):
-                os.makedirs('%s/run/%s/' % (script_path, remote_file_path[fn]))
+                                                  remote_file_path[fn_])):
+                os.makedirs('%s/run/%s/' % (script_path,
+                                            remote_file_path[fn_]))
             if not os.path.exists('%s/run/%s/%s' % (script_path,
-                                                    remote_file_path[fn], fn)):
+                                                    remote_file_path[fn_],
+                                                    fn_)):
                 outfile = open('%s/run/%s/%s' % (script_path,
-                                                 remote_file_path[fn],
-                                                 fn), 'wb')
+                                                 remote_file_path[fn_],
+                                                 fn_), 'wb')
                 urlout = openurl('%s/garmin/files/%s/%s'
-                                 % (BASEURL, remote_file_path[fn], fn))
+                                 % (BASEURL, remote_file_path[fn_], fn_))
                 if urlout.getcode() != 200:
                     print('something bad happened %d' % urlout.getcode())
                     from urllib2 import HTTPError
@@ -209,12 +218,12 @@ def compare_with_remote(script_path):
                 outfile.close()
 
     local_files_not_in_s3 = ['%s/run/%s/%s' % (script_path,
-                                               remote_file_path[fn], fn)
-                             for fn in local_file_chksum
-                             if fn not in s3_file_chksum]
+                                               remote_file_path[fn_], fn_)
+                             for fn_ in local_file_chksum
+                             if fn_ not in s3_file_chksum]
 
-    s3_files_not_in_local = [fn for fn in s3_file_chksum
-                             if fn not in local_file_chksum]
+    s3_files_not_in_local = [fn_ for fn_ in s3_file_chksum
+                             if fn_ not in local_file_chksum]
     if local_files_not_in_s3:
         print('\n'.join(local_files_not_in_s3))
         s3_file_chksum = save_to_s3.save_to_s3(filelist=local_files_not_in_s3)
@@ -341,7 +350,7 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
         elif 'do_%s' % arg in options:
             options['do_%s' % arg] = True
         else:
-            spts = filter(lambda x: arg in x, list(SPORT_TYPES))
+            spts = [x for x in SPORT_TYPES if arg in x]
             if len(spts) > 0:
                 options['do_sport'] = spts[0]
             elif arg == 'bike':
@@ -360,14 +369,14 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
                 basenames = [f.split('/')[-1] for f in sorted(files)]
                 if len([x for x in basenames if x[:10] == basenames[0][:10]])\
                         == len(basenames):
-                    for f in basenames:
-                        print(f)
+                    for fn_ in basenames:
+                        print(fn_)
                 gdir += files
             elif '.gmn' in arg or 'T' in arg:
                 files = glob.glob('%s/run/*/*/%s' % (script_path, arg))
                 gdir += files
             else:
-                print('unhandled argument:',arg)
+                print('unhandled argument:', arg)
     if not gdir:
         gdir.append('%s/run' % script_path)
 

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+""" Utility functions """
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
@@ -20,6 +21,10 @@ def run_command(command, do_popen=False, turn_on_commands=True):
         return call(command, shell=True)
 
 def convert_date(input_date):
+    """
+        convert string to datetime object
+        (why not just use dateutil.parser.parse?)
+    """
     import datetime
     _month = int(input_date[0:2])
     _day = int(input_date[2:4])

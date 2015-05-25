@@ -25,22 +25,22 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
 
     if os.path.exists(socketfile):
         os.remove(socketfile)
-    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock_ = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
-        s.bind(socketfile)
+        sock_.bind(socketfile)
         os.chmod(socketfile, 0o777)
     except socket.error:
         time.sleep(10)
         print('try again to open socket')
         return server_thread(socketfile, msg_q)
     print('socket open')
-    s.listen(0)
+    sock_.listen(0)
 
     while True:
-        c, a = s.accept()
-        d = c.recv(1024)
+        conn, _ = sock_.accept()
+        recv_ = conn.recv(1024)
 
-        args = d.split()
+        args = recv_.split()
         isprev = False
         if not args:
             continue
@@ -74,33 +74,39 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
         garmin_parse_arg_list(args, msg_q, **options)
 
         if msg_q != None and not isprev:
-            if d.strip() != 'prev year':
-                msg_q.append(d.strip())
+            if recv_.strip() != 'prev year':
+                msg_q.append(recv_.strip())
 
         if msg_q != None:
             print(msg_q)
 
-        c.send('done')
-        c.close()
-    s.shutdown(socket.SHUT_RDWR)
-    s.close()
+        conn.send('done')
+        conn.close()
+    sock_.shutdown(socket.SHUT_RDWR)
+    sock_.close()
     return 0
 
 class GarminServer(object):
+    """ Garmin Server Class """
     def __init__(self):
+        """ Init Method """
         self.msg_q = None
         self.net = None
         pass
 
     def start_server(self):
+        """ start server, manager based communication """
         manager = multiprocessing.Manager()
-        self.msg_q = manager.list([])
+        self.msg_q = manager.list()
         self.net = multiprocessing.Process(target=server_thread,
                                            args=(GARMIN_SOCKET_FILE,
                                                  self.msg_q))
         self.net.start()
+    
+    def join_server(self):
         self.net.join()
 
 if __name__ == '__main__':
-    g = GarminServer()
-    g.start_server()
+    gsrv = GarminServer()
+    gsrv.start_server()
+    gsrv.join_server()

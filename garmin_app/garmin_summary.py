@@ -19,6 +19,7 @@ class GarminSummary(object):
                  'md5sum']
 
     def __init__(self, filename='', md5sum=None):
+        """ Init Method """
         self.filename = filename
         self.begin_datetime = None
         self.sport = None
@@ -34,6 +35,7 @@ class GarminSummary(object):
             self.md5sum = get_md5(self.filename)
 
     def __repr__(self):
+        """ string representation """
         return 'GarminSummary<%s>' % ', '.join(
             '%s=%s' % (x, getattr(self, x)) for x in self.__slots__)
 

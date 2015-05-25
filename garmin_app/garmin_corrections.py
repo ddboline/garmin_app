@@ -59,8 +59,8 @@ list_of_corrected_laps = {
 '2014-09-28T11:00:39Z': {1: [6.0, 60*60+45], 5: [19.38+0.061, 5*60*60+10*60]}}
 
 JSON_DIR = '/home/ddboline/setup_files/build/garmin_app/garmin_app'
-with open('%s/garmin_corrections.json' % JSON_DIR, 'rb') as jfile:
-    tmp_dict = json.load(jfile)
+with open('%s/garmin_corrections.json' % JSON_DIR, 'rb') as jfile_:
+    tmp_dict = json.load(jfile_)
     for key, val in tmp_dict.items():
         tmp_ = {}
         for k2_, v2_ in val.items():
@@ -69,5 +69,7 @@ with open('%s/garmin_corrections.json' % JSON_DIR, 'rb') as jfile:
         list_of_corrected_laps[key] = tmp_
 
 def save_corrections(list_):
+    """ save json file """
     with open('%s/garmin_corrections.json' % JSON_DIR, 'wb') as jfile:
         json.dump(list_, jfile, indent=1, sort_keys=True)
+

@@ -22,7 +22,7 @@ from garmin_app.garmin_utils import get_md5, print_date_string
 
 try:
     import cPickle as pickle
-except:
+except ImportError:
     import pickle
 
 class GarminCache(object):
@@ -65,6 +65,7 @@ class GarminCache(object):
         return True
 
     def read_cached_gfile(self, gfbasename=''):
+        """ return cached file """
         if not gfbasename or not self.cache_directory:
             return False
         if not os.path.exists('%s/%s.pkl.gz' % (self.cache_directory,
@@ -80,6 +81,7 @@ class GarminCache(object):
                 return False
 
     def write_cached_gfile(self, garminfile=None):
+        """ write cached file """
         if not garminfile or not self.cache_directory:
             return False
         gfbasename = os.path.basename(garminfile.orig_filename)
@@ -87,7 +89,7 @@ class GarminCache(object):
         return self.write_pickle_object_to_file(garminfile, pickle_file=pfname)
 
     def get_cache_summary_list(self, directory, **options):
-        """ """
+        """ return list of cached garmin_summary objects """
         self.do_update = False
         if 'do_update' in options and options['do_update']:
             self.do_update = True
@@ -102,7 +104,8 @@ class GarminCache(object):
         self.cache_summary_md5_dict = {x.md5sum:
                                        x for x in self.cache_summary_list}
 
-        def process_files(arg, dirname, names):
+        def process_files(_, dirname, names):
+            """ callback function for os.walk """
             for name in names:
                 gmn_filename = '%s/%s' % (dirname, name)
                 if os.path.isdir(gmn_filename):
@@ -112,6 +115,7 @@ class GarminCache(object):
                 add_file(gmn_filename)
 
         def add_file(gmn_filename):
+            """ generate garmin_summary """
             if not any(a in gmn_filename.lower() for a in ['.gmn', '.tcx',
                                                            '.fit', '.txt']):
                 return
@@ -146,11 +150,11 @@ class GarminCache(object):
             elif os.path.isfile(directory):
                 add_file(directory)
         if type(directory) == list:
-            for d in directory:
-                if os.path.isdir(d):
-                    os.path.walk(d, process_files, None)
-                elif os.path.isfile(d):
-                    add_file(d)
+            for dr_ in directory:
+                if os.path.isdir(dr_):
+                    os.path.walk(dr_, process_files, None)
+                elif os.path.isfile(dr_):
+                    add_file(dr_)
 
         if self.cache_file_is_modified:
             self.write_pickle_object_to_file(self.cache_summary_list)
@@ -166,16 +170,18 @@ class GarminDataFrame(object):
             self.fill_dataframe(garmin_list)
 
     def fill_dataframe(self, arr):
+        """ fill dataframe """
         inp_array = []
-        for it in arr:
+        for it_ in arr:
             tmp_array = []
             for attr in self.garminclass.__slots__:
-                tmp_array.append(getattr(it, attr))
+                tmp_array.append(getattr(it_, attr))
             inp_array.append(tmp_array)
         self.dataframe = pd.DataFrame(inp_array,
                                       columns=self.garminclass.__slots__)
 
     def fill_list(self):
+        """ fill list """
         output = []
         for row in self.dataframe.iterrows():
             tmpobj = self.garminclass()
