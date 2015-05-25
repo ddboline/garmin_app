@@ -33,16 +33,6 @@ def print_h_m_s(second):
     seconds = int(second) - minutes * 60 - hours * 3600
     return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
-def print_m_s(second):
-    """ convert time from seconds to mm:ss format """
-    hours = int(second / 3600)
-    minutes = int(second / 60) - hours * 60
-    seconds = int(second) - minutes * 60 - hours * 3600
-    if hours == 0:
-        return '%02i:%02i' % (minutes, seconds)
-    else:
-        return '%02i:%02i:%02i' % (hours, minutes, seconds)
-
 def datetimefromstring(tstr, ignore_tz=False):
     """ wrapper around dateutil.parser.parse """
     from dateutil.parser import parse

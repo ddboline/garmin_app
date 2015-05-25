@@ -30,6 +30,7 @@ from garmin_app import garmin_utils,\
 
 from garmin_app.util import run_command
 
+
 class TestGarminApp(unittest.TestCase):
 
     def setUp(self):
