@@ -268,7 +268,7 @@ def add_correction(correction_str):
     from dateutil.parser import parse
     from garmin_app.garmin_corrections import list_of_corrected_laps,\
                                               save_corrections
-    
+
     ent = correction_str.split()
     timestr = ent[0]
     try:
@@ -300,7 +300,7 @@ def add_correction(correction_str):
     list_of_corrected_laps[timestr] = lapdict
     save_corrections(list_of_corrected_laps)
     return list_of_corrected_laps
-        
+
 
 def garmin_parse_arg_list(args, msg_q=None, **options):
     script_path = options['script_path']
@@ -391,7 +391,7 @@ def garmin_arg_parse():
     script_path = BASEDIR
     if not os.path.exists(script_path):
         script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
-    
+
 
     if '%s/bin' % script_path not in os.getenv('PATH'):
         os.putenv('PATH', '%s:%s/bin' % (os.getenv('PATH'), script_path))

@@ -46,7 +46,7 @@ def openurl(url_):
         SSLContext = None
         PROTOCOL_TLSv1 = None
     from urllib2 import urlopen
-    
+
     if SSLContext is None:
         return urlopen(url_)
     else:
