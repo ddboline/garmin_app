@@ -239,7 +239,10 @@ def read_garmin_file(fname, msg_q=None, **options):
     _pickle_file = '%s/run/garmin.pkl.gz' % script_path
     _cache_dir = '%s/run/cache' % script_path
     _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir)
-    _temp_file = _cache.read_cached_gfile(gfbasename=os.path.basename(fname))
+    _temp_file = None
+    if not options['do_update']:
+        _temp_file = _cache.read_cached_gfile(
+                        gfbasename=os.path.basename(fname))
     if _temp_file:
         _gfile = _temp_file
     else:
