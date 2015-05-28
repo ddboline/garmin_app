@@ -53,16 +53,17 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
             print(msg_q)
 
         if msg_q != None and isprev:
-            _tmp = ' '.join(args)
-            if _tmp in msg_q:
-                idx = msg_q.index(_tmp)
+            tmp_ = ' '.join(args)
+            print(tmp_, msg_q)
+            if tmp_ in msg_q:
+                idx = msg_q.index(tmp_)
                 print('msg_q', msg_q, idx)
                 if idx > 0:
                     msg_q = msg_q[0:idx]
                 elif idx == 0:
                     while len(msg_q) > 1:
                         msg_q.pop(-1)
-            if _tmp == 'year':
+            if tmp_ == 'year':
                 while len(msg_q) > 0:
                     msg_q.pop(-1)
 
@@ -92,12 +93,11 @@ class GarminServer(object):
         """ Init Method """
         self.msg_q = None
         self.net = None
-        pass
 
     def start_server(self):
         """ start server, manager based communication """
         manager = multiprocessing.Manager()
-        self.msg_q = manager.list()
+        self.msg_q = manager.list([])
         self.net = multiprocessing.Process(target=server_thread,
                                            args=(GARMIN_SOCKET_FILE,
                                                  self.msg_q))

@@ -443,5 +443,6 @@ def garmin_arg_parse():
     if getattr(args, 'daemon'):
         gar = GarminServer()
         gar.start_server()
+        gar.join_server()
     else:
         garmin_parse_arg_list(getattr(args, 'command'), **options)
