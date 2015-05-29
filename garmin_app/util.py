@@ -60,7 +60,7 @@ def dump_to_file(url_, outfile_):
     import requests
     from requests import HTTPError
     requests.packages.urllib3.disable_warnings()
-    with closing(requests.get(url_, stream=True)) as url_:
+    with closing(requests.get(url_, stream=True, verify=False)) as url_:
         if url_.status_code != 200:
             print('something bad happened %d' % url_.status_code)
             raise HTTPError        
