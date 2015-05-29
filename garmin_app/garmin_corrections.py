@@ -54,19 +54,22 @@ list_of_mislabeled_times = {'biking':
                                 ['2010-12-24T14:04:58Z',
                                 '2013-12-26T21:24:38Z'],}
 
-list_of_corrected_laps = {
-'2015-05-22T14:49:26Z': {0: 6.5},
-'2014-09-28T11:00:39Z': {1: [6.0, 60*60+45], 5: [19.38+0.061, 5*60*60+10*60]}}
-
 JSON_DIR = '/home/ddboline/setup_files/build/garmin_app/garmin_app'
-with open('%s/garmin_corrections.json' % JSON_DIR, 'rb') as jfile_:
-    tmp_dict = json.load(jfile_)
-    for key, val in tmp_dict.items():
-        tmp_ = {}
-        for k2_, v2_ in val.items():
-            k2_ = int(k2_)
-            tmp_[k2_] = v2_
-        list_of_corrected_laps[key] = tmp_
+
+_list_of_corrected_laps = {}
+
+def list_of_corrected_laps():
+    if len(_list_of_corrected_laps) == 0:
+        with open('%s/garmin_corrections.json' % JSON_DIR, 'rb') as jfile_:
+            tmp_dict = json.load(jfile_)
+            for key, val in tmp_dict.items():
+                tmp_ = {}
+                for k2_, v2_ in val.items():
+                    k2_ = int(k2_)
+                    tmp_[k2_] = v2_
+                _list_of_corrected_laps[key] = tmp_
+    return _list_of_corrected_laps
+        
 
 def save_corrections(list_):
     """ save json file """

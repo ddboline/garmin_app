@@ -303,9 +303,9 @@ def add_correction(correction_str):
             lapdict[idx] = tmp_[0]
         elif len(tmp_) > 1:
             lapdict[idx] = tmp_
-    list_of_corrected_laps[timestr] = lapdict
-    save_corrections(list_of_corrected_laps)
-    return list_of_corrected_laps
+    list_of_corrected_laps()[timestr] = lapdict
+    save_corrections(list_of_corrected_laps())
+    return list_of_corrected_laps()
 
 
 def garmin_parse_arg_list(args, msg_q=None, **options):

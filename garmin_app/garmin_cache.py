@@ -128,7 +128,7 @@ class GarminCache(object):
                      and print_date_string(
                          self.cache_summary_file_dict[reduced_gmn_filename]\
                              .begin_datetime)
-                        in list_of_corrected_laps)):
+                        in list_of_corrected_laps())):
                 self.cache_file_is_modified = True
                 gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)
                 gfile = gsum.read_file()
