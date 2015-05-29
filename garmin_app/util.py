@@ -49,7 +49,7 @@ def openurl(url_):
     from requests import HTTPError
     requests.packages.urllib3.disable_warnings()
 
-    urlout = requests.get(url_)
+    urlout = requests.get(url_, verify=False)
     if urlout.status_code != 200:
         print('something bad happened %d' % urlout.status_code)
         raise HTTPError
