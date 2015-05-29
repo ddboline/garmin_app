@@ -8,6 +8,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import json
 from garmin_app.garmin_utils import METERS_PER_MILE
 
@@ -54,7 +55,7 @@ list_of_mislabeled_times = {'biking':
                                 ['2010-12-24T14:04:58Z',
                                 '2013-12-26T21:24:38Z'],}
 
-JSON_DIR = '/home/ddboline/setup_files/build/garmin_app/garmin_app'
+JSON_DIR = '%s/setup_files/build/garmin_app/garmin_app' % os.getenv('HOME')
 
 _list_of_corrected_laps = {}
 
