@@ -59,7 +59,9 @@ JSON_DIR = '%s/setup_files/build/garmin_app/garmin_app' % os.getenv('HOME')
 
 _list_of_corrected_laps = {}
 
-def list_of_corrected_laps():
+def list_of_corrected_laps(json_path=None):
+    if not json_path:
+        json_path = JSON_DIR
     if len(_list_of_corrected_laps) == 0:
         with open('%s/garmin_corrections.json' % JSON_DIR, 'rb') as jfile_:
             tmp_dict = json.load(jfile_)

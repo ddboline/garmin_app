@@ -270,11 +270,11 @@ def do_summary(directory_, msg_q=None, **options):
     print(_report.summary_report(_summary_list, **options))
     return True
 
-def add_correction(correction_str):
+def add_correction(correction_str, json_path=None):
     from dateutil.parser import parse
     from garmin_app.garmin_corrections import list_of_corrected_laps,\
                                               save_corrections
-
+    l_corr = list_of_corrected_laps(json_path=json_path)
     ent = correction_str.split()
     timestr = ent[0]
     try:
@@ -303,9 +303,9 @@ def add_correction(correction_str):
             lapdict[idx] = tmp_[0]
         elif len(tmp_) > 1:
             lapdict[idx] = tmp_
-    list_of_corrected_laps()[timestr] = lapdict
-    save_corrections(list_of_corrected_laps())
-    return list_of_corrected_laps()
+    l_corr[timestr] = lapdict
+    save_corrections(l_corr)
+    return l_corr
 
 
 def garmin_parse_arg_list(args, msg_q=None, **options):
@@ -340,7 +340,7 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
         elif arg != 'run' and os.path.isdir('%s/run/%s' % (script_path, arg)):
             gdir.append('%s/run/%s' % (script_path, arg))
         elif arg == 'correction':
-            add_correction(' '.join(args[1:]))
+            add_correction(' '.join(args[1:]), json_path=script_path)
             exit(0)
         elif arg in options:
             options[arg] = True
