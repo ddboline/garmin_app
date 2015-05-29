@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Utility functions """
-from __future__ import print_function
+from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -54,3 +54,17 @@ def openurl(url_):
         print('something bad happened %d' % urlout.status_code)
         raise HTTPError
     return urlout.text.split('\n')
+
+def dump_to_file(url_, outfile_):
+    from contextlib import closing
+    import requests
+    from requests import HTTPError
+    requests.packages.urllib3.disable_warnings()
+    with closing(requests.get(url_, stream=True)) as url_:
+        if url_.status_code != 200:
+            print('something bad happened %d' % url_.status_code)
+            raise HTTPError        
+        for chunk in url_.iter_content(4096):
+            outfile_.write(chunk)
+    return True
+            

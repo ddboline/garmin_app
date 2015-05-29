@@ -18,7 +18,8 @@ import argparse
 
 import garmin_app
 from garmin_app.garmin_daemon import GarminServer
-from garmin_app.util import run_command, datetimefromstring, openurl, HOMEDIR
+from garmin_app.util import run_command, datetimefromstring, openurl, \
+                            dump_to_file, HOMEDIR
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -203,19 +204,12 @@ def compare_with_remote(script_path):
             if not os.path.exists('%s/run/%s/%s' % (script_path,
                                                     remote_file_path[fn_],
                                                     fn_)):
-                outfile = open('%s/run/%s/%s' % (script_path,
-                                                 remote_file_path[fn_],
-                                                 fn_), 'wb')
-                urlout = openurl('%s/garmin/files/%s/%s'
-                                 % (BASEURL, remote_file_path[fn_], fn_))
-                if urlout.getcode() != 200:
-                    print('something bad happened %d' % urlout.getcode())
-                    from urllib2 import HTTPError
-                    raise HTTPError
-                for line in urlout:
-                    outfile.write(line)
-                urlout.close()
-                outfile.close()
+                with open('%s/run/%s/%s' % (script_path, remote_file_path[fn_],
+                                            fn_), 'wb') as outfile:
+                    urlout = '%s/garmin/files/%s/%s' % (BASEURL,
+                                                        remote_file_path[fn_],
+                                                        fn_)
+                    dump_to_file(urlout, outfile)
 
     local_files_not_in_s3 = ['%s/run/%s/%s' % (script_path,
                                                remote_file_path[fn_], fn_)
@@ -416,15 +410,11 @@ def garmin_arg_parse():
             if not os.path.exists('%s/run' % script_path):
                 os.makedirs('%s/run/' % script_path)
                 os.chdir('%s/run' % script_path)
-                outfile = open('temp.tar.gz', 'wb')
-                urlout = openurl('%s/backup/garmin_data.tar.gz' % BASEURL)
-                if urlout.getcode() != 200:
-                    print('something bad happened %d' % urlout.getcode())
-                    from urllib2 import HTTPError
-                    raise HTTPError
-                for line in urlout:
-                    outfile.write(line)
-                outfile.close()
+                with open('temp.tar.gz', 'wb') as outfile:
+                    urlout = '%s/backup/garmin_data.tar.gz' % BASEURL
+                    dump_to_file(urlout, outfile)
+                if not os.path.exists('temp.tar.gz'):
+                    raise OSError
                 print('downloaded file')
                 run_command('tar zxf temp.tar.gz 2>&1 > /dev/null')
                 os.remove('temp.tar.gz')
