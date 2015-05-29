@@ -44,16 +44,13 @@ def datetimefromstring(tstr, ignore_tz=False):
     return parse(tstr, ignoretz=ignore_tz)
 
 def openurl(url_):
-    """ wrapper around urlopen """
-    try:
-        from ssl import SSLContext, PROTOCOL_TLSv1
-    except ImportError:
-        SSLContext = None
-        PROTOCOL_TLSv1 = None
-    from urllib2 import urlopen
+    """ wrapper around requests.get.text simulating urlopen """
+    import requests
+    from requests import HTTPError
+    requests.packages.urllib3.disable_warnings()
 
-    if SSLContext is None:
-        return urlopen(url_)
-    else:
-        gcontext = SSLContext(PROTOCOL_TLSv1)
-        return urlopen(url_, context=gcontext)
+    urlout = requests.get(url_)
+    if urlout.status_code != 200:
+        print('something bad happened %d' % urlout.status_code)
+        raise HTTPError
+    return urlout.text.split('\n')
