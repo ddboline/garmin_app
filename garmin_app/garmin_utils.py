@@ -167,6 +167,8 @@ def compare_with_remote(script_path):
     remote_file_chksum = {}
     remote_file_path = {}
     for line in openurl('%s/garmin/files/garmin.list' % BASEURL):
+        if len(line) < 2:
+            continue
         md5sum, fname = line.split()[0:2]
         fn_ = fname.split('/')[-1]
         if fn_ not in remote_file_chksum:
