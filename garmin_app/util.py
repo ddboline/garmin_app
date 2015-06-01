@@ -47,8 +47,10 @@ def openurl(url_):
     """ wrapper around requests.get.text simulating urlopen """
     import requests
     from requests import HTTPError
-    requests.packages.urllib3.disable_warnings()
-
+    try:
+        requests.packages.urllib3.disable_warnings()
+    except AttributeError:
+        pass
     urlout = requests.get(url_, verify=False)
     if urlout.status_code != 200:
         print('something bad happened %d' % urlout.status_code)
@@ -59,7 +61,10 @@ def dump_to_file(url_, outfile_):
     from contextlib import closing
     import requests
     from requests import HTTPError
-    requests.packages.urllib3.disable_warnings()
+    try:
+        requests.packages.urllib3.disable_warnings()
+    except AttributeError:
+        pass
     with closing(requests.get(url_, stream=True, verify=False)) as url_:
         if url_.status_code != 200:
             print('something bad happened %d' % url_.status_code)
@@ -67,4 +72,3 @@ def dump_to_file(url_, outfile_):
         for chunk in url_.iter_content(4096):
             outfile_.write(chunk)
     return True
-            
