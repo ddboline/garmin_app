@@ -9,9 +9,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import time
 import multiprocessing
-import socket
+from util import OpenUnixSocketServer, OpenSocketConnection
 
 GARMIN_SOCKET_FILE = '/tmp/.garmin_test_socket'
 
@@ -23,68 +22,55 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
 
     script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
 
-    if os.path.exists(socketfile):
-        os.remove(socketfile)
-    sock_ = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    try:
-        sock_.bind(socketfile)
-        os.chmod(socketfile, 0o777)
-    except socket.error:
-        time.sleep(10)
-        print('try again to open socket')
-        return server_thread(socketfile, msg_q)
-    print('socket open')
-    sock_.listen(0)
+    with OpenUnixSocketServer(socketfile) as sock:
+        while True:
+            with OpenSocketConnection(sock) as conn:
+                recv_ = conn.recv(1024)
 
-    while True:
-        conn, _ = sock_.accept()
-        recv_ = conn.recv(1024)
-
-        args = recv_.split()
-        isprev = False
-        if not args:
-            continue
-
-        if args[0] == 'prev':
-            isprev = True
-            args.pop(0)
-
-        if msg_q != None:
-            print(msg_q)
-
-        if msg_q != None and isprev:
-            tmp_ = ' '.join(args)
-            print(tmp_, msg_q)
-            if tmp_ in msg_q:
-                idx = msg_q.index(tmp_)
-                print('msg_q', msg_q, idx)
-                if idx > 0:
-                    msg_q = msg_q[0:idx]
-                elif idx == 0:
-                    while len(msg_q) > 1:
-                        msg_q.pop(-1)
-            if tmp_ == 'year':
-                while len(msg_q) > 0:
-                    msg_q.pop(-1)
-
-        options = {'do_plot': False, 'do_year': False, 'do_month': False,
-                   'do_week': False, 'do_day': False, 'do_file': False,
-                   'do_sport': None, 'do_update': False, 'do_average': False}
-        options['script_path'] = script_path
-
-        garmin_parse_arg_list(args, msg_q, **options)
-
-        if msg_q != None and not isprev:
-            if recv_.strip() != 'prev year':
-                msg_q.append(recv_.strip())
-
-        if msg_q != None:
-            print(msg_q)
-
-        conn.send('done')
-        conn.close()
-    sock_.shutdown(socket.SHUT_RDWR)
-    sock_.close()
+                args = recv_.split()
+                isprev = False
+                if not args:
+                    continue
+        
+                if args[0] == 'prev':
+                    isprev = True
+                    args.pop(0)
+        
+                if msg_q != None:
+                    print(msg_q)
+        
+                if msg_q != None and isprev:
+                    tmp_ = ' '.join(args)
+                    print(tmp_, msg_q)
+                    if tmp_ in msg_q:
+                        idx = msg_q.index(tmp_)
+                        print('msg_q', msg_q, idx)
+                        if idx > 0:
+                            msg_q = msg_q[0:idx]
+                        elif idx == 0:
+                            while len(msg_q) > 1:
+                                msg_q.pop(-1)
+                    if tmp_ == 'year':
+                        while len(msg_q) > 0:
+                            msg_q.pop(-1)
+        
+                options = {'do_plot': False, 'do_year': False,
+                           'do_month': False, 'do_week': False,
+                           'do_day': False, 'do_file': False,
+                           'do_sport': None, 'do_update': False,
+                           'do_average': False}
+                options['script_path'] = script_path
+        
+                garmin_parse_arg_list(args, msg_q, **options)
+        
+                if msg_q != None and not isprev:
+                    if recv_.strip() != 'prev year':
+                        msg_q.append(recv_.strip())
+        
+                if msg_q != None:
+                    print(msg_q)
+        
+                conn.send('done')
     return 0
 
 class GarminServer(object):
@@ -93,6 +79,13 @@ class GarminServer(object):
         """ Init Method """
         self.msg_q = None
         self.net = None
+
+    def __enter__(self):
+        self.start_server()
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.join_server()
 
     def start_server(self):
         """ start server, manager based communication """
@@ -107,6 +100,5 @@ class GarminServer(object):
         self.net.join()
 
 if __name__ == '__main__':
-    gsrv = GarminServer()
-    gsrv.start_server()
-    gsrv.join_server()
+    with GarminServer() as gsrv:
+        pass

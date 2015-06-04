@@ -72,3 +72,49 @@ def dump_to_file(url_, outfile_):
         for chunk in url_.iter_content(4096):
             outfile_.write(chunk)
     return True
+
+import socket, time
+class OpenUnixSocketServer(object):
+    def __init__(self, socketfile):
+        self.sock = None
+        self.socketfile = socketfile
+        if os.path.exists(socketfile):
+            os.remove(socketfile)
+        return
+
+    def __enter__(self):
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        try:
+            self.sock.bind(self.socketfile)
+            os.chmod(self.socketfile, 0o777)
+        except:
+            time.sleep(10)
+            print('failed to open socket')
+            return self.__enter__()
+        print('open socket')
+        self.sock.listen(0)
+        return self.sock
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.sock.shutdown(socket.SHUT_RDWR)
+        self.sock.close()
+        if exc_type or exc_value or traceback:
+            return False
+        else:
+            return True
+
+
+class OpenSocketConnection(object):
+    def __init__(self, sock):
+        self.sock = sock
+
+    def __enter__(self):
+        self.conn, _ = self.sock.accept()
+        return self.conn
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.conn.close()
+        if exc_type or exc_value or traceback:
+            return False
+        else:
+            return True
