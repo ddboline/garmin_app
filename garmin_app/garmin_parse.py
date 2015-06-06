@@ -226,82 +226,85 @@ class GarminParse(GarminFile):
 
     def read_file_txt(self):
         """ read txt file, these just contain summary information """
-        for line in open(self.filename, 'r'):
-            if len(line.strip()) == 0:
-                continue
-            cur_lap = None
-            cur_point = None
-
-            for ent in line.strip().split():
-                if '=' not in ent:
+        with open(self.filename, 'r') as infile:
+            for line in infile:
+                if len(line.strip()) == 0:
                     continue
-                key = ent.split('=')[0]
-                val = ent.split('=')[1]
-                if key == 'date':
-                    year = int(val[0:4])
-                    month = int(val[4:6])
-                    day = int(val[6:8])
-                    if not cur_lap:
-                        cur_lap = GarminLap()
-                    if not cur_point:
-                        cur_point = GarminPoint()
-                    cur_lap.lap_start = datetime.datetime(year, month, day)
-                    cur_point.time = datetime.datetime(year, month, day)
-                    if len(self.points) == 0:
-                        self.points.append(cur_point)
-                        cur_point = GarminPoint(time=cur_point.time)
-                if key == 'time':
-                    hour = int(val[0:2])
-                    minute = int(val[2:4])
-                    second = int(val[4:6])
-                    cur_lap.lap_start.hour = hour
-                    cur_lap.lap_start.minute = minute
-                    cur_lap.lap_start.second = second
-                if key == 'type':
-                    self.sport = val
-                if key == 'lap':
-                    cur_lap.lap_number = int(val)
-                if key == 'dur':
-                    cur_lap.lap_duration = float(convert_time_string(val))
-                    cur_point.time = self.points[-1].time\
-                                     + datetime.timedelta(
-                                         seconds=cur_lap.lap_duration)
-                if key == 'dis':
-                    if 'mi' in val: # specify mi, m or assume it's meters
-                        cur_lap.lap_distance = float(val.split('mi')[0])\
-                                               * METERS_PER_MILE
-                    elif 'm' in val:
-                        cur_lap.lap_distance = float(val.split('m')[0])
-                    else:
-                        cur_lap.lap_distance = float(val)
-                    cur_point.distance = cur_lap.lap_distance
-                    if self.points[-1].distance:
-                        cur_point.distance += self.points[-1].distance
-                if key == 'cal':
-                    cur_lap.lap_calories = int(val)
-                if key == 'avghr':
-                    cur_lap.lap_avg_hr = float(val)
-                    cur_point.heart_rate = cur_lap.lap_avg_hr
-            if cur_lap.lap_calories == -1:
-                dur = cur_lap.lap_duration / 60.
-                dis = cur_lap.lap_distance / METERS_PER_MILE
-                pace = dur / dis
-                cur_lap.lap_calories = int(
-                    expected_calories(weight=175, pace_min_per_mile=pace,
-                                      distance=dis))
-            self.total_calories += cur_lap.lap_calories
-            self.total_distance += cur_lap.lap_distance
-            self.total_duration += cur_lap.lap_duration
-            if cur_lap.lap_avg_hr:
-                self.total_hr_dur += cur_lap.lap_avg_hr * cur_lap.lap_duration
-                self.total_hr_dis += cur_lap.lap_duration
-            self.laps.append(cur_lap)
-            self.points.append(cur_point)
+                cur_lap = None
+                cur_point = None
+    
+                for ent in line.strip().split():
+                    if '=' not in ent:
+                        continue
+                    key = ent.split('=')[0]
+                    val = ent.split('=')[1]
+                    if key == 'date':
+                        year = int(val[0:4])
+                        month = int(val[4:6])
+                        day = int(val[6:8])
+                        if not cur_lap:
+                            cur_lap = GarminLap()
+                        if not cur_point:
+                            cur_point = GarminPoint()
+                        cur_lap.lap_start = datetime.datetime(year, month, day)
+                        cur_point.time = datetime.datetime(year, month, day)
+                        if len(self.points) == 0:
+                            self.points.append(cur_point)
+                            cur_point = GarminPoint(time=cur_point.time)
+                    if key == 'time':
+                        hour = int(val[0:2])
+                        minute = int(val[2:4])
+                        second = int(val[4:6])
+                        cur_lap.lap_start.hour = hour
+                        cur_lap.lap_start.minute = minute
+                        cur_lap.lap_start.second = second
+                    if key == 'type':
+                        self.sport = val
+                    if key == 'lap':
+                        cur_lap.lap_number = int(val)
+                    if key == 'dur':
+                        cur_lap.lap_duration = float(convert_time_string(val))
+                        cur_point.time = self.points[-1].time + \
+                                         datetime.timedelta(
+                                             seconds=cur_lap.lap_duration)
+                    if key == 'dis':
+                        if 'mi' in val: # specify mi, m or assume it's meters
+                            cur_lap.lap_distance = float(val.split('mi')[0])\
+                                                   * METERS_PER_MILE
+                        elif 'm' in val:
+                            cur_lap.lap_distance = float(val.split('m')[0])
+                        else:
+                            cur_lap.lap_distance = float(val)
+                        cur_point.distance = cur_lap.lap_distance
+                        if self.points[-1].distance:
+                            cur_point.distance += self.points[-1].distance
+                    if key == 'cal':
+                        cur_lap.lap_calories = int(val)
+                    if key == 'avghr':
+                        cur_lap.lap_avg_hr = float(val)
+                        cur_point.heart_rate = cur_lap.lap_avg_hr
+                if cur_lap.lap_calories == -1:
+                    dur = cur_lap.lap_duration / 60.
+                    dis = cur_lap.lap_distance / METERS_PER_MILE
+                    pace = dur / dis
+                    cur_lap.lap_calories = int(
+                        expected_calories(weight=175, pace_min_per_mile=pace,
+                                          distance=dis))
+                self.total_calories += cur_lap.lap_calories
+                self.total_distance += cur_lap.lap_distance
+                self.total_duration += cur_lap.lap_duration
+                if cur_lap.lap_avg_hr:
+                    self.total_hr_dur += cur_lap.lap_avg_hr * \
+                                         cur_lap.lap_duration
+                    self.total_hr_dis += cur_lap.lap_duration
+                self.laps.append(cur_lap)
+                self.points.append(cur_point)
 
         time_since_begin = 0
         for idx in range(1, len(self.points)):
             if self.points[idx].distance and self.points[idx-1].distance \
-                    and self.points[idx].distance > self.points[idx-1].distance:
+                    and self.points[idx].distance > \
+                        self.points[idx-1].distance:
                 self.points[idx].duration_from_last = \
                     (self.points[idx].time - self.points[idx-1].time)\
                         .total_seconds()
