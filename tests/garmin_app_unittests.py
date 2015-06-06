@@ -285,6 +285,8 @@ class TestGarminApp(unittest.TestCase):
         file_md5 = [['index.html', '1c1abe181f36a85949974a222cc874df']]
         for fn_, fmd5 in file_md5:
             md5 = garmin_utils.get_md5('%s/%s' % (html_path, fn_))
+            if hasattr(md5, 'decode'):
+                md5 = md5.decode()
             self.assertEqual(md5, fmd5)
 
     def test_garmin_total_summary_report_txt(self):
