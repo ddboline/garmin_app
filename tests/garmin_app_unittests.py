@@ -222,7 +222,10 @@ class TestGarminApp(unittest.TestCase):
         gsum.read_file()
         output = gsum.__repr__()
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'f73293da4f5d64545ad4a1d5a1efb283')
 
     def test_garmin_file_report_txt(self):
@@ -232,7 +235,10 @@ class TestGarminApp(unittest.TestCase):
         gr_ = garmin_report.GarminReport()
         output = gr_.file_report_txt(gfile)
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'dc49eed73bf44c1b5d5c2444a59bec96')
 
     def test_garmin_file_report_html(self):
@@ -256,7 +262,10 @@ class TestGarminApp(unittest.TestCase):
         gr_ = garmin_report.GarminReport()
         output = gr_.total_summary_report_txt(gsum, sport='running')
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '9f5aa437a6e8bbe6ecd25a088b634018')
 
     def test_garmin_day_summary_report_txt(self):
@@ -267,7 +276,10 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.day_summary_report_txt(gsum, sport='running',
                                            cur_date=gsum.begin_datetime.date())
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'b05ddcddc03a64b650a75ad397037d00')
 
     def test_garmin_day_average_report_txt(self):
@@ -278,7 +290,10 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.day_average_report_txt(gsum, sport='running',
                                            number_days=1)
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '59c50d1eff34a78619e9f37e45445535')
 
     def test_garmin_week_summary_report_txt(self):
@@ -292,7 +307,10 @@ class TestGarminApp(unittest.TestCase):
                                             number_in_week=1,
                                             date=gsum.begin_datetime)
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'e538e1b1abd954083c9cc19e14d04315')
 
     def test_garmin_week_average_report_txt(self):
@@ -303,7 +321,10 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.week_average_report_txt(gsum, sport='running',
                                             number_of_weeks=1)
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '4b649d4c617128138a1540c9dc2e1a09')
 
     def test_garmin_month_summary_report_txt(self):
@@ -316,7 +337,10 @@ class TestGarminApp(unittest.TestCase):
                                              month=gsum.begin_datetime.month,
                                              number_in_month=1)
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'd2a1204e0374c7e83c450a1ae4ce3981')
 
     def test_garmin_month_average_report_txt(self):
@@ -327,7 +351,10 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.month_average_report_txt(gsum, sport='running',
                                              number_of_months=1)
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '08a90d3c2e16ba2aafb4403e3ed69824')
 
     def test_garmin_year_summary_report_txt(self):
@@ -339,7 +366,10 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.year_summary_report_txt(gsum, sport='running',
                                             year=dt_.year, number_in_year=1)
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'b7ab537ea3090fc44276b15bc61577b5')
 
     def test_garmin_cache_get_summary_list(self):
@@ -389,7 +419,10 @@ class TestGarminApp(unittest.TestCase):
         options['script_path'] = script_path
         output = rp_.summary_report(sl_, copy_to_public_html=False, **options)
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '022c8b604d32c9297195ad80aef5b73c')
 
 
