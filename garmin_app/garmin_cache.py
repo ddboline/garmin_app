@@ -144,17 +144,18 @@ class GarminCache(object):
                 gsum = self.cache_summary_file_dict[reduced_gmn_filename]
             summary_list.append(gsum)
 
-        if type(directory) in (str, unicode):
-            if os.path.isdir(directory):
-                os.path.walk(directory, process_files, None)
-            elif os.path.isfile(directory):
-                add_file(directory)
+
         if type(directory) == list:
             for dr_ in directory:
                 if os.path.isdir(dr_):
                     os.path.walk(dr_, process_files, None)
                 elif os.path.isfile(dr_):
                     add_file(dr_)
+        elif directory:
+            if os.path.isdir(directory):
+                os.path.walk(directory, process_files, None)
+            elif os.path.isfile(directory):
+                add_file(directory)
 
         if self.cache_file_is_modified:
             self.write_pickle_object_to_file(self.cache_summary_list)
