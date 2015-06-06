@@ -483,7 +483,7 @@ class GarminReport(object):
         sum_time = 0
         hr_vals = []
         for point in gfile.points:
-            if point.heart_rate > 0:
+            if point.heart_rate and point.heart_rate > 0:
                 avg_hr += point.heart_rate * point.duration_from_last
                 sum_time += point.duration_from_last
                 hr_vals.append(point.heart_rate)
