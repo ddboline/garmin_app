@@ -157,7 +157,7 @@ class GarminParse(GarminFile):
             try:
                 ent = line.strip().split('/')
             except TypeError:
-                ent = line.encode().strip().split('/')
+                ent = line.decode().strip().split('/')
             if len(ent) < 5:
                 continue
             elif 'Sport' in ent[4]:
