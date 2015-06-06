@@ -10,14 +10,17 @@ from subprocess import call, Popen, PIPE
 
 HOMEDIR = os.getenv('HOME')
 
-def run_command(command, do_popen=False, turn_on_commands=True):
+def run_command(command, do_popen=False, turn_on_commands=True,
+                single_line=False):
     """ wrapper around os.system """
     if not turn_on_commands:
         print(command)
         return command
     elif do_popen:
-        with Popen(command, shell=True, stdout=PIPE, close_fds=True) as pop:
-            return pop.stdout
+        return Popen(command, shell=True, stdout=PIPE, close_fds=True)            
+    elif single_line:
+        with Popen(command, shell=True, stdout=PIPE, close_fds=True) as pop_:
+            return pop_.stdout.read()
     else:
         return call(command, shell=True)
 

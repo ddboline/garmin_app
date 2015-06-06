@@ -67,31 +67,32 @@ class GarminParse(GarminFile):
         cur_point = None
         last_ent = None
         temp_points = []
-        for line in run_command('xml2 < %s' % self.filename, do_popen=True):
-            try:
-                ent = line.strip().split('/')
-            except TypeError:
-                ent = line.decode().strip().split('/')
-            if ent[2] == 'run':
-                if '@sport' in ent[3]:
-                    self.sport = ent[3].split('=')[1]
-            elif ent[2] == 'lap':
-                if len(ent) < 4:
+        with run_command('xml2 < %s' % self.filename, do_popen=True) as pop_:
+            for line in pop_.stdout:
+                try:
+                    ent = line.strip().split('/')
+                except TypeError:
+                    ent = line.decode().strip().split('/')
+                if ent[2] == 'run':
+                    if '@sport' in ent[3]:
+                        self.sport = ent[3].split('=')[1]
+                elif ent[2] == 'lap':
+                    if len(ent) < 4:
+                        self.laps.append(cur_lap)
+                    elif 'type' in ent[3]:
+                        cur_lap = GarminLap()
+                    cur_lap.read_lap_xml(ent[3:])
+                elif ent[2] == 'point':
+                    if len(ent) < 4:
+                        temp_points.append(cur_point)
+                    elif 'type' in ent[3]:
+                        cur_point = GarminPoint()
+                    cur_point.read_point_xml(ent[3:])
+                else:
+                    pass
+                if ent[2] != 'lap' and last_ent and last_ent[2] == 'lap':
                     self.laps.append(cur_lap)
-                elif 'type' in ent[3]:
-                    cur_lap = GarminLap()
-                cur_lap.read_lap_xml(ent[3:])
-            elif ent[2] == 'point':
-                if len(ent) < 4:
-                    temp_points.append(cur_point)
-                elif 'type' in ent[3]:
-                    cur_point = GarminPoint()
-                cur_point.read_point_xml(ent[3:])
-            else:
-                pass
-            if ent[2] != 'lap' and last_ent and last_ent[2] == 'lap':
-                self.laps.append(cur_lap)
-            last_ent = ent
+                last_ent = ent
         if cur_lap and cur_lap not in self.laps:
             self.laps.append(cur_lap)
         if cur_point and cur_point not in temp_points:
@@ -156,30 +157,31 @@ class GarminParse(GarminFile):
         cur_lap = None
         cur_point = None
         temp_points = []
-        for line in run_command('xml2 < %s' % self.filename, do_popen=True):
-            try:
-                ent = line.strip().split('/')
-            except TypeError:
-                ent = line.decode().strip().split('/')
-            if len(ent) < 5:
-                continue
-            elif 'Sport' in ent[4]:
-                self.sport = ent[4].split('=')[1].lower()
-            elif ent[4] == 'Lap':
-                if len(ent[5:]) == 0:
-                    self.laps.append(cur_lap)
-                elif 'StartTime' in ent[5]:
-                    cur_lap = GarminLap()
-                elif ent[5] == 'Track':
-                    if len(ent[6:]) == 0:
-                        continue
-                    elif ent[6] == 'Trackpoint':
-                        if len(ent[7:]) == 0:
-                            temp_points.append(cur_point)
-                        elif 'Time' in ent[7]:
-                            cur_point = GarminPoint()
-                        cur_point.read_point_tcx(ent[7:])
-                cur_lap.read_lap_tcx(ent[5:])
+        with run_command('xml2 < %s' % self.filename, do_popen=True) as pop_:
+            for line in pop_.stdout:
+                try:
+                    ent = line.strip().split('/')
+                except TypeError:
+                    ent = line.decode().strip().split('/')
+                if len(ent) < 5:
+                    continue
+                elif 'Sport' in ent[4]:
+                    self.sport = ent[4].split('=')[1].lower()
+                elif ent[4] == 'Lap':
+                    if len(ent[5:]) == 0:
+                        self.laps.append(cur_lap)
+                    elif 'StartTime' in ent[5]:
+                        cur_lap = GarminLap()
+                    elif ent[5] == 'Track':
+                        if len(ent[6:]) == 0:
+                            continue
+                        elif ent[6] == 'Trackpoint':
+                            if len(ent[7:]) == 0:
+                                temp_points.append(cur_point)
+                            elif 'Time' in ent[7]:
+                                cur_point = GarminPoint()
+                            cur_point.read_point_tcx(ent[7:])
+                    cur_lap.read_lap_tcx(ent[5:])
 
         if cur_lap not in self.laps:
             self.laps.append(cur_lap)
