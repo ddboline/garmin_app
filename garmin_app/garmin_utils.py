@@ -137,7 +137,10 @@ def convert_gmn_to_xml(gmn_filename):
         xml_file.write('<root>\n')
         for line in run_command('garmin_dump %s' % gmn_filename,
                                 do_popen=True):
-            xml_file.write(line)
+            try:
+                xml_file.write(line)
+            except TypeError:
+                xml_file.write(line.decode())
         xml_file.write('</root>\n')
     run_command('mv /tmp/.temp.xml /tmp/temp.xml')
     return '/tmp/temp.xml'
