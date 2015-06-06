@@ -1093,7 +1093,7 @@ def print_lap_string(glap, sport):
                            print_h_m_s(glap.lap_duration
                                         / (glap.lap_distance / 1000.), False),
                            '/ km',])
-    if glap.lap_avg_hr > 0:
+    if glap.lap_avg_hr and glap.lap_avg_hr > 0:
         outstr.append('%i bpm' % glap.lap_avg_hr)
 
     return ' '.join(outstr)
