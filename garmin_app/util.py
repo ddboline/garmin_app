@@ -20,6 +20,8 @@ class PopenWrapperClass(object):
         return self.pop_
 
     def __exit__(self, exc_type, exc_value, traceback):
+        if hasattr(self.pop_, '__exit__'):
+            return self.pop_.__exit__(exc_type, exc_value, traceback)
         self.pop_.wait()
         if exc_type or exc_value or traceback:
             return False
