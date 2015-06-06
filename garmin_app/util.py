@@ -118,3 +118,12 @@ class OpenSocketConnection(object):
             return False
         else:
             return True
+
+def walk_wrapper(direc, callback, arg):
+    if hasattr(os.path, 'walk'):
+        return os.path.walk(direc, callback, arg)
+    elif hasattr(os, 'walk'):
+        for dirpath, dirnames, filenames in os.walk(direc):
+            callback(arg, dirpath, dirnames + filenames)
+    return
+    

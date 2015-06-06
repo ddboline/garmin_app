@@ -15,7 +15,7 @@ import pandas as pd
 
 import gzip
 
-from garmin_app.util import run_command
+from garmin_app.util import run_command, walk_wrapper
 from garmin_app.garmin_corrections import list_of_corrected_laps
 from garmin_app.garmin_summary import GarminSummary
 from garmin_app.garmin_utils import get_md5, print_date_string
@@ -148,12 +148,12 @@ class GarminCache(object):
         if type(directory) == list:
             for dr_ in directory:
                 if os.path.isdir(dr_):
-                    os.path.walk(dr_, process_files, None)
+                    walk_wrapper(dr_, process_files, None)
                 elif os.path.isfile(dr_):
                     add_file(dr_)
         elif directory:
             if os.path.isdir(directory):
-                os.path.walk(directory, process_files, None)
+                walk_wrapper(directory, process_files, None)
             elif os.path.isfile(directory):
                 add_file(directory)
 
