@@ -153,7 +153,7 @@ def get_md5_old(fname):
     with open(fname, 'r') as infile:
         for line in infile:
             md_.update(line)
-    return md_.hexdigest()
+    return md_.hexdigest().decode()
 
 def get_md5(fname):
     """ md5 function using cli """
@@ -161,7 +161,7 @@ def get_md5(fname):
         return None
     output = run_command('md5sum "%s"' % fname,
                          do_popen=True).read().split()[0]
-    return output
+    return output.decode()
 
 def compare_with_remote(script_path):
     """ sync files at script_path with files at BASEURL """
