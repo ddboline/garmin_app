@@ -65,11 +65,8 @@ def list_of_corrected_laps(json_path=None):
     if not os.path.exists(json_path):
         json_path = '%s/garmin_app/garmin_app' % os.getenv('HOME')
     if len(_list_of_corrected_laps) == 0:
-        with open('%s/garmin_corrections.json' % json_path, 'rb') as jfile_:
-            try:
-                tmp_dict = json.loads(jfile_.read())
-            except TypeError:
-                tmp_dict = json.loads(jfile_.read().decode())
+        with open('%s/garmin_corrections.json' % json_path, 'r') as jfile_:
+            tmp_dict = json.load(jfile_)
             for key, val in tmp_dict.items():
                 tmp_ = {}
                 for k2_, v2_ in val.items():
