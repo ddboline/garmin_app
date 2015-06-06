@@ -19,7 +19,7 @@ elif [ $1 = "html" ] ; then
 fi
 
 ### This is a bit of a hack...
-if [ $USER = "root" ] ; then
+if [ "$USER" = "root" ] ; then
     echo "America/New_York" > timezone
     sudo mv timezone /etc/timezone
     sudo rm /etc/localtime
