@@ -10,11 +10,11 @@ from __future__ import unicode_literals
 import datetime
 
 from garmin_app.garmin_file import GarminFile, GarminLap, GarminPoint
-from garmin_app.garmin_utils import METERS_PER_MILE, \
-     convert_time_string, print_date_string,\
-     convert_fit_to_tcx, convert_gmn_to_xml, expected_calories
-from garmin_app.garmin_corrections import list_of_mislabeled_times, \
-                                          list_of_corrected_laps
+from garmin_app.garmin_utils import (METERS_PER_MILE, convert_time_string,
+                                     print_date_string, convert_fit_to_tcx,
+                                     convert_gmn_to_xml, expected_calories)
+from garmin_app.garmin_corrections import (list_of_mislabeled_times,
+                                           list_of_corrected_laps)
 
 from garmin_app.util import run_command
 

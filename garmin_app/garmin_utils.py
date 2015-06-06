@@ -18,8 +18,8 @@ import argparse
 
 import garmin_app
 from garmin_app.garmin_daemon import GarminServer
-from garmin_app.util import run_command, datetimefromstring, openurl, \
-                            dump_to_file, HOMEDIR
+from garmin_app.util import (run_command, datetimefromstring, openurl,
+                             dump_to_file, HOMEDIR)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR

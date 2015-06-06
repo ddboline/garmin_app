@@ -10,7 +10,7 @@ from __future__ import unicode_literals
 
 import os
 import multiprocessing
-from util import OpenUnixSocketServer, OpenSocketConnection
+from garmin_app.util import OpenUnixSocketServer, OpenSocketConnection
 
 GARMIN_SOCKET_FILE = '/tmp/.garmin_test_socket'
 
