@@ -253,6 +253,7 @@ class TestGarminApp(unittest.TestCase):
         gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         output = gsum.__repr__()
+        print(output)
         mstr = hashlib.md5()
         try:
             mstr.update(output)
