@@ -253,12 +253,8 @@ class TestGarminApp(unittest.TestCase):
         gsum = garmin_summary.GarminSummary(FITFILE)
         gsum.read_file()
         output = gsum.__repr__()
-        print(output.encode())
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'f73293da4f5d64545ad4a1d5a1efb283')
 
     def test_garmin_file_report_txt(self):
