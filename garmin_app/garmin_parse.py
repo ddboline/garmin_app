@@ -154,7 +154,10 @@ class GarminParse(GarminFile):
         cur_point = None
         temp_points = []
         for line in run_command('xml2 < %s' % self.filename, do_popen=True):
-            ent = line.strip().split('/')
+            try:
+                ent = line.strip().split('/')
+            except TypeError:
+                ent = line.encode().strip().split('/')
             if len(ent) < 5:
                 continue
             elif 'Sport' in ent[4]:
