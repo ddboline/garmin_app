@@ -355,7 +355,10 @@ class TestGarminApp(unittest.TestCase):
                 .replace('/home/ddboline/Downloads/backup',
                          '/home/ddboline/setup_files/build')
         mstr = hashlib.md5()
-        mstr.update(output)
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
 
     def test_cached_gfile(self):
