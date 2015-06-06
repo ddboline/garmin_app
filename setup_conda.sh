@@ -2,7 +2,9 @@
 
 sudo apt-get update
 sudo apt-get install -y gpsbabel garmin-forerunner-tools xml2
-sudo /opt/conda/bin/conda install --yes requests pandas dateutil usb
+sudo /opt/conda/bin/conda install --yes pip requests pandas dateutil usb
+
+sudo /opt/conda/bin/pip install --upgrade pyusb
 
 if [ -z $1 ] ; then
     true
