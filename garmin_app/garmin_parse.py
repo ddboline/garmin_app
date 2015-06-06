@@ -300,7 +300,8 @@ class GarminParse(GarminFile):
 
         time_since_begin = 0
         for idx in range(1, len(self.points)):
-            if self.points[idx].distance > self.points[idx-1].distance:
+            if self.points[idx].distance and self.points[idx-1].distance \
+                    and self.points[idx].distance > self.points[idx-1].distance:
                 self.points[idx].duration_from_last = \
                     (self.points[idx].time - self.points[idx-1].time)\
                         .total_seconds()
