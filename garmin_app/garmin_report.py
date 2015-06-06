@@ -409,20 +409,21 @@ class GarminReport(object):
         if not os.path.exists('%s/html' % curpath):
             os.makedirs('%s/html' % curpath)
         with open('%s/html/index.html' % curpath, 'w') as htmlfile:
-            for line in open('%s/garmin_app/templates/GARMIN_TEMPLATE.html'
-                    % curpath, 'r'):
-                if 'INSERTTEXTHERE' in line:
-                    htmlfile.write(htmlostr)
-                elif 'SPORTTITLEDATE' in line:
-                    newtitle = 'Garmin Summary'
-                    htmlfile.write(line.replace('SPORTTITLEDATE', newtitle))
-                elif 'HISTORYBUTTONS' in line:
-                    if self.msg_q:
-                        htmlfile.write(
-                            line.replace('HISTORYBUTTONS',
-                                         print_history_buttons(self.msg_q)))
-                else:
-                    htmlfile.write(line)
+            with open('%s/garmin_app/templates/GARMIN_TEMPLATE.html'
+                      % curpath, 'r') as infile:
+                for line in infile:
+                    if 'INSERTTEXTHERE' in line:
+                        htmlfile.write(htmlostr)
+                    elif 'SPORTTITLEDATE' in line:
+                        newtitle = 'Garmin Summary'
+                        htmlfile.write(line.replace('SPORTTITLEDATE',
+                                                    newtitle))
+                    elif 'HISTORYBUTTONS' in line:
+                        if self.msg_q:
+                            htmlfile.write(line.replace('HISTORYBUTTONS',
+                                            print_history_buttons(self.msg_q)))
+                    else:
+                        htmlfile.write(line)
 
         if (os.path.exists('%s/html' % curpath) and
                 os.path.exists('%s/public_html/garmin' % os.getenv('HOME')))\
