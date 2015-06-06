@@ -51,7 +51,7 @@ class GarminCache(object):
             with gzip.open(pickle_file, 'rb') as pkl_file:
                 try:
                     outobj = pickle.load(pkl_file, fix_imports=True,
-                                         errors='ignore')
+                                         errors='replace')
                 except TypeError:
                     outobj = pickle.load(pkl_file)
         return outobj
