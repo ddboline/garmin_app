@@ -130,7 +130,7 @@ class GarminParse(GarminFile):
             time_from_begin += cur_point.duration_from_last
             cur_point.duration_from_begin = time_from_begin
 
-            if cur_point.distance > 0:
+            if cur_point.distance and cur_point.distance > 0:
                 self.points.append(cur_point)
 
         printed_datetime = print_date_string(self.laps[0].lap_start)
