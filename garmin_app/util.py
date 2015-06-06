@@ -16,8 +16,12 @@ def run_command(command, do_popen=False, turn_on_commands=True):
         print(command)
         return command
     elif do_popen:
-        with Popen(command, shell=True, stdout=PIPE, close_fds=True) as popen:
-            return popen.stdout
+        def _popen_wrapper(command):
+            with Popen(command, shell=True, stdout=PIPE, close_fds=True) as \
+                    pop:
+                for line in pop.stdout:
+                    yield line
+        return _popen_wrapper(command)
     else:
         return call(command, shell=True)
 
