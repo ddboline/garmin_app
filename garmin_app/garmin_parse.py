@@ -68,7 +68,10 @@ class GarminParse(GarminFile):
         last_ent = None
         temp_points = []
         for line in run_command('xml2 < %s' % self.filename, do_popen=True):
-            ent = line.strip().split('/')
+            try:
+                ent = line.strip().split('/')
+            except TypeError:
+                ent = line.decode().strip().split('/')
             if ent[2] == 'run':
                 if '@sport' in ent[3]:
                     self.sport = ent[3].split('=')[1]
