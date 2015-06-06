@@ -539,7 +539,7 @@ class GarminReport(object):
                 xval = point.duration_from_begin
             else:
                 xval = point.distance / METERS_PER_MILE
-            if xval > 0 and point.heart_rate > 0:
+            if xval and xval > 0 and point.heart_rate and point.heart_rate > 0:
                 avg_hr += point.heart_rate * point.duration_from_last
                 sum_time += point.duration_from_last
                 hr_vals.append(point.heart_rate)
