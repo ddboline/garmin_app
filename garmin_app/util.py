@@ -16,7 +16,8 @@ def run_command(command, do_popen=False, turn_on_commands=True):
         print(command)
         return command
     elif do_popen:
-        return Popen(command, shell=True, stdout=PIPE, close_fds=True).stdout
+        with Popen(command, shell=True, stdout=PIPE, close_fds=True) as popen:
+            return popen.stdout
     else:
         return call(command, shell=True)
 
