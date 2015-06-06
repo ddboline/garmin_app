@@ -49,7 +49,10 @@ class GarminCache(object):
         outobj = None
         if os.path.exists(pickle_file):
             with gzip.open(pickle_file, 'rb') as pkl_file:
-                outobj = pickle.load(pkl_file)
+                try:
+                    outobj = pickle.load(pkl_file, fix_imports=True)
+                except TypeError:
+                    outobj = pickle.load(pkl_file)
         return outobj
 
     def write_pickle_object_to_file(self, inpobj, pickle_file=''):

@@ -74,7 +74,6 @@ class GarminSummary(object):
 
         return temp_gfile
 
-
     def add(self, summary_to_add):
         """ add to totals """
         self.total_calories += summary_to_add.total_calories
