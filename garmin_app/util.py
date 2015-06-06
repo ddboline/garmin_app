@@ -10,6 +10,22 @@ from subprocess import call, Popen, PIPE
 
 HOMEDIR = os.getenv('HOME')
 
+class PopenWrapperClass(object):
+    def __init__(self, command):
+        self.command = command
+
+    def __enter__(self):
+        self.pop_ = Popen(self.command, shell=True, stdout=PIPE,
+                          close_fds=True)
+        return self.pop_
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.pop_.wait()
+        if exc_type or exc_value or traceback:
+            return False
+        else:
+            return True
+
 def run_command(command, do_popen=False, turn_on_commands=True,
                 single_line=False):
     """ wrapper around os.system """
@@ -17,9 +33,11 @@ def run_command(command, do_popen=False, turn_on_commands=True,
         print(command)
         return command
     elif do_popen:
-        return Popen(command, shell=True, stdout=PIPE, close_fds=True)            
+        return PopenWrapperClass(command)
+#        return Popen(command, shell=True, stdout=PIPE, close_fds=True)         
     elif single_line:
-        with Popen(command, shell=True, stdout=PIPE, close_fds=True) as pop_:
+#        with Popen(command, shell=True, stdout=PIPE, close_fds=True) as pop_:
+        with PopenWrapperClass(command) as pop_:
             return pop_.stdout.read()
     else:
         return call(command, shell=True)
