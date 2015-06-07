@@ -30,6 +30,11 @@ from garmin_app import garmin_utils,\
 
 from garmin_app.util import run_command
 
+def md5_command(command, md5val):
+    md5 = run_command(command, single_line=True).split()[0]
+    if hasattr(md5, 'decode'):
+        md5 = md5.decode()
+    return md5
 
 class TestGarminApp(unittest.TestCase):
     """ GarminApp Unittests """
@@ -53,28 +58,19 @@ class TestGarminApp(unittest.TestCase):
         """ test gmn_to_gpx converter """
         outfile = garmin_utils.convert_gmn_to_gpx(GMNFILE)
         self.assertEqual('/tmp/temp.gpx', outfile)
-        md5 = run_command('tail -n186 %s | md5sum' % outfile,
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('tail -n186 %s | md5sum' % outfile)
         self.assertEqual(md5, '93e68a7fcc0e6b41037e16d3f3c59baa')
 
         outfile = garmin_utils.convert_gmn_to_gpx(TCXFILE)
         self.assertEqual('/tmp/temp.gpx', outfile)
         if hasattr(md5, 'decode'):
             md5 = md5.decode()
-        md5 = run_command('tail -n740 %s | md5sum' % outfile,
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('tail -n740 %s | md5sum' % outfile)
         self.assertEqual(md5, '3e7ab7d5dc77a6e299596d615226ff0b')
 
         outfile = garmin_utils.convert_gmn_to_gpx(FITFILE)
         self.assertEqual('/tmp/temp.gpx', outfile)
-        md5 = run_command('tail -n1246 %s | md5sum' % outfile,
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('tail -n1246 %s | md5sum' % outfile)
         self.assertEqual(md5, 'e06a6217293b218b8ca1e4dbf07174ce')
 
         outfile = garmin_utils.convert_gmn_to_gpx(TXTFILE)
@@ -86,10 +82,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertFalse(garmin_utils.convert_fit_to_tcx(TCXFILE))
         outfile = garmin_utils.convert_fit_to_tcx(FITFILE)
         self.assertEqual('/tmp/temp.tcx', outfile)
-        md5 = run_command('cat %s | md5sum' % outfile,
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('cat %s | md5sum' % outfile)
         self.assertEqual(md5, '1c304e508709540ccdf44fd70b3c5dcc')
 
     def test_gmn_to_xml(self):
@@ -100,10 +93,7 @@ class TestGarminApp(unittest.TestCase):
         ### don't run the test if localtimezone isn't EST
         if datetime.datetime.now(dateutil.tz.tzlocal()).tzname() == 'EST':
             outfile = garmin_utils.convert_gmn_to_xml(GMNFILE)
-            md5 = run_command('cat %s | md5sum' % outfile,
-                              single_line=True).split()[0]
-            if hasattr(md5, 'decode'):
-                md5 = md5.decode()
+            md5 = md5_command('cat %s | md5sum' % outfile)
             self.assertEqual(md5, 'c941a945ec3a2f75f72d426b57ff3b57')
 
     def test_read_txt(self):
@@ -147,26 +137,17 @@ class TestGarminApp(unittest.TestCase):
             gdf = garmin_cache.GarminDataFrame(garmin_file.GarminPoint,\
                     gfile.points).dataframe
             gdf.to_csv('temp.xml.point.csv', index=False)
-            md5 = run_command('cat temp.xml.point.csv | md5sum',
-                              single_line=True).split()[0]
-            if hasattr(md5, 'decode'):
-                md5 = md5.decode()
+            md5 = md5_command('cat temp.xml.point.csv | md5sum')
             self.assertEqual(md5, '4f574433d75f4c5406babc81997f719c')
             gdf = garmin_cache.GarminDataFrame(garmin_file.GarminLap,
                                                gfile.laps).dataframe
             gdf.to_csv('temp.xml.lap.csv', index=False)
-            md5 = run_command('cat temp.xml.lap.csv | md5sum',
-                              single_line=True).split()[0]
-            if hasattr(md5, 'decode'):
-                md5 = md5.decode()
+            md5 = md5_command('cat temp.xml.lap.csv | md5sum')
             self.assertEqual(md5, '1a18d3b5b06368a13efb6e00dd0a718c')
             gdf = garmin_cache.GarminDataFrame(garmin_summary.GarminSummary,
                                                [gsum]).dataframe
             gdf.to_csv('temp.fit.sum.csv', index=False)
-            md5 = run_command('cat temp.fit.sum.csv | md5sum',
-                              single_line=True).split()[0]
-            if hasattr(md5, 'decode'):
-                md5 = md5.decode()
+            md5 = md5_command('cat temp.fit.sum.csv | md5sum')
             self.assertEqual(md5, 'b83e146680aa2583f9f1650c5a709b6a')
 
     def test_cache_dataframe_tcx(self):
@@ -176,26 +157,17 @@ class TestGarminApp(unittest.TestCase):
         gdf = garmin_cache.GarminDataFrame(garmin_file.GarminPoint,
                                            gfile.points).dataframe
         gdf.to_csv('temp.tcx.point.csv', index=False)
-        md5 = run_command('cat temp.tcx.point.csv | md5sum',
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('cat temp.tcx.point.csv | md5sum')
         self.assertEqual(md5, '3bb1db7d72096006e3cecdb719c55706')
         gdf = garmin_cache.GarminDataFrame(garmin_file.GarminLap,
                                            gfile.laps).dataframe
         gdf.to_csv('temp.tcx.lap.csv', index=False)
-        md5 = run_command('cat temp.tcx.lap.csv | md5sum',
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('cat temp.tcx.lap.csv | md5sum')
         self.assertEqual(md5, '982ea8e4949c75f17926cec705882de1')
         gdf = garmin_cache.GarminDataFrame(garmin_summary.GarminSummary,
                                            [gsum]).dataframe
         gdf.to_csv('temp.fit.sum.csv', index=False)
-        md5 = run_command('cat temp.fit.sum.csv | md5sum',
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('cat temp.fit.sum.csv | md5sum')
         self.assertEqual(md5, '26856b7d8c53ba8f11e75f49295c5311')
 
     def test_cache_dataframe_fit(self):
@@ -205,26 +177,17 @@ class TestGarminApp(unittest.TestCase):
         gdf = garmin_cache.GarminDataFrame(garmin_file.GarminPoint,
                                            gfile.points).dataframe
         gdf.to_csv('temp.fit.point.csv', index=False)
-        md5 = run_command('cat temp.fit.point.csv | md5sum',
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('cat temp.fit.point.csv | md5sum')
         self.assertEqual(md5, '31a1ec7ed186440c28ff6ff052da13f3')
         gdf = garmin_cache.GarminDataFrame(garmin_file.GarminLap,
                                            gfile.laps).dataframe
         gdf.to_csv('temp.fit.lap.csv', index=False)
-        md5 = run_command('cat temp.fit.lap.csv | md5sum',
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('cat temp.fit.lap.csv | md5sum')
         self.assertEqual(md5, '7597faf3ade359c193e7fb07607693c7')
         gdf = garmin_cache.GarminDataFrame(garmin_summary.GarminSummary,
                                            [gsum]).dataframe
         gdf.to_csv('temp.fit.sum.csv', index=False)
-        md5 = run_command('cat temp.fit.sum.csv | md5sum',
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('cat temp.fit.sum.csv | md5sum')
         self.assertEqual(md5, 'a70326f6c022c149f2c20ad070d24130')
 
     def test_pickle_fit(self):
@@ -242,10 +205,7 @@ class TestGarminApp(unittest.TestCase):
         gdf = garmin_cache.GarminDataFrame(garmin_file.GarminPoint,
                                            gfile.points).dataframe
         gdf.to_csv('temp.fit.point.csv', index=False)
-        md5 = run_command('cat temp.fit.point.csv | md5sum',
-                          single_line=True).split()[0]
-        if hasattr(md5, 'decode'):
-            md5 = md5.decode()
+        md5 = md5_command('cat temp.fit.point.csv | md5sum')
         self.assertEqual(md5, '31a1ec7ed186440c28ff6ff052da13f3')
 
     def test_garmin_summary(self):

@@ -36,9 +36,7 @@ def run_command(command, do_popen=False, turn_on_commands=True,
         return command
     elif do_popen:
         return PopenWrapperClass(command)
-#        return Popen(command, shell=True, stdout=PIPE, close_fds=True)         
     elif single_line:
-#        with Popen(command, shell=True, stdout=PIPE, close_fds=True) as pop_:
         with PopenWrapperClass(command) as pop_:
             return pop_.stdout.read()
     else:
