@@ -30,7 +30,7 @@ from garmin_app import garmin_utils,\
 
 from garmin_app.util import run_command
 
-def md5_command(command, md5val):
+def md5_command(command):
     md5 = run_command(command, single_line=True).split()[0]
     if hasattr(md5, 'decode'):
         md5 = md5.decode()
