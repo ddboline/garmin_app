@@ -425,13 +425,13 @@ class GarminReport(object):
                     else:
                         htmlfile.write(line)
 
-        if (os.path.exists('%s/html' % curpath) and
-                os.path.exists('%s/public_html/garmin' % os.getenv('HOME')))\
-                and copy_to_public_html:
-            if os.path.exists(
-                    '%s/public_html/garmin/html' % os.getenv('HOME')):
-                run_command(
-                    'rm -rf %s/public_html/garmin/html' % os.getenv('HOME'))
+        if os.path.exists('%s/html' % curpath) and copy_to_public_html:
+            if not os.path.exists('%s/public_html/garmin' % os.getenv('HOME')):
+                os.makedirs('%s/public_html/garmin' % os.getenv('HOME'))
+            if os.path.exists('%s/public_html/garmin/html' %
+                              os.getenv('HOME')):
+                run_command('rm -rf %s/public_html/garmin/html' %
+                            os.getenv('HOME'))
             run_command(
                 'mv %s/html %s/public_html/garmin' % (curpath,
                                                       os.getenv('HOME')))
