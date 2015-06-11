@@ -347,7 +347,7 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
         elif arg != 'run' and os.path.isdir('%s/run/%s' % (script_path, arg)):
             gdir.append('%s/run/%s' % (script_path, arg))
         elif arg == 'correction':
-            add_correction(' '.join(args[1:]), json_path=script_path)
+            add_correction(' '.join(args[1:]), json_path='%s/garmin_app' % script_path)
             exit(0)
         elif arg in options:
             options[arg] = True
