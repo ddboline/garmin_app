@@ -16,15 +16,15 @@ import hashlib
 import datetime
 import argparse
 
-import garmin_app
-from garmin_app.garmin_daemon import GarminServer
-from garmin_app.util import (run_command, datetimefromstring, openurl,
+from .garmin_daemon import GarminServer
+from .util import (run_command, datetimefromstring, openurl,
                              dump_to_file, HOMEDIR)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
 
 if not os.path.exists(BASEDIR):
+    import garmin_app
     BASEDIR = os.path.abspath('../%s' % garmin_app.__path__[0])
 
 ### Useful constants
@@ -166,8 +166,8 @@ def get_md5(fname):
 
 def compare_with_remote(script_path):
     """ sync files at script_path with files at BASEURL """
-    from garmin_app import save_to_s3
-    s3_file_chksum = save_to_s3.save_to_s3()
+    from .save_to_s3 import save_to_s3
+    s3_file_chksum = save_to_s3()
     remote_file_chksum = {}
     remote_file_path = {}
     for line in openurl('%s/garmin/files/garmin.list' % BASEURL):
@@ -233,9 +233,9 @@ def compare_with_remote(script_path):
     return
 
 def read_garmin_file(fname, msg_q=None, **options):
-    from garmin_app.garmin_cache import GarminCache
-    from garmin_app.garmin_report import GarminReport
-    from garmin_app.garmin_parse import GarminParse
+    from .garmin_cache import GarminCache
+    from .garmin_report import GarminReport
+    from .garmin_parse import GarminParse
     script_path = options['script_path']
     _pickle_file = '%s/run/garmin.pkl.gz' % script_path
     _cache_dir = '%s/run/cache' % script_path
@@ -260,8 +260,8 @@ def read_garmin_file(fname, msg_q=None, **options):
     return True
 
 def do_summary(directory_, msg_q=None, **options):
-    from garmin_app.garmin_cache import GarminCache
-    from garmin_app.garmin_report import GarminReport
+    from .garmin_cache import GarminCache
+    from .garmin_report import GarminReport
     script_path = options['script_path']
     _pickle_file = '%s/run/garmin.pkl.gz' % script_path
     _cache_dir = '%s/run/cache' % script_path
@@ -279,7 +279,7 @@ def do_summary(directory_, msg_q=None, **options):
 
 def add_correction(correction_str, json_path=None):
     from dateutil.parser import parse
-    from garmin_app.garmin_corrections import list_of_corrected_laps,\
+    from .garmin_corrections import list_of_corrected_laps,\
                                               save_corrections
     l_corr = list_of_corrected_laps(json_path=json_path)
     ent = correction_str.split()

@@ -10,7 +10,7 @@ from __future__ import unicode_literals
 
 import os
 import json
-from garmin_app.garmin_utils import METERS_PER_MILE
+from .garmin_utils import METERS_PER_MILE
 
 FIVEK_DIST = 5000/METERS_PER_MILE
 

@@ -8,7 +8,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from garmin_app.garmin_utils import (get_md5, expected_calories,
+from .garmin_utils import (get_md5, expected_calories,
                                      SPORT_TYPES, METERS_PER_MILE)
 
 class GarminSummary(object):
@@ -41,7 +41,7 @@ class GarminSummary(object):
 
     def read_file(self):
         """  read the file, calculate some stuff """
-        from garmin_app.garmin_parse import GarminParse
+        from .garmin_parse import GarminParse
         temp_gfile = GarminParse(self.filename)
         temp_gfile.read_file()
         self.begin_datetime = temp_gfile.begin_datetime

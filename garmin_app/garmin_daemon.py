@@ -10,7 +10,7 @@ from __future__ import unicode_literals
 
 import os
 import multiprocessing
-from garmin_app.util import OpenUnixSocketServer, OpenSocketConnection
+from .util import OpenUnixSocketServer, OpenSocketConnection
 
 GARMIN_SOCKET_FILE = '/tmp/.garmin_test_socket'
 
@@ -18,7 +18,7 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
     """
         server_thread, listens for commands, sends back responses.
     """
-    from garmin_app.garmin_utils import garmin_parse_arg_list
+    
 
     script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
 
@@ -61,6 +61,7 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
                            'do_average': False}
                 options['script_path'] = script_path
         
+                from .garmin_utils import garmin_parse_arg_list
                 garmin_parse_arg_list(args, msg_q, **options)
         
                 if msg_q != None and not isprev:
