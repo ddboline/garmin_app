@@ -773,16 +773,26 @@ class GarminReport(object):
         week = cur_date.isocalendar()[1]
         weekdayname = WEEKDAY_NAMES[cur_date.weekday()]
         if sport == 'running' or sport == 'walking':
-            retval.append(
-                '%17s %10s \t %10s \t %10s \t %10s \t %10s \t %10s'
-                % ('%10s %02i %3s' % (cur_date, week, weekdayname), sport,
-                   '%.2f mi' % (gsum.total_distance/METERS_PER_MILE),
-                   '%i cal' % gsum.total_calories,
-                   '%s / mi' % print_h_m_s(gsum.total_duration
-                   / (gsum.total_distance/METERS_PER_MILE), False),
-                   '%s / km' % print_h_m_s(gsum.total_duration
-                   / (gsum.total_distance/1000.), False),
-                   print_h_m_s(gsum.total_duration)))
+            if gsum.total_distance > 0:
+                retval.append(
+                    '%17s %10s \t %10s \t %10s \t %10s \t %10s \t %10s'
+                    % ('%10s %02i %3s' % (cur_date, week, weekdayname), sport,
+                    '%.2f mi' % (gsum.total_distance/METERS_PER_MILE),
+                    '%i cal' % gsum.total_calories,
+                    '%s / mi' % print_h_m_s(gsum.total_duration
+                    / (gsum.total_distance/METERS_PER_MILE), False),
+                    '%s / km' % print_h_m_s(gsum.total_duration
+                    / (gsum.total_distance/1000.), False),
+                    print_h_m_s(gsum.total_duration)))
+            else:
+                retval.append(
+                    '%17s %10s \t %10s \t %10s \t %10s \t %10s \t %10s'
+                    % ('%10s %02i %3s' % (cur_date, week, weekdayname), sport,
+                    '%.2f mi' % (gsum.total_distance/METERS_PER_MILE),
+                    '%i cal' % gsum.total_calories,
+                    '         / mi',
+                    '         / km',
+                    print_h_m_s(gsum.total_duration)))
         elif sport == 'biking':
             retval.append(
                 '%17s %10s \t %10s \t %10s \t %10s \t %10s' % (
