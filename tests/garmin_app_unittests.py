@@ -71,7 +71,7 @@ class TestGarminApp(unittest.TestCase):
         outfile = garmin_utils.convert_gmn_to_gpx(FITFILE)
         self.assertEqual('/tmp/temp.gpx', outfile)
         md5 = md5_command('tail -n1246 %s | md5sum' % outfile)
-        self.assertEqual(md5, 'e06a6217293b218b8ca1e4dbf07174ce')
+        self.assertEqual(md5, '47b9208c4ce3fed1c2da3da0ece615c1')
 
         outfile = garmin_utils.convert_gmn_to_gpx(TXTFILE)
         self.assertEqual(None, outfile)
@@ -83,7 +83,7 @@ class TestGarminApp(unittest.TestCase):
         outfile = garmin_utils.convert_fit_to_tcx(FITFILE)
         self.assertEqual('/tmp/temp.tcx', outfile)
         md5 = md5_command('cat %s | md5sum' % outfile)
-        self.assertEqual(md5, '1c304e508709540ccdf44fd70b3c5dcc')
+        self.assertEqual(md5, 'd96c38457f8bc1b6782bae9f9b02fe5a')
 
     def test_gmn_to_xml(self):
         """ test gmn to xml conversion"""
@@ -178,7 +178,7 @@ class TestGarminApp(unittest.TestCase):
                                            gfile.points).dataframe
         gdf.to_csv('temp.fit.point.csv', index=False)
         md5 = md5_command('cat temp.fit.point.csv | md5sum')
-        self.assertEqual(md5, '31a1ec7ed186440c28ff6ff052da13f3')
+        self.assertEqual(md5, '0331e497bb967376401a030654146fe7')
         gdf = garmin_cache.GarminDataFrame(garmin_file.GarminLap,
                                            gfile.laps).dataframe
         gdf.to_csv('temp.fit.lap.csv', index=False)
@@ -206,7 +206,7 @@ class TestGarminApp(unittest.TestCase):
                                            gfile.points).dataframe
         gdf.to_csv('temp.fit.point.csv', index=False)
         md5 = md5_command('cat temp.fit.point.csv | md5sum')
-        self.assertEqual(md5, '31a1ec7ed186440c28ff6ff052da13f3')
+        self.assertEqual(md5, '0331e497bb967376401a030654146fe7')
 
     def test_garmin_summary(self):
         """ test GarminSummary.__repr__ """
@@ -239,7 +239,7 @@ class TestGarminApp(unittest.TestCase):
         options = {'script_path': script_path}
         html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
                                         **options)
-        file_md5 = [['index.html', '1c1abe181f36a85949974a222cc874df']]
+        file_md5 = [['index.html', '548581a142811d412dbf955d2e5372aa']]
         for fn_, fmd5 in file_md5:
             md5 = garmin_utils.get_md5('%s/%s' % (html_path, fn_))
             if hasattr(md5, 'decode'):

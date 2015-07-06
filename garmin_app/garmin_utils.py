@@ -118,7 +118,9 @@ def convert_gmn_to_gpx(gmn_filename):
 def convert_fit_to_tcx(fit_filename):
     """ fit files to tcx files """
     if '.fit' in fit_filename.lower():
-        if os.path.exists('%s/bin/fit2tcx' % os.getenv('HOME')):
+        if os.path.exists('/usr/bin/fit2tcx'):
+            run_command('/usr/bin/fit2tcx -i %s -o /tmp/temp.tcx 2>&1 > /dev/null' % fit_filename)
+        elif os.path.exists('%s/bin/fit2tcx' % os.getenv('HOME')):
             run_command('fit2tcx %s > /tmp/temp.tcx' % fit_filename)
         elif os.path.exists('./bin/fit2tcx'):
             run_command('./bin/fit2tcx %s > /tmp/temp.tcx' % fit_filename)
