@@ -22,10 +22,10 @@ from .util import (run_command, datetimefromstring, openurl,
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
+CACHEDIR = '%s/.garmin_cache' % HOMEDIR
 
-if not os.path.exists(BASEDIR):
-    import garmin_app
-    BASEDIR = os.path.abspath('../%s' % garmin_app.__path__[0])
+if not os.path.exists(CACHEDIR):
+    os.makedirs(CACHEDIR)
 
 ### Useful constants
 METERS_PER_MILE = 1609.344 # meters
@@ -166,7 +166,7 @@ def get_md5(fname):
         output = pop_.stdout.read().split()[0]
     return output.decode()
 
-def compare_with_remote(script_path):
+def compare_with_remote(cache_dir):
     """ sync files at script_path with files at BASEURL """
     from .save_to_s3 import save_to_s3
     s3_file_chksum = save_to_s3()
@@ -189,9 +189,10 @@ def compare_with_remote(script_path):
         """ callback function for os.walk """
         for fn_ in names:
             fname = '%s/%s' % (dirname, fn_)
-            if os.path.isdir(fname) or\
-                ('garmin.pkl' in fn_) or\
-                ('garmin.list' in fn_) or\
+            if os.path.isdir(fname) or \
+                ('garmin.pkl' in fn_) or \
+                ('garmin.list' in fn_) or \
+                ('garmin_corrections.json' in fn_) or \
                 ('.pkl.gz' in fn_):
                 continue
             cmd = 'md5sum %s' % fname
@@ -200,27 +201,27 @@ def compare_with_remote(script_path):
             if fn_ not in local_file_chksum:
                 local_file_chksum[fn_] = md5sum
 
-    walk_wrapper('%s/run' % script_path, process_files, None)
+    walk_wrapper('%s/run' % cache_dir, process_files, None)
 
     for fn_ in remote_file_chksum.keys():
         if fn_ not in local_file_chksum.keys():
             print('download:', fn_, remote_file_chksum[fn_],
-                  remote_file_path[fn_], script_path)
-            if not os.path.exists('%s/run/%s/' % (script_path,
+                  remote_file_path[fn_], cache_dir)
+            if not os.path.exists('%s/run/%s/' % (cache_dir,
                                                   remote_file_path[fn_])):
-                os.makedirs('%s/run/%s/' % (script_path,
+                os.makedirs('%s/run/%s/' % (cache_dir,
                                             remote_file_path[fn_]))
-            if not os.path.exists('%s/run/%s/%s' % (script_path,
+            if not os.path.exists('%s/run/%s/%s' % (cache_dir,
                                                     remote_file_path[fn_],
                                                     fn_)):
-                with open('%s/run/%s/%s' % (script_path, remote_file_path[fn_],
+                with open('%s/run/%s/%s' % (cache_dir, remote_file_path[fn_],
                                             fn_), 'wb') as outfile:
                     urlout = '%s/garmin/files/%s/%s' % (BASEURL,
                                                         remote_file_path[fn_],
                                                         fn_)
                     dump_to_file(urlout, outfile)
 
-    local_files_not_in_s3 = ['%s/run/%s/%s' % (script_path,
+    local_files_not_in_s3 = ['%s/run/%s/%s' % (cache_dir,
                                                remote_file_path[fn_], fn_)
                              for fn_ in local_file_chksum
                              if fn_ not in s3_file_chksum]
@@ -238,10 +239,15 @@ def read_garmin_file(fname, msg_q=None, **options):
     from .garmin_cache import GarminCache
     from .garmin_report import GarminReport
     from .garmin_parse import GarminParse
-    script_path = options['script_path']
-    _pickle_file = '%s/run/garmin.pkl.gz' % script_path
-    _cache_dir = '%s/run/cache' % script_path
-    _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir)
+    from .garmin_corrections import list_of_corrected_laps
+    cache_dir = options['cache_dir']
+
+    corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)    
+    
+    _pickle_file = '%s/run/garmin.pkl.gz' % cache_dir
+    _cache_dir = '%s/run/cache' % cache_dir
+    _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir,
+                         corr_list=corr_list_)
     _temp_file = None
     if not options['do_update']:
         _temp_file = _cache.read_cached_gfile(
@@ -249,7 +255,7 @@ def read_garmin_file(fname, msg_q=None, **options):
     if _temp_file:
         _gfile = _temp_file
     else:
-        _gfile = GarminParse(fname)
+        _gfile = GarminParse(fname, corr_list=corr_list_)
         _gfile.read_file()
     if _gfile:
         _cache.write_cached_gfile(garminfile=_gfile)
@@ -264,12 +270,18 @@ def read_garmin_file(fname, msg_q=None, **options):
 def do_summary(directory_, msg_q=None, **options):
     from .garmin_cache import GarminCache
     from .garmin_report import GarminReport
+    from .garmin_corrections import list_of_corrected_laps
     script_path = options['script_path']
-    _pickle_file = '%s/run/garmin.pkl.gz' % script_path
-    _cache_dir = '%s/run/cache' % script_path
-    _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir)
+    cache_dir = options['cache_dir']
+
+    corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
+    
+    _pickle_file = '%s/run/garmin.pkl.gz' % cache_dir
+    _cache_dir = '%s/run/cache' % cache_dir
+    _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir,
+                         corr_list=corr_list_)
     if 'build' in options and options['build']:
-        return _cache.get_cache_summary_list(directory='%s/run' % script_path,
+        return _cache.get_cache_summary_list(directory='%s/run' % cache_dir,
                                              **options)
     _summary_list = _cache.get_cache_summary_list(directory=directory_,
                                                   **options)
@@ -281,8 +293,7 @@ def do_summary(directory_, msg_q=None, **options):
 
 def add_correction(correction_str, json_path=None):
     from dateutil.parser import parse
-    from .garmin_corrections import list_of_corrected_laps,\
-                                              save_corrections
+    from .garmin_corrections import (list_of_corrected_laps, save_corrections)
     l_corr = list_of_corrected_laps(json_path=json_path)
     ent = correction_str.split()
     timestr = ent[0]
@@ -314,11 +325,13 @@ def add_correction(correction_str, json_path=None):
             lapdict[idx] = tmp_
     l_corr[timestr] = lapdict
     save_corrections(l_corr)
+    print(json_path)
+    save_corrections(l_corr, json_path=json_path)
     return l_corr
 
 
 def garmin_parse_arg_list(args, msg_q=None, **options):
-    script_path = options['script_path']
+    cache_dir = options['cache_dir']
 
     gdir = []
     for arg in args:
@@ -330,15 +343,16 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
             if msg_q != None:
                 return
             fname = '%s/garmin_data_%s.tar.gz'\
-                     % (script_path, datetime.date.today().strftime('%Y%m%d'))
-            run_command('cd %s/run/ ; tar zcvf %s 2* garmin.pkl* cache/'
-                        % (script_path, fname))
+                     % (cache_dir, datetime.date.today().strftime('%Y%m%d'))
+            run_command('cd %s/run/ ; ' % cache_dir + 
+                        'tar zcvf %s 2* garmin.pkl* ' % fname + 
+                        'garmin_corrections.json cache/')
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
                 run_command('cp %s %s/public_html/backup/garmin_data.tar.gz'
-                             % (fname, os.getenv('HOME')))
+                            % (fname, os.getenv('HOME')))
             if os.path.exists('%s/public_html/garmin/tar' % os.getenv('HOME')):
                 run_command('mv %s %s/public_html/garmin/tar'
-                             % (fname, os.getenv('HOME')))
+                            % (fname, os.getenv('HOME')))
             return
         elif arg == 'occur':
             options['occur'] = True
@@ -346,10 +360,10 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
             gdir.append(arg)
         elif arg != 'run' and os.path.isdir(arg):
             gdir.append(arg)
-        elif arg != 'run' and os.path.isdir('%s/run/%s' % (script_path, arg)):
-            gdir.append('%s/run/%s' % (script_path, arg))
+        elif arg != 'run' and os.path.isdir('%s/run/%s' % (cache_dir, arg)):
+            gdir.append('%s/run/%s' % (cache_dir, arg))
         elif arg == 'correction':
-            add_correction(' '.join(args[1:]), json_path='%s/garmin_app' % script_path)
+            add_correction(' '.join(args[1:]), json_path='%s/run' % cache_dir)
             exit(0)
         elif arg in options:
             options[arg] = True
@@ -368,9 +382,9 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
                     month = ent[1]
                 else:
                     month = '*'
-                files = glob.glob('%s/run/%s/%s/%s*' % (script_path, year,
+                files = glob.glob('%s/run/%s/%s/%s*' % (cache_dir, year,
                                                         month, arg))\
-                        + glob.glob('%s/run/%s/%s/%s*' % (script_path, year,
+                        + glob.glob('%s/run/%s/%s/%s*' % (cache_dir, year,
                                                           month, ''.join(ent)))
                 basenames = [f.split('/')[-1] for f in sorted(files)]
                 if len([x for x in basenames if x[:10] == basenames[0][:10]])\
@@ -379,19 +393,19 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
                         print(fn_)
                 gdir += files
             elif '.gmn' in arg or 'T' in arg:
-                files = glob.glob('%s/run/*/*/%s' % (script_path, arg))
+                files = glob.glob('%s/run/*/*/%s' % (cache_dir, arg))
                 gdir += files
             else:
                 print('unhandled argument:', arg)
     if not gdir:
-        gdir.append('%s/run' % script_path)
+        gdir.append('%s/run' % cache_dir)
 
     if len(gdir) == 1 and os.path.isfile(gdir[0]):
         return read_garmin_file(gdir[0], msg_q, **options)
     else:
         return do_summary(gdir, msg_q, **options)
 
-def garmin_arg_parse():
+def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     """ parse command line arguments """
     help_text = 'usage: ./garmin.py <%s>' % '|'.join(COMMANDS)
     parser = argparse.ArgumentParser(description='garmin app')
@@ -402,23 +416,14 @@ def garmin_arg_parse():
 
     options = ['build', 'sync', 'backup']
 
-    #print(os.sys.argv)
-    script_path = BASEDIR
-    if not os.path.exists(script_path):
-        script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
-
-
-    if '%s/bin' % script_path not in os.getenv('PATH'):
-        os.putenv('PATH', '%s:%s/bin' % (os.getenv('PATH'), script_path))
-
     for arg in getattr(args, 'command'):
         if any(arg == x for x in ['h', 'help', '-h', '--help']):
             print('usage: ./garmin.py <%s>' % '|'.join(COMMANDS))
             return
         elif arg == 'get':
-            if not os.path.exists('%s/run' % script_path):
-                os.makedirs('%s/run/' % script_path)
-                os.chdir('%s/run' % script_path)
+            if not os.path.exists('%s/run' % cache_dir):
+                os.makedirs('%s/run/' % cache_dir)
+                os.chdir('%s/run' % cache_dir)
                 with open('temp.tar.gz', 'wb') as outfile:
                     urlout = '%s/backup/garmin_data.tar.gz' % BASEURL
                     dump_to_file(urlout, outfile)
@@ -430,10 +435,10 @@ def garmin_arg_parse():
             return
 
         if arg == 'sync':
-            compare_with_remote(script_path)
+            compare_with_remote(cache_dir)
             return
 
-    if not os.path.exists('%s/run' % script_path):
+    if not os.path.exists('%s/run' % cache_dir):
         print('need to download files first')
         return
 
@@ -441,6 +446,7 @@ def garmin_arg_parse():
                'do_week': False, 'do_day': False, 'do_file': False,
                'do_sport': None, 'do_update': False, 'do_average': False}
     options['script_path'] = script_path
+    options['cache_dir'] = cache_dir
 
     if getattr(args, 'daemon'):
         with GarminServer() as gar:
