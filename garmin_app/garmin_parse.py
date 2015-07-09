@@ -103,6 +103,7 @@ class GarminParse(GarminFile):
                 list_of_corrected_laps():
             _lstr = print_date_string(self.laps[0].lap_start)
             corrected_laps = list_of_corrected_laps()[_lstr]
+        print(corrected_laps)
         for lap_number, cur_lap in enumerate(self.laps):
             if lap_number in corrected_laps:
                 if type(corrected_laps[lap_number]) == float\
