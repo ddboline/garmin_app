@@ -375,6 +375,7 @@ class TestGarminApp(unittest.TestCase):
                 .replace('/root', '/home/ddboline/setup_files/build')\
                 .replace('/home/ddboline/Downloads/backup',
                          '/home/ddboline/setup_files/build')
+        print(output)
         mstr = hashlib.md5()
         try:
             mstr.update(output)
