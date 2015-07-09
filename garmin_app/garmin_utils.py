@@ -18,7 +18,7 @@ import argparse
 
 from .garmin_daemon import GarminServer
 from .util import (run_command, datetimefromstring, openurl,
-                             dump_to_file, HOMEDIR)
+                   dump_to_file, HOMEDIR, walk_wrapper)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -200,7 +200,7 @@ def compare_with_remote(script_path):
             if fn_ not in local_file_chksum:
                 local_file_chksum[fn_] = md5sum
 
-    os.path.walk('%s/run' % script_path, process_files, None)
+    walk_wrapper('%s/run' % script_path, process_files, None)
 
     for fn_ in remote_file_chksum.keys():
         if fn_ not in local_file_chksum.keys():

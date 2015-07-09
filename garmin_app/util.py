@@ -148,4 +148,3 @@ def walk_wrapper(direc, callback, arg):
         for dirpath, dirnames, filenames in os.walk(direc):
             callback(arg, dirpath, dirnames + filenames)
     return
-    
