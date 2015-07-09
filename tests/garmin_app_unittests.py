@@ -371,8 +371,8 @@ class TestGarminApp(unittest.TestCase):
         output = (
             '\n'.join(
                 '%s' % s for s in sorted(sl_, key=lambda x: x.filename)))\
-                .replace('ubuntu', 'ddboline')\
                 .replace('/home/ubuntu', '/home/ddboline/setup_files/build')\
+                .replace('ubuntu', 'ddboline')\
                 .replace('/home/ddboline/Downloads/backup',
                          '/home/ddboline/setup_files/build')
         print(output)
