@@ -13,8 +13,7 @@ from .garmin_file import GarminFile, GarminLap, GarminPoint
 from .garmin_utils import (METERS_PER_MILE, convert_time_string,
                                      print_date_string, convert_fit_to_tcx,
                                      convert_gmn_to_xml, expected_calories)
-from .garmin_corrections import (list_of_mislabeled_times,
-                                           list_of_corrected_laps)
+from .garmin_corrections import list_of_mislabeled_times
 
 from .util import run_command
 
@@ -22,7 +21,7 @@ class GarminParse(GarminFile):
     """
         Parse garmin xml based formats
     """
-    def __init__(self, filename, filetype=''):
+    def __init__(self, filename, filetype='', corr_list=None):
         """ Init Method """
         GarminFile.__init__(self, filename, filetype)
 
@@ -30,6 +29,9 @@ class GarminParse(GarminFile):
             self.filetype = filetype
         else:
             self.determine_file_type()
+        self.corr_list = []
+        if corr_list:
+            self.corr_list = corr_list
 
     def determine_file_type(self):
         """ determine file type """
@@ -99,8 +101,8 @@ class GarminParse(GarminFile):
             temp_points.append(cur_point)
         corrected_laps = {}
         lstr_ = print_date_string(self.laps[0].lap_start)
-        if lstr_ in list_of_corrected_laps():
-            corrected_laps = list_of_corrected_laps()[lstr_]
+        if lstr_ in self.corr_list:
+            corrected_laps = self.corr_list[lstr_]
         for lap_number, cur_lap in enumerate(self.laps):
             if lap_number in corrected_laps:
                 if type(corrected_laps[lap_number]) == float\
@@ -189,9 +191,8 @@ class GarminParse(GarminFile):
 
         corrected_laps = {}
         lstr_ = print_date_string(self.laps[0].lap_start)
-        if lstr_ in \
-                list_of_corrected_laps():
-            corrected_laps = list_of_corrected_laps()[lstr_]
+        if lstr_ in self.corr_list:
+            corrected_laps = self.corr_list[lstr_]
         for lap_number, cur_lap in enumerate(self.laps):
             if lap_number in corrected_laps:
                 if type(corrected_laps[lap_number]) in [float, int]:
