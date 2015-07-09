@@ -11,8 +11,6 @@ from __future__ import unicode_literals
 
 import os
 
-import pandas as pd
-
 import gzip
 
 from .util import run_command, walk_wrapper
@@ -178,6 +176,7 @@ class GarminDataFrame(object):
 
     def fill_dataframe(self, arr):
         """ fill dataframe """
+        import pandas as pd
         inp_array = []
         for it_ in arr:
             tmp_array = []
