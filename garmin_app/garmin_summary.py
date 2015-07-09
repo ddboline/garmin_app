@@ -16,9 +16,9 @@ class GarminSummary(object):
     __slots__ = ['filename', 'begin_datetime', 'sport',
                  'total_calories', 'total_distance', 'total_duration',
                  'total_hr_dur', 'total_hr_dis', 'number_of_items',
-                 'md5sum']
+                 'md5sum', 'corr_list']
 
-    def __init__(self, filename='', md5sum=None):
+    def __init__(self, filename='', md5sum=None, corr_list=None):
         """ Init Method """
         self.filename = filename
         self.begin_datetime = None
@@ -33,6 +33,9 @@ class GarminSummary(object):
             self.md5sum = md5sum
         elif self.filename != '':
             self.md5sum = get_md5(self.filename)
+        self.corr_list = []
+        if corr_list:
+            self.corr_list = corr_list
 
     def __repr__(self):
         """ string representation """
@@ -42,7 +45,7 @@ class GarminSummary(object):
     def read_file(self):
         """  read the file, calculate some stuff """
         from .garmin_parse import GarminParse
-        temp_gfile = GarminParse(self.filename)
+        temp_gfile = GarminParse(self.filename, corr_list=self.corr_list)
         temp_gfile.read_file()
         self.begin_datetime = temp_gfile.begin_datetime
         self.sport = temp_gfile.sport
