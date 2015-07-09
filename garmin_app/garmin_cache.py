@@ -16,7 +16,6 @@ import pandas as pd
 import gzip
 
 from .util import run_command, walk_wrapper
-from .garmin_corrections import list_of_corrected_laps
 from .garmin_summary import GarminSummary
 from .garmin_utils import get_md5, print_date_string
 
@@ -27,7 +26,7 @@ except ImportError:
 
 class GarminCache(object):
     """ class to manage caching objects """
-    def __init__(self, pickle_file='', cache_directory=''):
+    def __init__(self, pickle_file='', cache_directory='', corr_list=None):
         self.pickle_file = pickle_file
         self.cache_directory = cache_directory
         self.cache_summary_list = []
@@ -38,6 +37,9 @@ class GarminCache(object):
         if cache_directory:
             if not os.path.exists(cache_directory):
                 os.makedirs(cache_directory)
+        self.corr_list = []
+        if corr_list:
+            self.corr_list = corr_list
 
     def read_pickle_object_in_file(self, pickle_file=''):
         """ read python object from gzipped pickle file """
@@ -131,9 +133,10 @@ class GarminCache(object):
                      and print_date_string(
                          self.cache_summary_file_dict[reduced_gmn_filename]\
                              .begin_datetime)
-                        in list_of_corrected_laps())):
+                        in self.corr_list)):
                 self.cache_file_is_modified = True
-                gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)
+                gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum,
+                                     corr_list=self.corr_list)
                 gfile = gsum.read_file()
                 if gfile:
                     self.cache_summary_list.append(gsum)
