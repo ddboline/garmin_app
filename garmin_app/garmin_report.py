@@ -405,12 +405,13 @@ class GarminReport(object):
                                    'onclick="send_command(\'%s\');">' % cmd +\
                                    '%s</button> %s' % (cmd, ent.strip())
         htmlostr = re.sub('\n\n+', '<br>\n', '\n'.join(htmlostr))
-        curpath = options['script_path']
-        if not os.path.exists('%s/html' % curpath):
-            os.makedirs('%s/html' % curpath)
-        with open('%s/html/index.html' % curpath, 'w') as htmlfile:
-            with open('%s/garmin_app/templates/GARMIN_TEMPLATE.html'
-                      % curpath, 'r') as infile:
+        cache_dir = options['cache_dir']
+        script_path = options['script_path']
+        if not os.path.exists('%s/html' % cache_dir):
+            os.makedirs('%s/html' % cache_dir)
+        with open('%s/html/index.html' % cache_dir, 'w') as htmlfile:
+            with open('%s/templates/GARMIN_TEMPLATE.html'
+                      % script_path, 'r') as infile:
                 for line in infile:
                     if 'INSERTTEXTHERE' in line:
                         htmlfile.write(htmlostr)
@@ -425,7 +426,7 @@ class GarminReport(object):
                     else:
                         htmlfile.write(line)
 
-        if os.path.exists('%s/html' % curpath) and copy_to_public_html:
+        if os.path.exists('%s/html' % cache_dir) and copy_to_public_html:
             if not os.path.exists('%s/public_html/garmin' % os.getenv('HOME')):
                 os.makedirs('%s/public_html/garmin' % os.getenv('HOME'))
             if os.path.exists('%s/public_html/garmin/html' %
@@ -433,7 +434,7 @@ class GarminReport(object):
                 run_command('rm -rf %s/public_html/garmin/html' %
                             os.getenv('HOME'))
             run_command(
-                'mv %s/html %s/public_html/garmin' % (curpath,
+                'mv %s/html %s/public_html/garmin' % (cache_dir,
                                                       os.getenv('HOME')))
 
         return outstr
@@ -564,34 +565,38 @@ class GarminReport(object):
             avg_hr /= sum_time
             max_hr = max(hr_vals)
 
-        curpath = options['script_path']
-        if not os.path.exists('%s/html' % curpath):
-            os.makedirs('%s/html' % curpath)
+        cache_dir = options['cache_dir']
+        script_path = options['script_path']
+        if not os.path.exists('%s/html' % cache_dir):
+            os.makedirs('%s/html' % cache_dir)
 
         if len(mile_split_vals) > 0:
             options = {'plotopt': {'marker': 'o'}, 'xlabel': 'mi',
-                       'ylabel': 'min/mi'}
+                       'ylabel': 'min/mi', 'cache_dir': cache_dir}
             graphs.append(plot_graph(name='mile_splits',
                                      title='Pace per Mile every mi',
                                      data=mile_split_vals, **options))
 
         if len(hr_values) > 0:
-            options = {'xlabel': 'mi', 'ylabel': 'bpm'}
+            options = {'xlabel': 'mi', 'ylabel': 'bpm', 'cache_dir': cache_dir}
             graphs.append(plot_graph(name='heart_rate',
                                      title='Heart Rate %2.2f avg %2.2f max'
                                            % (avg_hr, max_hr), data=hr_values,
                                            **options))
         if len(alt_values) > 0:
-            options = {'xlabel': 'mi', 'ylabel': 'height [m]'}
+            options = {'xlabel': 'mi', 'ylabel': 'height [m]',
+                       'cache_dir': cache_dir}
             graphs.append(plot_graph(name='altitude', title='Altitude',
                                      data=alt_values, **options))
         if len(speed_values) > 0:
-            options = {'xlabel': 'mi', 'ylabel': 'min/mi'}
+            options = {'xlabel': 'mi', 'ylabel': 'min/mi',
+                       'cache_dir': cache_dir}
             graphs.append(plot_graph(name='speed_minpermi',
                                      title='Speed min/mi every 1/4 mi',
                                      data=speed_values,
                                      **options))
-            options = {'xlabel': 'mi', 'ylabel': 'mph'}
+            options = {'xlabel': 'mi', 'ylabel': 'mph',
+                       'cache_dir': cache_dir}
             graphs.append(plot_graph(name='speed_mph', title='Speed mph',
                                      data=mph_speed_values,
                                      **options))
@@ -600,7 +605,8 @@ class GarminReport(object):
             avg_speed_value_min = int(avg_speed_values[-1][1])
             avg_speed_value_sec = int((avg_speed_values[-1][1]
                                         - avg_speed_value_min) * 60.)
-            options = {'xlabel': 'mi', 'ylabel': 'mph'}
+            options = {'xlabel': 'mi', 'ylabel': 'mph',
+                       'cache_dir': cache_dir}
             graphs.append(plot_graph(name='avg_speed_minpermi',
                                      title='Avg Speed %i:%02i min/mi'
                                      % (avg_speed_value_min,
@@ -610,14 +616,15 @@ class GarminReport(object):
 
         if len(avg_mph_speed_values) > 0:
             avg_mph_speed_value = avg_mph_speed_values[-1][1]
-            options = {'xlabel': 'mi', 'ylabel': 'min/mi'}
+            options = {'xlabel': 'mi', 'ylabel': 'min/mi',
+                       'cache_dir': cache_dir}
             graphs.append(plot_graph(name='avg_speed_mph',
                                      title='Avg Speed %.2f mph'
                                      % avg_mph_speed_value,
                                      data=avg_mph_speed_values,
                                      **options))
 
-        with open('%s/html/index.html' % curpath, 'w') as htmlfile:
+        with open('%s/html/index.html' % cache_dir, 'w') as htmlfile:
             if len(lat_vals) > 0 and len(lon_vals) > 0\
                     and len(lat_vals) == len(lon_vals):
                 minlat, maxlat = min(lat_vals), max(lat_vals)
@@ -627,8 +634,8 @@ class GarminReport(object):
                 latlon_min = max((maxlat-minlat), (maxlon-minlon))
                 latlon_thresholds = [[15, 0.015], [14, 0.038], [13, 0.07],
                                      [12, 0.12], [11, 0.20], [10, 0.4]]
-                with open('%s/garmin_app/templates/MAP_TEMPLATE.html' %
-                          curpath, 'r') as infile:
+                with open('%s/templates/MAP_TEMPLATE.html' %
+                          script_path, 'r') as infile:
                     for line in infile:
                         if 'SPORTTITLEDATE' in line:
                             newtitle = 'Garmin Event %s on %s' % (
@@ -683,8 +690,8 @@ class GarminReport(object):
                         else:
                             htmlfile.write(line)
             else:
-                with open('%s/garmin_app/templates/GARMIN_TEMPLATE.html'
-                          % curpath, 'r') as infile:
+                with open('%s/templates/GARMIN_TEMPLATE.html'
+                          % script_path, 'r') as infile:
                     for line in infile:
                         if 'INSERTTEXTHERE' in line:
                             htmlfile.write('%s\n' % get_file_html(gfile))
@@ -712,7 +719,7 @@ class GarminReport(object):
                             htmlfile.write(line.replace('<pre>', '<div>')\
                                     .replace('</pre>', '</div>'))
 
-        if (os.path.exists('%s/html' % curpath)
+        if (os.path.exists('%s/html' % cache_dir)
                 and os.path.exists('%s/public_html/garmin'
                     % os.getenv('HOME'))) and copy_to_public_html:
             if os.path.exists('%s/public_html/garmin/html'
@@ -720,10 +727,10 @@ class GarminReport(object):
                 run_command('rm -rf %s/public_html/garmin/html'
                             % os.getenv('HOME'))
             run_command('mv %s/html %s/public_html/garmin'
-                        % (curpath, os.getenv('HOME')))
+                        % (cache_dir, os.getenv('HOME')))
             return '%s/public_html/garmin/html' % os.getenv('HOME')
         else:
-            return '%s/html' % curpath
+            return '%s/html' % cache_dir
 
     @staticmethod
     def total_summary_report_txt(gsum, sport=None, number_days=0,
@@ -1193,6 +1200,7 @@ def plot_graph(name=None, title=None, data=None, **opts):
     matplotlib.use('Agg')
     import matplotlib.pyplot as pl
 
+    cache_dir = opts['cache_dir']
     popts = {}
     if 'plotopt' in opts:
         popts = opts['plotopt']
@@ -1209,7 +1217,7 @@ def plot_graph(name=None, title=None, data=None, **opts):
     if 'ylabel' in opts:
         pl.ylabel(opts['ylabel'], verticalalignment='top')
     pl.title(title)
-    pl.savefig('html/%s.png' % name)
+    pl.savefig('%s/html/%s.png' % (cache_dir, name))
     return '%s.png' % name
 
 def get_file_html(gfile):
