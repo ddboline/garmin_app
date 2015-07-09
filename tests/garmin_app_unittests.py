@@ -236,7 +236,8 @@ class TestGarminApp(unittest.TestCase):
         gfile.read_file()
         gr_ = garmin_report.GarminReport()
         script_path = CURDIR
-        options = {'script_path': script_path}
+        options = {'script_path': '%s/garmin_app' % script_path,
+                   'cache_dir': script_path}
         html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
                                         **options)
         file_md5 = [['index.html', '548581a142811d412dbf955d2e5372aa']]
@@ -407,7 +408,8 @@ class TestGarminApp(unittest.TestCase):
                    'do_week': False, 'do_day': False, 'do_file': False,
                    'do_sport': None, 'do_update': False, 'do_average': False}
         script_path = CURDIR
-        options['script_path'] = script_path
+        options['script_path'] = '%s/garmin_app' % script_path
+        options['cache_dir'] = script_path
         output = rp_.summary_report(sl_, copy_to_public_html=False, **options)
         mstr = hashlib.md5()
         try:
