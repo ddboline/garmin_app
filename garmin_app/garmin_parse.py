@@ -100,6 +100,8 @@ class GarminParse(GarminFile):
         corrected_laps = {}
         lstr_ = print_date_string(self.laps[0].lap_start)
         print(lstr_, type(lstr_))
+        print(lstr_ in list_of_corrected_laps(), 
+              '2011-07-04T08:58:27Z' in list_of_corrected_laps())
         if lstr_ in list_of_corrected_laps():
             corrected_laps = list_of_corrected_laps()[lstr_]
         print(corrected_laps)
