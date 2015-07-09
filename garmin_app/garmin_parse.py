@@ -98,6 +98,7 @@ class GarminParse(GarminFile):
         if cur_point and cur_point not in temp_points:
             temp_points.append(cur_point)
         corrected_laps = {}
+        print(print_date_string(self.laps[0].lap_start))
         if print_date_string(self.laps[0].lap_start) in \
                 list_of_corrected_laps():
             _lstr = print_date_string(self.laps[0].lap_start)
