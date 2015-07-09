@@ -99,6 +99,7 @@ class GarminParse(GarminFile):
             temp_points.append(cur_point)
         corrected_laps = {}
         lstr_ = print_date_string(self.laps[0].lap_start)
+        print(lstr_, type(lstr_))
         if lstr_ in list_of_corrected_laps():
             corrected_laps = list_of_corrected_laps()[lstr_]
         print(corrected_laps)
