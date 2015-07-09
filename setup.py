@@ -23,6 +23,7 @@ setup(
 #    install_requires=['pandas >= 0.13.0', 'numpy >= 1.8.0'],
     packages=['garmin_app'],
     package_dir={'garmin_app': 'garmin_app'},
-    package_data={'garmin_app': ['templates/*.html']},
+    package_data={'garmin_app': ['templates/*.html'],
+                  'garmin_app': ['garmin_corrections.json']},
     scripts=['garmin.py']
 )
