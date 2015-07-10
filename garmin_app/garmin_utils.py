@@ -192,7 +192,6 @@ def compare_with_remote(cache_dir):
             if os.path.isdir(fname) or \
                 ('garmin.pkl' in fn_) or \
                 ('garmin.list' in fn_) or \
-                ('garmin_corrections.json' in fn_) or \
                 ('.pkl.gz' in fn_):
                 continue
             cmd = 'md5sum %s' % fname
