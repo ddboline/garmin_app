@@ -18,9 +18,10 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
     """
         server_thread, listens for commands, sends back responses.
     """
-    
+    from .garmin_utils import garmin_parse_arg_list, BASEDIR, CACHEDIR
 
-    script_path = '/'.join(os.path.abspath(os.sys.argv[0]).split('/')[:-1])
+    script_path = BASEDIR
+    cache_dir = CACHEDIR
 
     with OpenUnixSocketServer(socketfile) as sock:
         while True:
@@ -60,8 +61,8 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
                            'do_sport': None, 'do_update': False,
                            'do_average': False}
                 options['script_path'] = script_path
-        
-                from .garmin_utils import garmin_parse_arg_list
+                options['cache_dir'] = cache_dir
+
                 garmin_parse_arg_list(args, msg_q, **options)
         
                 if msg_q != None and not isprev:
