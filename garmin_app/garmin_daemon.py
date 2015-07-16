@@ -20,7 +20,7 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
     """
     from .garmin_utils import garmin_parse_arg_list, BASEDIR, CACHEDIR
 
-    script_path = BASEDIR
+    script_path = '%s/garmin_app' % BASEDIR
     cache_dir = CACHEDIR
 
     with OpenUnixSocketServer(socketfile) as sock:
