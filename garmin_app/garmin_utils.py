@@ -119,7 +119,8 @@ def convert_fit_to_tcx(fit_filename):
     """ fit files to tcx files """
     if '.fit' in fit_filename.lower():
         if os.path.exists('/usr/bin/fit2tcx'):
-            run_command('/usr/bin/fit2tcx -i %s -o /tmp/temp.tcx 2>&1 > /dev/null' % fit_filename)
+            run_command('/usr/bin/fit2tcx -i %s ' % fit_filename + 
+                        '-o /tmp/temp.tcx 2>&1 > /dev/null')
         elif os.path.exists('%s/bin/fit2tcx' % os.getenv('HOME')):
             run_command('fit2tcx %s > /tmp/temp.tcx' % fit_filename)
         elif os.path.exists('./bin/fit2tcx'):
@@ -223,10 +224,12 @@ def compare_with_remote(cache_dir):
     local_files_not_in_s3 = ['%s/run/%s/%s' % (cache_dir,
                                                remote_file_path[fn_], fn_)
                              for fn_ in local_file_chksum
-                             if fn_ not in s3_file_chksum]
+                             if fn_ not in s3_file_chksum
+                             or local_file_chksum[fn_] != s3_file_chksum[fn_]]
 
     s3_files_not_in_local = [fn_ for fn_ in s3_file_chksum
-                             if fn_ not in local_file_chksum]
+                             if fn_ not in local_file_chksum
+                             or local_file_chksum[fn_] != s3_file_chksum[fn_]]
     if local_files_not_in_s3:
         print('\n'.join(local_files_not_in_s3))
         s3_file_chksum = save_to_s3(filelist=local_files_not_in_s3)
@@ -270,7 +273,6 @@ def do_summary(directory_, msg_q=None, **options):
     from .garmin_cache import GarminCache
     from .garmin_report import GarminReport
     from .garmin_corrections import list_of_corrected_laps
-    script_path = options['script_path']
     cache_dir = options['cache_dir']
 
     corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
