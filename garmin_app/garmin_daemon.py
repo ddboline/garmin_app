@@ -75,6 +75,6 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
 
 if __name__ == '__main__':
     from garmin_app.garmin_server import GarminServer
-    
+
     with GarminServer() as gsrv:
         pass

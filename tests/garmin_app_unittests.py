@@ -246,7 +246,7 @@ class TestGarminApp(unittest.TestCase):
         """ test GarminSummary.__repr__ """
         gsum = GarminSummary(FITFILE)
         gsum.read_file()
-        output = gsum.__repr__()
+        output = '%s' % gsum
         mstr = hashlib.md5()
         mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'f73293da4f5d64545ad4a1d5a1efb283')
@@ -273,7 +273,7 @@ class TestGarminApp(unittest.TestCase):
         options = {'script_path': '%s/garmin_app' % script_path,
                    'cache_dir': script_path}
         html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
-                                        options=options)
+                                         options=options)
         file_md5 = [['index.html', '548581a142811d412dbf955d2e5372aa']]
         for fn_, fmd5 in file_md5:
             md5 = get_md5('%s/%s' % (html_path, fn_))
@@ -299,8 +299,8 @@ class TestGarminApp(unittest.TestCase):
         gsum = GarminSummary(FITFILE)
         gsum.read_file()
         gr_ = GarminReport()
-        output = gr_.day_summary_report_txt(gsum, sport='running',
-                                           cur_date=gsum.begin_datetime.date())
+        output = gr_.day_summary_report_txt(
+                    gsum, sport='running', cur_date=gsum.begin_datetime.date())
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -314,7 +314,7 @@ class TestGarminApp(unittest.TestCase):
         gsum.read_file()
         gr_ = GarminReport()
         output = gr_.day_average_report_txt(gsum, sport='running',
-                                           number_days=1)
+                                            number_days=1)
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -329,9 +329,9 @@ class TestGarminApp(unittest.TestCase):
         gr_ = GarminReport()
         ic_ = gsum.begin_datetime.isocalendar()
         output = gr_.week_summary_report_txt(gsum, sport='running',
-                                            isoyear=ic_[0], isoweek=ic_[1],
-                                            number_in_week=1,
-                                            date=gsum.begin_datetime)
+                                             isoyear=ic_[0], isoweek=ic_[1],
+                                             number_in_week=1,
+                                             date=gsum.begin_datetime)
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -345,7 +345,7 @@ class TestGarminApp(unittest.TestCase):
         gsum.read_file()
         gr_ = GarminReport()
         output = gr_.week_average_report_txt(gsum, sport='running',
-                                            number_of_weeks=1)
+                                             number_of_weeks=1)
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -359,9 +359,9 @@ class TestGarminApp(unittest.TestCase):
         gsum.read_file()
         gr_ = GarminReport()
         output = gr_.month_summary_report_txt(gsum, sport='running',
-                                             year=gsum.begin_datetime.year,
-                                             month=gsum.begin_datetime.month,
-                                             number_in_month=1)
+                                              year=gsum.begin_datetime.year,
+                                              month=gsum.begin_datetime.month,
+                                              number_in_month=1)
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -375,7 +375,7 @@ class TestGarminApp(unittest.TestCase):
         gsum.read_file()
         gr_ = GarminReport()
         output = gr_.month_average_report_txt(gsum, sport='running',
-                                             number_of_months=1)
+                                              number_of_months=1)
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -390,7 +390,7 @@ class TestGarminApp(unittest.TestCase):
         gr_ = GarminReport()
         dt_ = gsum.begin_datetime
         output = gr_.year_summary_report_txt(gsum, sport='running',
-                                            year=dt_.year, number_in_year=1)
+                                             year=dt_.year, number_in_year=1)
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -401,15 +401,15 @@ class TestGarminApp(unittest.TestCase):
     def test_garmin_cache_get_summary_list(self):
         """ test GarminCache.get_cache_summary_list """
         gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
-                                      cache_directory='%s/run/cache' % CURDIR)
+                          cache_directory='%s/run/cache' % CURDIR)
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
-        output = (
-            '\n'.join(
-                '%s' % s for s in sorted(sl_, key=lambda x: x.filename)))\
-                .replace('/home/ubuntu', '/home/ddboline/setup_files/build')\
-                .replace('ubuntu', 'ddboline')\
-                .replace('/home/ddboline/Downloads/backup',
-                         '/home/ddboline/setup_files/build')
+        output = '\n'.join('%s' % s for s in sorted(sl_,
+                                                    key=lambda x: x.filename))
+        output = output.replace('/home/ubuntu',
+                                '/home/ddboline/setup_files/build')\
+                       .replace('ubuntu', 'ddboline')\
+                       .replace('/home/ddboline/Downloads/backup',
+                                '/home/ddboline/setup_files/build')
         mstr = hashlib.md5()
         try:
             mstr.update(output)
