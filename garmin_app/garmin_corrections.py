@@ -74,7 +74,7 @@ def list_of_corrected_laps(json_path=None):
                     tmp_[k2_] = v2_
                 _list_of_corrected_laps[key] = tmp_
     return _list_of_corrected_laps
-        
+
 
 def save_corrections(list_, json_path=None):
     """ save json file """
@@ -84,4 +84,3 @@ def save_corrections(list_, json_path=None):
         os.makedirs(json_path)
     with open('%s/garmin_corrections.json' % json_path, 'w') as jfile:
         json.dump(list_, jfile, indent=1, sort_keys=True)
-

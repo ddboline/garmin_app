@@ -16,7 +16,7 @@ import hashlib
 import datetime
 import argparse
 
-from .garmin_daemon import GarminServer
+from .garmin_server import GarminServer
 from .util import (run_command, datetimefromstring, openurl,
                    dump_to_file, HOMEDIR, walk_wrapper)
 
@@ -119,7 +119,7 @@ def convert_fit_to_tcx(fit_filename):
     """ fit files to tcx files """
     if '.fit' in fit_filename.lower():
         if os.path.exists('/usr/bin/fit2tcx'):
-            run_command('/usr/bin/fit2tcx -i %s ' % fit_filename + 
+            run_command('/usr/bin/fit2tcx -i %s ' % fit_filename +
                         '-o /tmp/temp.tcx 2>&1 > /dev/null')
         elif os.path.exists('%s/bin/fit2tcx' % os.getenv('HOME')):
             run_command('fit2tcx %s > /tmp/temp.tcx' % fit_filename)
@@ -237,15 +237,15 @@ def compare_with_remote(cache_dir):
         print('missing files', s3_files_not_in_local)
     return
 
-def read_garmin_file(fname, msg_q=None, **options):
+def read_garmin_file(fname, msg_q=None, options={}):
     from .garmin_cache import GarminCache
     from .garmin_report import GarminReport
     from .garmin_parse import GarminParse
     from .garmin_corrections import list_of_corrected_laps
     cache_dir = options['cache_dir']
 
-    corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)    
-    
+    corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
+
     _pickle_file = '%s/run/garmin.pkl.gz' % cache_dir
     _cache_dir = '%s/run/cache' % cache_dir
     _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir,
@@ -265,31 +265,31 @@ def read_garmin_file(fname, msg_q=None, **options):
         return False
     _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
     print(_report.file_report_txt(_gfile))
-    _report.file_report_html(_gfile, **options)
+    _report.file_report_html(_gfile, options=options)
     convert_gmn_to_gpx(fname)
     return True
 
-def do_summary(directory_, msg_q=None, **options):
+def do_summary(directory_, msg_q=None, options={}):
     from .garmin_cache import GarminCache
     from .garmin_report import GarminReport
     from .garmin_corrections import list_of_corrected_laps
     cache_dir = options['cache_dir']
 
     corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
-    
+
     _pickle_file = '%s/run/garmin.pkl.gz' % cache_dir
     _cache_dir = '%s/run/cache' % cache_dir
     _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir,
                          corr_list=corr_list_)
     if 'build' in options and options['build']:
         return _cache.get_cache_summary_list(directory='%s/run' % cache_dir,
-                                             **options)
+                                             options=options)
     _summary_list = _cache.get_cache_summary_list(directory=directory_,
-                                                  **options)
+                                                  options=options)
     if not _summary_list:
         return None
     _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
-    print(_report.summary_report(_summary_list, **options))
+    print(_report.summary_report(_summary_list, options=options))
     return True
 
 def add_correction(correction_str, json_path=None):
@@ -331,7 +331,7 @@ def add_correction(correction_str, json_path=None):
     return l_corr
 
 
-def garmin_parse_arg_list(args, msg_q=None, **options):
+def garmin_parse_arg_list(args, options={}, msg_q=None):
     cache_dir = options['cache_dir']
 
     gdir = []
@@ -345,8 +345,8 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
                 return
             fname = '%s/garmin_data_%s.tar.gz'\
                      % (cache_dir, datetime.date.today().strftime('%Y%m%d'))
-            run_command('cd %s/run/ ; ' % cache_dir + 
-                        'tar zcvf %s 2* garmin.pkl* ' % fname + 
+            run_command('cd %s/run/ ; ' % cache_dir +
+                        'tar zcvf %s 2* garmin.pkl* ' % fname +
                         'garmin_corrections.json cache/')
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
                 run_command('cp %s %s/public_html/backup/garmin_data.tar.gz'
@@ -402,9 +402,9 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
         gdir.append('%s/run' % cache_dir)
 
     if len(gdir) == 1 and os.path.isfile(gdir[0]):
-        return read_garmin_file(gdir[0], msg_q, **options)
+        return read_garmin_file(gdir[0], msg_q=msg_q, options=options)
     else:
-        return do_summary(gdir, msg_q, **options)
+        return do_summary(gdir, msg_q=msg_q, options=options)
 
 def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     """ parse command line arguments """
@@ -453,4 +453,4 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
         with GarminServer() as gar:
             return gar
     else:
-        return garmin_parse_arg_list(getattr(args, 'command'), **options)
+        return garmin_parse_arg_list(getattr(args, 'command'), options=options)

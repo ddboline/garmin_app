@@ -9,7 +9,9 @@ from __future__ import unicode_literals
 
 import datetime
 
-from .garmin_file import GarminFile, GarminLap, GarminPoint
+from .garmin_file import GarminFile
+from .garmin_lap import GarminLap
+from .garmin_point import GarminPoint
 from .garmin_utils import (METERS_PER_MILE, convert_time_string,
                                      print_date_string, convert_fit_to_tcx,
                                      convert_gmn_to_xml, expected_calories)
@@ -234,7 +236,7 @@ class GarminParse(GarminFile):
                     continue
                 cur_lap = None
                 cur_point = None
-    
+
                 for ent in line.strip().split():
                     if '=' not in ent:
                         continue
