@@ -30,12 +30,12 @@ class GarminParse(GarminFile):
         if filetype in GarminFile.garmin_file_types:
             self.filetype = filetype
         else:
-            self.determine_file_type()
+            self._determine_file_type()
         self.corr_list = []
         if corr_list:
             self.corr_list = corr_list
 
-    def determine_file_type(self):
+    def _determine_file_type(self):
         """ determine file type """
         if '.tcx' in self.filename.lower():
             self.filetype = 'tcx'
@@ -230,7 +230,7 @@ class GarminParse(GarminFile):
 
     def read_file_txt(self):
         """ read txt file, these just contain summary information """
-        with open(self.filename, 'r') as infile:
+        with open(self.filename, 'rt') as infile:
             for line in infile:
                 if len(line.strip()) == 0:
                     continue

@@ -18,6 +18,12 @@ TCXFILE = 'tests/test.tcx'
 FITFILE = 'tests/test.fit'
 TXTFILE = 'tests/test.txt'
 
+### terrible hack
+if os.path.exists('garmin_app_unittests.py'):
+    os.chdir('../')
+
+print(os.path.abspath(os.curdir))
+
 CURDIR = os.path.abspath(os.curdir)
 os.sys.path.append(CURDIR)
 

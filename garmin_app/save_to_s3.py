@@ -30,7 +30,7 @@ import glob
 # read aws credentials from file, then stick into global variables...
 def read_keys():
     """ read keys from credentials file """
-    with open('%s/.aws/credentials' % os.getenv('HOME'), 'r') as cfile:
+    with open('%s/.aws/credentials' % os.getenv('HOME'), 'rt') as cfile:
         for line in cfile:
             if 'aws_access_key_id' in line:
                 aws_access_key_id = line.split('=')[-1].strip()
@@ -54,7 +54,7 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
         kn_ = fn_.split('/')[-1]
         if kn_ in list_of_keys:
             continue
-        with open(fn_, 'r') as infile:
+        with open(fn_, 'rb') as infile:
             k = boto.s3.key.Key(bucket)
             k.key = kn_
             k.set_contents_from_file(infile)

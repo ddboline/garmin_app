@@ -136,7 +136,7 @@ def convert_gmn_to_xml(gmn_filename):
     if any([a in gmn_filename
             for a in ('.tcx', '.TCX', '.fit', '.FIT', '.xml', '.txt')]):
         return gmn_filename
-    with open('/tmp/.temp.xml', 'w') as xml_file:
+    with open('/tmp/.temp.xml', 'wt') as xml_file:
         xml_file.write('<root>\n')
         with run_command('garmin_dump %s' % gmn_filename, do_popen=True) as \
                 pop_:
@@ -154,7 +154,7 @@ def get_md5_old(fname):
     if not os.path.exists(fname):
         return None
     md_ = hashlib.md5()
-    with open(fname, 'r') as infile:
+    with open(fname, 'rb') as infile:
         for line in infile:
             md_.update(line)
     return md_.hexdigest().decode()
