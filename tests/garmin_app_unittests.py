@@ -28,7 +28,8 @@ from garmin_app.garmin_summary import GarminSummary
 from garmin_app.garmin_data_frame import GarminDataFrame
 from garmin_app.garmin_point import GarminPoint
 from garmin_app.garmin_lap import GarminLap
-from garmin_app.garmin_cache import GarminCache
+from garmin_app.garmin_cache import (GarminCache, read_pickle_object_in_file,
+                                     write_pickle_object_to_file)
 from garmin_app.garmin_report import GarminReport
 
 from garmin_app.util import run_command
@@ -232,10 +233,10 @@ class TestGarminApp(unittest.TestCase):
         gfile.read_file()
         gcache = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
                              cache_directory='%s/run/cache' % CURDIR)
-        gcache.write_pickle_object_to_file(gfile)
+        write_pickle_object_to_file(gfile, gcache.pickle_file)
         del gfile
 
-        gfile = gcache.read_pickle_object_in_file()
+        gfile = read_pickle_object_in_file(gcache.pickle_file)
         gdf = GarminDataFrame(garmin_class=GarminPoint,
                               garmin_list=gfile.points).dataframe
         gdf.to_csv('temp.fit.point.csv', index=False)
