@@ -326,8 +326,9 @@ def add_correction(correction_str, json_path=None):
             lapdict[idx] = tmp_
     l_corr[timestr] = lapdict
     save_corrections(l_corr)
-    print(json_path)
     save_corrections(l_corr, json_path=json_path)
+    if os.path.exists('%s/public_html/garmin/files' % HOMEDIR):
+        save_corrections(l_corr, json_path='%s/public_html/garmin/files' % HOMEDIR)
     return l_corr
 
 
