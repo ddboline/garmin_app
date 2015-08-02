@@ -119,7 +119,7 @@ def convert_fit_to_tcx(fit_filename):
     """ fit files to tcx files """
     if '.fit' in fit_filename.lower():
         if os.path.exists('/usr/bin/fit2tcx'):
-            run_command('/usr/bin/fit2tcx -i %s ' % fit_filename + 
+            run_command('/usr/bin/fit2tcx -i %s ' % fit_filename +
                         '-o /tmp/temp.tcx 2>&1 > /dev/null')
         elif os.path.exists('%s/bin/fit2tcx' % os.getenv('HOME')):
             run_command('fit2tcx %s > /tmp/temp.tcx' % fit_filename)
@@ -203,23 +203,20 @@ def compare_with_remote(cache_dir):
 
     walk_wrapper('%s/run' % cache_dir, process_files, None)
 
-    for fn_ in remote_file_chksum.keys():
-        if fn_ not in local_file_chksum.keys():
+    for fn_ in remote_file_chksum:
+        if fn_ not in local_file_chksum or remote_file_chksum[fn_] != local_file_chksum[fn_]:
             print('download:', fn_, remote_file_chksum[fn_],
                   remote_file_path[fn_], cache_dir)
             if not os.path.exists('%s/run/%s/' % (cache_dir,
                                                   remote_file_path[fn_])):
                 os.makedirs('%s/run/%s/' % (cache_dir,
                                             remote_file_path[fn_]))
-            if not os.path.exists('%s/run/%s/%s' % (cache_dir,
+            with open('%s/run/%s/%s' % (cache_dir, remote_file_path[fn_],
+                                        fn_), 'wb') as outfile:
+                urlout = '%s/garmin/files/%s/%s' % (BASEURL,
                                                     remote_file_path[fn_],
-                                                    fn_)):
-                with open('%s/run/%s/%s' % (cache_dir, remote_file_path[fn_],
-                                            fn_), 'wb') as outfile:
-                    urlout = '%s/garmin/files/%s/%s' % (BASEURL,
-                                                        remote_file_path[fn_],
-                                                        fn_)
-                    dump_to_file(urlout, outfile)
+                                                    fn_)
+                dump_to_file(urlout, outfile)
 
     local_files_not_in_s3 = ['%s/run/%s/%s' % (cache_dir,
                                                remote_file_path[fn_], fn_)
@@ -244,7 +241,7 @@ def read_garmin_file(fname, msg_q=None, **options):
     from .garmin_corrections import list_of_corrected_laps
     cache_dir = options['cache_dir']
 
-    corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)    
+    corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
     
     _pickle_file = '%s/run/garmin.pkl.gz' % cache_dir
     _cache_dir = '%s/run/cache' % cache_dir
@@ -345,8 +342,8 @@ def garmin_parse_arg_list(args, msg_q=None, **options):
                 return
             fname = '%s/garmin_data_%s.tar.gz'\
                      % (cache_dir, datetime.date.today().strftime('%Y%m%d'))
-            run_command('cd %s/run/ ; ' % cache_dir + 
-                        'tar zcvf %s 2* garmin.pkl* ' % fname + 
+            run_command('cd %s/run/ ; ' % cache_dir +
+                        'tar zcvf %s 2* garmin.pkl* ' % fname +
                         'garmin_corrections.json cache/')
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
                 run_command('cp %s %s/public_html/backup/garmin_data.tar.gz'
