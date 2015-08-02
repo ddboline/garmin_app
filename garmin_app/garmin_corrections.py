@@ -84,4 +84,6 @@ def save_corrections(list_, json_path=None):
         os.makedirs(json_path)
     with open('%s/garmin_corrections.json' % json_path, 'w') as jfile:
         json.dump(list_, jfile, indent=1, sort_keys=True)
+    if os.path.exists('%s/public_html/garmin/files' % os.getenv('HOME')):
+        os.system('cp %s/garmin_corrections.json %s/public_html/garmin/files/' % (json_path, os.getenv('HOME')))
 
