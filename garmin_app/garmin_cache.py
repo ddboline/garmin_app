@@ -22,6 +22,25 @@ try:
 except ImportError:
     import pickle
 
+def read_pickle_object_in_file(pickle_file):
+    """ read python object from gzipped pickle file """
+    outobj = None
+    if os.path.exists(pickle_file):
+        with gzip.open(pickle_file, 'rb') as pkl_file:
+            try:
+                outobj = pickle.load(pkl_file)
+            except UnicodeDecodeError:
+                return None
+    return outobj
+
+def write_pickle_object_to_file(inpobj, pickle_file):
+    """ write python object to gzipped pickle file """
+    with gzip.open('%s.tmp' % pickle_file, 'wb') as pkl_file:
+        pickle.dump(inpobj, pkl_file, pickle.HIGHEST_PROTOCOL)
+    run_command('mv %s.tmp %s' % (pickle_file, pickle_file))
+    return True
+
+
 class GarminCache(object):
     """ class to manage caching objects """
     def __init__(self, pickle_file='', cache_directory='', corr_list=None):
@@ -39,34 +58,6 @@ class GarminCache(object):
         if corr_list:
             self.corr_list = corr_list
 
-    def read_pickle_object_in_file(self, pickle_file=''):
-        """ read python object from gzipped pickle file """
-        if not pickle_file:
-            if not self.pickle_file:
-                return None
-            else:
-                pickle_file = self.pickle_file
-        outobj = None
-        if os.path.exists(pickle_file):
-            with gzip.open(pickle_file, 'rb') as pkl_file:
-                try:
-                    outobj = pickle.load(pkl_file)
-                except UnicodeDecodeError:
-                    return None
-        return outobj
-
-    def write_pickle_object_to_file(self, inpobj, pickle_file=''):
-        """ write python object to gzipped pickle file """
-        if not pickle_file:
-            if not self.pickle_file:
-                return False
-            else:
-                pickle_file = self.pickle_file
-        with gzip.open('%s.tmp' % pickle_file, 'wb') as pkl_file:
-            pickle.dump(inpobj, pkl_file, pickle.HIGHEST_PROTOCOL)
-        run_command('mv %s.tmp %s' % (pickle_file, pickle_file))
-        return True
-
     def read_cached_gfile(self, gfbasename=''):
         """ return cached file """
         if not gfbasename or not self.cache_directory:
@@ -75,9 +66,9 @@ class GarminCache(object):
                                                 gfbasename)):
             return False
         else:
-            gfile = self.read_pickle_object_in_file(pickle_file='%s/%s.pkl.gz'
-                                                    % (self.cache_directory,
-                                                       gfbasename))
+            pkl_file = '%s/%s.pkl.gz' % (self.cache_directory,
+                                                 gfbasename)
+            gfile = read_pickle_object_in_file(pkl_file)
             if gfile:
                 return gfile
             else:
@@ -88,10 +79,10 @@ class GarminCache(object):
         if not garminfile or not self.cache_directory:
             return False
         gfbasename = os.path.basename(garminfile.orig_filename)
-        pfname = '%s/%s.pkl.gz' % (self.cache_directory, gfbasename)
-        return self.write_pickle_object_to_file(garminfile, pickle_file=pfname)
+        pkl_file = '%s/%s.pkl.gz' % (self.cache_directory, gfbasename)
+        return write_pickle_object_to_file(garminfile, pkl_file)
 
-    def get_cache_summary_list(self, directory, **options):
+    def get_cache_summary_list(self, directory, options={}):
         """ return list of cached garmin_summary objects """
         self.do_update = False
         if 'do_update' in options and options['do_update']:
@@ -99,7 +90,7 @@ class GarminCache(object):
         summary_list = []
 
         self.cache_file_is_modified = False
-        temp_list = self.read_pickle_object_in_file()
+        temp_list = read_pickle_object_in_file(self.pickle_file)
         if temp_list and type(temp_list) == list:
             self.cache_summary_list = temp_list
         self.cache_summary_file_dict = {os.path.basename(x.filename):
@@ -162,39 +153,6 @@ class GarminCache(object):
                 add_file(directory)
 
         if self.cache_file_is_modified:
-            self.write_pickle_object_to_file(self.cache_summary_list)
+            write_pickle_object_to_file(self.cache_summary_list,
+                                        self.pickle_file)
         return summary_list
-
-
-class GarminDataFrame(object):
-    """ dump list of garmin_points to pandas.DataFrame """
-    def __init__(self, garmin_class=None, garmin_list=None):
-        self.dataframe = None
-        self.garminclass = garmin_class
-        if garmin_class and garmin_list:
-            self.fill_dataframe(garmin_list)
-
-    def fill_dataframe(self, arr):
-        """ fill dataframe """
-        import pandas as pd
-        inp_array = []
-        for it_ in arr:
-            columns = []
-            tmp_array = []
-            for attr in self.garminclass.__slots__:
-                if attr == 'corr_list':
-                    continue
-                columns.append(attr)
-                tmp_array.append(getattr(it_, attr))
-            inp_array.append(tmp_array)
-        self.dataframe = pd.DataFrame(inp_array, columns=columns)
-
-    def fill_list(self):
-        """ fill list """
-        output = []
-        for row in self.dataframe.iterrows():
-            tmpobj = self.garminclass()
-            for attr in self.garminclass.__slots__:
-                setattr(tmpobj, attr, row[attr])
-            output.append(tmpobj)
-        return output

@@ -11,22 +11,28 @@ from subprocess import call, Popen, PIPE
 HOMEDIR = os.getenv('HOME')
 
 class PopenWrapperClass(object):
+    """ context wrapper around subprocess.Popen """
     def __init__(self, command):
+        """ init fn """
         self.command = command
-
-    def __enter__(self):
         self.pop_ = Popen(self.command, shell=True, stdout=PIPE,
                           close_fds=True)
+
+    def __enter__(self):
+        """ enter fn """
         return self.pop_
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """ exit fn """
         if hasattr(self.pop_, '__exit__'):
-            return self.pop_.__exit__(exc_type, exc_value, traceback)
-        self.pop_.wait()
-        if exc_type or exc_value or traceback:
-            return False
+            efunc = getattr(self.pop_, '__exit__')
+            return efunc(exc_type, exc_value, traceback)
         else:
-            return True
+            self.pop_.wait()
+            if exc_type or exc_value or traceback:
+                return False
+            else:
+                return True
 
 def run_command(command, do_popen=False, turn_on_commands=True,
                 single_line=False):
@@ -80,6 +86,7 @@ def openurl(url_):
     return urlout.text.split('\n')
 
 def dump_to_file(url_, outfile_):
+    """ dump url to file """
     from contextlib import closing
     import requests
     from requests import HTTPError
@@ -90,34 +97,32 @@ def dump_to_file(url_, outfile_):
     with closing(requests.get(url_, stream=True, verify=False)) as url_:
         if url_.status_code != 200:
             print('something bad happened %d' % url_.status_code)
-            raise HTTPError        
+            raise HTTPError
         for chunk in url_.iter_content(4096):
             outfile_.write(chunk)
     return True
 
-import socket, time
+import socket
 class OpenUnixSocketServer(object):
+    """ context wrapper around unix socket """
     def __init__(self, socketfile):
+        """ init fn """
         self.sock = None
         self.socketfile = socketfile
         if os.path.exists(socketfile):
             os.remove(socketfile)
-        return
 
     def __enter__(self):
+        """ enter fn """
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        try:
-            self.sock.bind(self.socketfile)
-            os.chmod(self.socketfile, 0o777)
-        except:
-            time.sleep(10)
-            print('failed to open socket')
-            return self.__enter__()
+        self.sock.bind(self.socketfile)
+        os.chmod(self.socketfile, 0o777)
         print('open socket')
         self.sock.listen(0)
         return self.sock
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """ exit fn """
         self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
         if exc_type or exc_value or traceback:
@@ -127,14 +132,18 @@ class OpenUnixSocketServer(object):
 
 
 class OpenSocketConnection(object):
+    """ context wrapper around socket connection """
     def __init__(self, sock):
+        """ init fn """
         self.sock = sock
+        self.conn, _ = self.sock.accept()
 
     def __enter__(self):
-        self.conn, _ = self.sock.accept()
+        """ enter fn """
         return self.conn
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """ exit fn """
         self.conn.close()
         if exc_type or exc_value or traceback:
             return False
@@ -142,6 +151,7 @@ class OpenSocketConnection(object):
             return True
 
 def walk_wrapper(direc, callback, arg):
+    """ wrapper around walk to allow consistent execution for py2/py3 """
     if hasattr(os.path, 'walk'):
         return os.path.walk(direc, callback, arg)
     elif hasattr(os, 'walk'):

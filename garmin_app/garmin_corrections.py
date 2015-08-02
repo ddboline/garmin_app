@@ -65,7 +65,7 @@ def list_of_corrected_laps(json_path=None):
     if not os.path.exists(json_path):
         json_path = '%s/garmin_app/garmin_app' % os.getenv('HOME')
     if len(_list_of_corrected_laps) == 0:
-        with open('%s/garmin_corrections.json' % json_path, 'r') as jfile_:
+        with open('%s/garmin_corrections.json' % json_path, 'rt') as jfile_:
             tmp_dict = json.load(jfile_)
             for key, val in tmp_dict.items():
                 tmp_ = {}
@@ -74,7 +74,7 @@ def list_of_corrected_laps(json_path=None):
                     tmp_[k2_] = v2_
                 _list_of_corrected_laps[key] = tmp_
     return _list_of_corrected_laps
-        
+
 
 def save_corrections(list_, json_path=None):
     """ save json file """
@@ -82,8 +82,7 @@ def save_corrections(list_, json_path=None):
         json_path = JSON_DIR
     if not os.path.exists(json_path):
         os.makedirs(json_path)
-    with open('%s/garmin_corrections.json' % json_path, 'w') as jfile:
+    with open('%s/garmin_corrections.json' % json_path, 'wt') as jfile:
         json.dump(list_, jfile, indent=1, sort_keys=True)
     if os.path.exists('%s/public_html/garmin/files' % os.getenv('HOME')):
         os.system('cp %s/garmin_corrections.json %s/public_html/garmin/files/' % (json_path, os.getenv('HOME')))
-

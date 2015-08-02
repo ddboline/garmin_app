@@ -12,11 +12,10 @@ import re
 import datetime
 
 from .garmin_summary import GarminSummary
-from .garmin_utils import (print_date_string, print_h_m_s,
-                                     run_command, days_in_month,
-                                     days_in_year, METERS_PER_MILE,
-                                     MARATHON_DISTANCE_MI, WEEKDAY_NAMES,
-                                     MONTH_NAMES, SPORT_TYPES)
+from .garmin_utils import (print_date_string, print_h_m_s, run_command,
+                           days_in_month, days_in_year, METERS_PER_MILE,
+                           MARATHON_DISTANCE_MI, WEEKDAY_NAMES, MONTH_NAMES,
+                           SPORT_TYPES)
 
 def print_history_buttons(history_list):
     """ ... """
@@ -42,7 +41,7 @@ class GarminReport(object):
         self.msg_q = msg_q
 
     def summary_report(self, summary_list, copy_to_public_html=True,
-                       **options):
+                       options={}):
         """ get summary of files in directory """
         opts = ['do_year', 'do_month', 'do_week', 'do_day',
                 'do_file', 'do_sport', 'do_average']
@@ -409,9 +408,9 @@ class GarminReport(object):
         script_path = options['script_path']
         if not os.path.exists('%s/html' % cache_dir):
             os.makedirs('%s/html' % cache_dir)
-        with open('%s/html/index.html' % cache_dir, 'w') as htmlfile:
+        with open('%s/html/index.html' % cache_dir, 'wt') as htmlfile:
             with open('%s/templates/GARMIN_TEMPLATE.html'
-                      % script_path, 'r') as infile:
+                      % script_path, 'rt') as infile:
                 for line in infile:
                     if 'INSERTTEXTHERE' in line:
                         htmlfile.write(htmlostr)
@@ -510,8 +509,8 @@ class GarminReport(object):
 
         return '\n'.join(retval)
 
-    def file_report_html(self, gfile, use_time=False,
-                         copy_to_public_html=True, **options):
+    def file_report_html(self, gfile, options={}, use_time=False,
+                         copy_to_public_html=True):
         """ create pretty plots """
         avg_hr = 0
         sum_time = 0
@@ -575,31 +574,31 @@ class GarminReport(object):
                        'ylabel': 'min/mi', 'cache_dir': cache_dir}
             graphs.append(plot_graph(name='mile_splits',
                                      title='Pace per Mile every mi',
-                                     data=mile_split_vals, **options))
+                                     data=mile_split_vals, opts=options))
 
         if len(hr_values) > 0:
             options = {'xlabel': 'mi', 'ylabel': 'bpm', 'cache_dir': cache_dir}
             graphs.append(plot_graph(name='heart_rate',
                                      title='Heart Rate %2.2f avg %2.2f max'
                                            % (avg_hr, max_hr), data=hr_values,
-                                           **options))
+                                           opts=options))
         if len(alt_values) > 0:
             options = {'xlabel': 'mi', 'ylabel': 'height [m]',
                        'cache_dir': cache_dir}
             graphs.append(plot_graph(name='altitude', title='Altitude',
-                                     data=alt_values, **options))
+                                     data=alt_values, opts=options))
         if len(speed_values) > 0:
             options = {'xlabel': 'mi', 'ylabel': 'min/mi',
                        'cache_dir': cache_dir}
             graphs.append(plot_graph(name='speed_minpermi',
                                      title='Speed min/mi every 1/4 mi',
                                      data=speed_values,
-                                     **options))
+                                     opts=options))
             options = {'xlabel': 'mi', 'ylabel': 'mph',
                        'cache_dir': cache_dir}
             graphs.append(plot_graph(name='speed_mph', title='Speed mph',
                                      data=mph_speed_values,
-                                     **options))
+                                     opts=options))
 
         if len(avg_speed_values) > 0:
             avg_speed_value_min = int(avg_speed_values[-1][1])
@@ -612,7 +611,7 @@ class GarminReport(object):
                                      % (avg_speed_value_min,
                                         avg_speed_value_sec),
                                      data=avg_speed_values,
-                                     **options))
+                                     opts=options))
 
         if len(avg_mph_speed_values) > 0:
             avg_mph_speed_value = avg_mph_speed_values[-1][1]
@@ -622,9 +621,9 @@ class GarminReport(object):
                                      title='Avg Speed %.2f mph'
                                      % avg_mph_speed_value,
                                      data=avg_mph_speed_values,
-                                     **options))
+                                     opts=options))
 
-        with open('%s/html/index.html' % cache_dir, 'w') as htmlfile:
+        with open('%s/html/index.html' % cache_dir, 'wt') as htmlfile:
             if len(lat_vals) > 0 and len(lon_vals) > 0\
                     and len(lat_vals) == len(lon_vals):
                 minlat, maxlat = min(lat_vals), max(lat_vals)
@@ -635,7 +634,7 @@ class GarminReport(object):
                 latlon_thresholds = [[15, 0.015], [14, 0.038], [13, 0.07],
                                      [12, 0.12], [11, 0.20], [10, 0.4]]
                 with open('%s/templates/MAP_TEMPLATE.html' %
-                          script_path, 'r') as infile:
+                          script_path, 'rt') as infile:
                     for line in infile:
                         if 'SPORTTITLEDATE' in line:
                             newtitle = 'Garmin Event %s on %s' % (
@@ -691,7 +690,7 @@ class GarminReport(object):
                             htmlfile.write(line)
             else:
                 with open('%s/templates/GARMIN_TEMPLATE.html'
-                          % script_path, 'r') as infile:
+                          % script_path, 'rt') as infile:
                     for line in infile:
                         if 'INSERTTEXTHERE' in line:
                             htmlfile.write('%s\n' % get_file_html(gfile))
@@ -1193,7 +1192,7 @@ def print_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi'):
                    * MARATHON_DISTANCE_MI), hrt))
     return '\n'.join(retval)
 
-def plot_graph(name=None, title=None, data=None, **opts):
+def plot_graph(name=None, title=None, data=None, opts={}):
     """ graphics plotting function """
     import numpy as np
     import matplotlib
