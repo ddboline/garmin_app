@@ -10,6 +10,8 @@ from __future__ import unicode_literals
 import os
 import re
 import datetime
+from collections import defaultdict
+from itertools import izip
 
 from .garmin_summary import GarminSummary
 from .garmin_utils import (print_date_string, print_h_m_s, run_command,
@@ -41,12 +43,14 @@ class GarminReport(object):
         self.msg_q = msg_q
 
     def summary_report(self, summary_list, copy_to_public_html=True,
-                       options={}):
+                       options=None):
         """ get summary of files in directory """
         opts = ['do_year', 'do_month', 'do_week', 'do_day',
                 'do_file', 'do_sport', 'do_average']
-        do_year, do_month, do_week, do_day, do_file, do_sport, do_average = [
-            options[o] for o in opts]
+        if not options:
+            options = {o: None for o in opts}
+        do_year, do_month, do_week, do_day, do_file, do_sport, do_average = (
+                                                     options[o] for o in opts)
 
         summary_list = sorted(summary_list, key=lambda x: x.begin_datetime)
 
@@ -363,19 +367,17 @@ class GarminReport(object):
             retval.append('')
 
         if 'occur' in options:
-            occur_map = {}
-            for i in range(0, len(day_set)+1):
-                occur_map[i] = 0
+            occur_map = defaultdict(int)
 
             if len(day_set) > 1:
                 last_date = day_set[0]
-                for i in range(1, len(day_set)):
-                    if (day_set[i]-day_set[i-1]).days > 1:
-                        occur_map[(day_set[i-1] - last_date).days + 1] += 1
-                        if ((day_set[i-1] - last_date).days + 1) > 5:
-                            retval.append(day_set[i-1])
+                for day1, day0 in izip(day_set[1:], day_set):
+                    if (day1-day0).days > 1:
+                        occur_map[(day0 - last_date).days + 1] += 1
+                        if ((day0 - last_date).days + 1) > 5:
+                            retval.append(day0)
                             cmd_args.append('')
-                        last_date = day_set[i]
+                        last_date = day1
                 try:
                     occur_map[(day_set[-1]-last_date).days + 1] += 1
                 except KeyError:
@@ -387,9 +389,8 @@ class GarminReport(object):
                     raise KeyError
 
                 if not do_sport:
-                    for i in range(0, len(day_set)+1):
-                        if occur_map[i] > 0:
-                            retval.append(i, occur_map[i])
+                    for i in sorted(occur_map):
+                        retval.append(i, occur_map[i])
         outstr = re.sub('\n\n+', '\n', '\n'.join(retval))
 
         htmlostr = []
@@ -509,16 +510,13 @@ class GarminReport(object):
 
         return '\n'.join(retval)
 
-    def file_report_html(self, gfile, options={}, use_time=False,
+    def file_report_html(self, gfile, options=None, use_time=False,
                          copy_to_public_html=True):
         """ create pretty plots """
-        avg_hr = 0
-        sum_time = 0
-        max_hr = 0
-        hr_vals = []
-        hr_values = []
-        alt_vals = []
-        alt_values = []
+        avg_hr, sum_time, max_hr = 0, 0, 0
+        hr_vals, hr_values, alt_vals, alt_values = [], [], [], []
+        if not options:
+            options = {'cache_dir': None, 'script_path': None}
         speed_values = get_splits(gfile, 400., do_heart_rate=False)
         if speed_values:
             speed_values = [(d/4., 4*t/60.) for d, t in speed_values
@@ -662,10 +660,10 @@ class GarminReport(object):
                             if _tmp != None:
                                 htmlfile.write('<br><br>%s\n' % _tmp)
                         elif 'INSERTMAPSEGMENTSHERE' in line:
-                            for idx in range(0, len(lat_vals)):
+                            for latv, lonv in izip(lat_vals, lon_vals):
                                 htmlfile.write(
                                     'new google.maps.LatLng(%f,%f),\n'
-                                    % (lat_vals[idx], lon_vals[idx]))
+                                    % (latv, lonv))
                         elif 'MINLAT' in line or 'MAXLAT' in line\
                                 or 'MINLON' in line or 'MAXLON' in line:
                             htmlfile.write(line.replace('MINLAT',

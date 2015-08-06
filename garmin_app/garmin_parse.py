@@ -7,6 +7,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from itertools import izip
 import datetime
 
 from .garmin_file import GarminFile
@@ -305,14 +306,14 @@ class GarminParse(GarminFile):
                 self.points.append(cur_point)
 
         time_since_begin = 0
-        for idx in range(1, len(self.points)):
-            if self.points[idx].distance and self.points[idx-1].distance \
-                    and self.points[idx].distance > \
-                        self.points[idx-1].distance:
-                self.points[idx].duration_from_last = \
-                    (self.points[idx].time - self.points[idx-1].time)\
+        for point0, point1 in izip(self.points[1:], self.points):
+            if point0.distance and point1.distance \
+                    and point0.distance > \
+                        point1.distance:
+                point0.duration_from_last = \
+                    (point0.time - point1.time)\
                         .total_seconds()
-                time_since_begin += self.points[idx].duration_from_last
-                self.points[idx].duration_from_begin = time_since_begin
+                time_since_begin += point0.duration_from_last
+                point0.duration_from_begin = time_since_begin
             else:
-                self.points[idx].duration_from_last = 0
+                point0.duration_from_last = 0
