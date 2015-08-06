@@ -52,8 +52,6 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
         list_of_keys[k.key] = k.etag.replace('"', '')
     for fn_ in filelist:
         kn_ = fn_.split('/')[-1]
-        if kn_ in list_of_keys:
-            continue
         with open(fn_, 'rb') as infile:
             k = boto.s3.key.Key(bucket)
             k.key = kn_
