@@ -178,6 +178,8 @@ def compare_with_remote(cache_dir):
             continue
         md5sum, fname = line.split()[0:2]
         fn_ = fname.split('/')[-1]
+        if 'garmin_corrections' in fname:
+            print(md5sum, fname, fn_)
         if fn_ not in remote_file_chksum:
             remote_file_chksum[fn_] = md5sum
             remote_file_path[fn_] = '/'.join(fname.split('/')[:-1])
