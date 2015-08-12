@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 from .garmin_cache import GarminCache
 from .garmin_summary import GarminSummary
 
-from sqlalchemy import (create_engine, Column, Integer, Float, String, 
+from sqlalchemy import (create_engine, Column, Integer, Float, String,
                         DateTime)
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -21,7 +21,7 @@ Base = declarative_base()
 
 class GarminSummaryTable(Base):
     __tablename__ = 'garmin_summary'
-    
+
     filename = Column(String, primary_key=True)
     begin_datetime = Column(DateTime)
     sport = Column(String(12))
@@ -32,7 +32,7 @@ class GarminSummaryTable(Base):
     total_hr_dis = Column(Integer)
     number_of_items = Column(Integer)
     md5sum = Column(String(32))
-    
+
     def __repr__(self):
         return 'GarminSummaryTable<%s>' % ', '.join(
             '%s=%s' % (x, getattr(self, x)) for x in GarminSummary.__slots__
@@ -45,14 +45,14 @@ class GarminCacheSQL:
         if garmin_cache is not None:
             self.garmin_cache = garmin_cache
         else:
-            self.garmin_cache = GarminCache(pickle_file=pickle_file, 
+            self.garmin_cache = GarminCache(pickle_file=pickle_file,
                              cache_directory=cache_directory,
                              corr_list=corr_list,
                              cache_read_fn=self.read_sql_table,
                              cache_write_fn=self.write_sql_table)
         self.sql_string = sql_string
         self.summary_list = summary_list if summary_list else []
-        
+
         self.engine = create_engine(self.sql_string, echo=False)
         Base.metadata.create_all(self.engine)
 
@@ -78,7 +78,7 @@ class GarminCacheSQL:
 
         slists = []
         for sl_ in summary_list:
-            sld = {x: getattr(sl_, x) for x in sl_.__slots__ 
+            sld = {x: getattr(sl_, x) for x in sl_.__slots__
                    if x != 'corr_list'}
             slists.append(GarminSummaryTable(**sld))
 
