@@ -135,7 +135,6 @@ class GarminCache(object):
                                      corr_list=self.corr_list)
                 gfile = gsum.read_file()
                 if gfile:
-                    self.cache_summary_list.append(gsum)
                     self.cache_summary_file_dict[reduced_gmn_filename] = gsum
                     self.cache_summary_md5_dict[gmn_md5sum] = gsum
                     self.write_cached_gfile(garminfile=gfile)
@@ -158,6 +157,8 @@ class GarminCache(object):
                 walk_wrapper(directory, process_files, None)
             elif os.path.isfile(directory):
                 add_file(directory)
+
+        self.cache_summary_list = list(self.cache_summary_file_dict.values())
 
         if self.cache_file_is_modified:
             self.cache_write_fn(self.cache_summary_list)
