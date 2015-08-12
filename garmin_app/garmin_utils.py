@@ -18,7 +18,8 @@ import argparse
 
 from .garmin_server import GarminServer
 from .util import (run_command, datetimefromstring, openurl,
-                   dump_to_file, HOMEDIR, walk_wrapper)
+                   dump_to_file, HOMEDIR, walk_wrapper,
+                   OpenPostgreSQLsshTunnel)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -270,6 +271,7 @@ def read_garmin_file(fname, msg_q=None, options=None):
 
 def do_summary(directory_, msg_q=None, options=None):
     from .garmin_cache import GarminCache
+    from .garmin_cache_sql import GarminCacheSQL
     from .garmin_report import GarminReport
     from .garmin_corrections import list_of_corrected_laps
     if options is None:
@@ -291,6 +293,15 @@ def do_summary(directory_, msg_q=None, options=None):
         return None
     _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
     print(_report.summary_report(_summary_list, options=options))
+    
+#    postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost:5432/' + \
+#                  'garmin_summary'
+#    with OpenPostgreSQLsshTunnel():
+#        sql_cache = GarminCacheSQL(sql_string=postgre_str)
+#        sql_cache.delete_table()
+#        sql_cache.create_table()
+#        sql_cache.write_sql_table(_cache.cache_summary_list)
+
     return True
 
 def add_correction(correction_str, json_path=None):
