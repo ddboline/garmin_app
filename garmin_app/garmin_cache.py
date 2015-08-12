@@ -12,6 +12,7 @@ from __future__ import unicode_literals
 import os
 
 import gzip
+from functools import partial
 
 from .util import run_command, walk_wrapper
 from .garmin_summary import GarminSummary
@@ -43,7 +44,9 @@ def write_pickle_object_to_file(inpobj, pickle_file):
 
 class GarminCache(object):
     """ class to manage caching objects """
-    def __init__(self, pickle_file='', cache_directory='', corr_list=None):
+    def __init__(self, pickle_file='', cache_directory='', corr_list=None,
+                 cache_read_fn=read_pickle_object_in_file,
+                 cache_write_fn=write_pickle_object_to_file):
         self.pickle_file = pickle_file
         self.cache_directory = cache_directory
         self.cache_summary_list = []
@@ -51,6 +54,14 @@ class GarminCache(object):
         self.cache_summary_file_dict = {}
         self.cache_file_is_modified = False
         self.do_update = False
+        if pickle_file:
+            self.cache_read_fn = partial(cache_read_fn,
+                                         pickle_file=self.pickle_file)
+            self.cache_write_fn = partial(cache_write_fn,
+                                          pickle_file=self.pickle_file)
+        else:
+            self.cache_read_fn = cache_read_fn
+            self.cache_write_fn = cache_write_fn
         if cache_directory:
             if not os.path.exists(cache_directory):
                 os.makedirs(cache_directory)
@@ -62,17 +73,11 @@ class GarminCache(object):
         """ return cached file """
         if not gfbasename or not self.cache_directory:
             return False
-        if not os.path.exists('%s/%s.pkl.gz' % (self.cache_directory,
-                                                gfbasename)):
+        fname = '%s/%s.pkl.gz' % (self.cache_directory, gfbasename)
+        if not os.path.exists(fname):
             return False
         else:
-            pkl_file = '%s/%s.pkl.gz' % (self.cache_directory,
-                                                 gfbasename)
-            gfile = read_pickle_object_in_file(pkl_file)
-            if gfile:
-                return gfile
-            else:
-                return False
+            return read_pickle_object_in_file(fname)
 
     def write_cached_gfile(self, garminfile=None):
         """ write cached file """
@@ -82,15 +87,17 @@ class GarminCache(object):
         pkl_file = '%s/%s.pkl.gz' % (self.cache_directory, gfbasename)
         return write_pickle_object_to_file(garminfile, pkl_file)
 
-    def get_cache_summary_list(self, directory, options={}):
+    def get_cache_summary_list(self, directory, options=None):
         """ return list of cached garmin_summary objects """
         self.do_update = False
+        if options is None:
+            options = {}
         if 'do_update' in options and options['do_update']:
             self.do_update = True
         summary_list = []
 
         self.cache_file_is_modified = False
-        temp_list = read_pickle_object_in_file(self.pickle_file)
+        temp_list = self.cache_read_fn()
         if temp_list and type(temp_list) == list:
             self.cache_summary_list = temp_list
         self.cache_summary_file_dict = {os.path.basename(x.filename):
@@ -153,6 +160,5 @@ class GarminCache(object):
                 add_file(directory)
 
         if self.cache_file_is_modified:
-            write_pickle_object_to_file(self.cache_summary_list,
-                                        self.pickle_file)
+            self.cache_write_fn(self.cache_summary_list)
         return summary_list
