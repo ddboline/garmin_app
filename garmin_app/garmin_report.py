@@ -11,7 +11,10 @@ import os
 import re
 import datetime
 from collections import defaultdict
-from itertools import izip
+try:
+    from itertools import izip
+except ImportError:
+    from builtins import zip as izip
 
 from .garmin_summary import GarminSummary
 from .garmin_utils import (print_date_string, print_h_m_s, run_command,
