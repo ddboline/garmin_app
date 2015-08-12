@@ -22,8 +22,6 @@ TXTFILE = 'tests/test.txt'
 if os.path.exists('garmin_app_unittests.py'):
     os.chdir('../')
 
-print(os.path.abspath(os.curdir))
-
 CURDIR = os.path.abspath(os.curdir)
 os.sys.path.append(CURDIR)
 
@@ -36,6 +34,7 @@ from garmin_app.garmin_point import GarminPoint
 from garmin_app.garmin_lap import GarminLap
 from garmin_app.garmin_cache import (GarminCache, read_pickle_object_in_file,
                                      write_pickle_object_to_file)
+from garmin_app.garmin_cache_sql import GarminCacheSQL
 from garmin_app.garmin_report import GarminReport
 
 from garmin_app.util import run_command
@@ -150,13 +149,15 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertEqual(mstr.hexdigest(), 'ea40099ceb00e4ff1f01116a106f7d4c')
+        self.assertIn(mstr.hexdigest(), ['ea40099ceb00e4ff1f01116a106f7d4c',
+                                         'b8879054788ab755195c771deb4ff794'])
         output = '%s' % gfile.points[-1]
         try:
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertEqual(mstr.hexdigest(), 'effa33b5721ef4b0139386295d408685')
+        self.assertIn(mstr.hexdigest(), ['effa33b5721ef4b0139386295d408685',
+                                         'c58f162d8a64568a365161c413c003c1'])
 
     def test_cache_dataframe_xml(self):
         """ test cache dump xml to dataframe """
@@ -231,7 +232,8 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertEqual(mstr.hexdigest(), '73c52b6753bc841dc09936dadac33c9c')
+        self.assertIn(mstr.hexdigest(), ['73c52b6753bc841dc09936dadac33c9c',
+                                         '7c67d4fb98b12129b4878d11a2af35ee'])
 
     def test_pickle_fit(self):
         """ test cache dump pickle to dataframe """
@@ -423,6 +425,47 @@ class TestGarminApp(unittest.TestCase):
         except TypeError:
             mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
+
+    def test_garmin_cache_sqlite(self):
+        """ test GarminCacheSQL """
+        sqlite_str = 'sqlite:///%s/run/cache/test.db' % CURDIR
+        gc_ = GarminCacheSQL(sql_string=sqlite_str)
+        sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
+        output = '\n'.join('%s' % s for s in sorted(sl_,
+                                                    key=lambda x: x.filename))
+        output = output.replace('/home/ubuntu',
+                                '/home/ddboline/setup_files/build')\
+                       .replace('ubuntu', 'ddboline')\
+                       .replace('/home/ddboline/Downloads/backup',
+                                '/home/ddboline/setup_files/build')
+        mstr = hashlib.md5()
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
+        self.assertEqual(mstr.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
+
+    def test_garmin_cache_postgresql(self):
+        """ test GarminCacheSQL """
+        postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost' + \
+                      ':5432/test_garmin_summary'
+        gc_ = GarminCacheSQL(sql_string=postgre_str)
+        sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
+        output = '\n'.join('%s' % s for s in sorted(sl_,
+                                                    key=lambda x: x.filename))
+        output = output.replace('/home/ubuntu',
+                                '/home/ddboline/setup_files/build')\
+                       .replace('ubuntu', 'ddboline')\
+                       .replace('/home/ddboline/Downloads/backup',
+                                '/home/ddboline/setup_files/build')
+        mstr = hashlib.md5()
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
+        self.assertEqual(mstr.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
+
+        gc_.delete_table()
 
     def test_cached_gfile(self):
         """ test GarminCache.read_cached_gfile """
