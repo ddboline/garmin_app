@@ -37,7 +37,7 @@ from garmin_app.garmin_cache import (GarminCache, read_pickle_object_in_file,
 from garmin_app.garmin_cache_sql import GarminCacheSQL
 from garmin_app.garmin_report import GarminReport
 
-from garmin_app.util import run_command
+from garmin_app.util import run_command, OpenPostgreSQLsshTunnel
 
 def md5_command(command):
     md5 = run_command(command, single_line=True).split()[0]
@@ -447,25 +447,27 @@ class TestGarminApp(unittest.TestCase):
 
     def test_garmin_cache_postgresql(self):
         """ test GarminCacheSQL """
-        postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost' + \
-                      ':5432/test_garmin_summary'
-        gc_ = GarminCacheSQL(sql_string=postgre_str)
-        sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
-        output = '\n'.join('%s' % s for s in sorted(sl_,
-                                                    key=lambda x: x.filename))
-        output = output.replace('/home/ubuntu',
-                                '/home/ddboline/setup_files/build')\
-                       .replace('ubuntu', 'ddboline')\
-                       .replace('/home/ddboline/Downloads/backup',
-                                '/home/ddboline/setup_files/build')
-        mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
-        self.assertEqual(mstr.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
-
-        gc_.delete_table()
+        with OpenPostgreSQLsshTunnel():
+            postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
+                          '@localhost:5432/test_garmin_summary'
+            gc_ = GarminCacheSQL(sql_string=postgre_str)
+            sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
+            output = '\n'.join('%s' % s for s in sorted(sl_, key=lambda x: 
+                                                                   x.filename))
+            output = output.replace('/home/ubuntu',
+                                    '/home/ddboline/setup_files/build')\
+                           .replace('ubuntu', 'ddboline')\
+                           .replace('/home/ddboline/Downloads/backup',
+                                    '/home/ddboline/setup_files/build')
+            mstr = hashlib.md5()
+            try:
+                mstr.update(output)
+            except TypeError:
+                mstr.update(output.encode())
+            self.assertEqual(mstr.hexdigest(),
+                             'bb7da3b34b92ed8b63b4359e265dd3f9')
+    
+            gc_.delete_table()
 
     def test_cached_gfile(self):
         """ test GarminCache.read_cached_gfile """
