@@ -234,11 +234,13 @@ def compare_with_remote(cache_dir):
         print('missing files', s3_files_not_in_local)
     return
 
-def read_garmin_file(fname, msg_q=None, options={}):
+def read_garmin_file(fname, msg_q=None, options=None):
     from .garmin_cache import GarminCache
     from .garmin_report import GarminReport
     from .garmin_parse import GarminParse
     from .garmin_corrections import list_of_corrected_laps
+    if options is None:
+        options = {'cache_dir': CACHEDIR, 'do_update': False}
     cache_dir = options['cache_dir']
 
     corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
@@ -266,10 +268,12 @@ def read_garmin_file(fname, msg_q=None, options={}):
     convert_gmn_to_gpx(fname)
     return True
 
-def do_summary(directory_, msg_q=None, options={}):
+def do_summary(directory_, msg_q=None, options=None):
     from .garmin_cache import GarminCache
     from .garmin_report import GarminReport
     from .garmin_corrections import list_of_corrected_laps
+    if options is None:
+        options = {'cache_dir': CACHEDIR}
     cache_dir = options['cache_dir']
 
     corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
@@ -329,7 +333,9 @@ def add_correction(correction_str, json_path=None):
     return l_corr
 
 
-def garmin_parse_arg_list(args, options={}, msg_q=None):
+def garmin_parse_arg_list(args, options=None, msg_q=None):
+    if options is None:
+        options = {'cache_dir': CACHEDIR}
     cache_dir = options['cache_dir']
 
     gdir = []
