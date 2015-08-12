@@ -54,6 +54,9 @@ class GarminCacheSQL:
         self.summary_list = summary_list if summary_list else []
 
         self.engine = create_engine(self.sql_string, echo=False)
+        self.create_table()
+
+    def create_table(self):
         Base.metadata.create_all(self.engine)
 
     def delete_table(self):
