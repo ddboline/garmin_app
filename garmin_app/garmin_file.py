@@ -10,7 +10,10 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from itertools import izip
+try:
+    from itertools import izip
+except ImportError:
+    from builtins import zip as izip
 
 from .garmin_utils import METERS_PER_MILE
 
