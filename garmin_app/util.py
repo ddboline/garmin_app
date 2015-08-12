@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import os
 from subprocess import call, Popen, PIPE
 
+HOSTNAME = os.uname()[1]
 HOMEDIR = os.getenv('HOME')
 
 class PopenWrapperClass(object):
@@ -158,3 +159,26 @@ def walk_wrapper(direc, callback, arg):
         for dirpath, dirnames, filenames in os.walk(direc):
             callback(arg, dirpath, dirnames + filenames)
     return
+
+class OpenPostgreSQLsshTunnel(object):
+    """ Class to let us open an ssh tunnel, then close it when done """
+    def __init__(self):
+        self.tunnel_process = None
+
+    def __enter__(self):
+        import shlex, time
+        if HOSTNAME != 'dilepton-tower':
+            _cmd = 'ssh -N -L localhost:5432:localhost:5432 ' \
+                   + 'ddboline@ddbolineathome.mooo.com'
+            args = shlex.split(_cmd)
+            self.tunnel_process = Popen(args, shell=False)
+            time.sleep(5)
+        return self.tunnel_process
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.tunnel_process:
+            self.tunnel_process.kill()
+        if exc_type or exc_value or traceback:
+            return False
+        else:
+            return True
