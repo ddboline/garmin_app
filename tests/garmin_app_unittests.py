@@ -37,7 +37,7 @@ from garmin_app.garmin_cache import (GarminCache, read_pickle_object_in_file,
 from garmin_app.garmin_cache_sql import GarminCacheSQL
 from garmin_app.garmin_report import GarminReport
 
-from garmin_app.util import run_command, OpenPostgreSQLsshTunnel
+from garmin_app.util import run_command, OpenPostgreSQLsshTunnel, HOSTNAME
 
 def md5_command(command):
     md5 = run_command(command, single_line=True).split()[0]
@@ -54,9 +54,9 @@ class TestGarminApp(unittest.TestCase):
 
     def tearDown(self):
         """ tear down """
-        #for csvf in glob.glob('temp.*.*.csv'):
-            #if os.path.exists(csvf):
-                #os.remove(csvf)
+        for csvf in glob.glob('temp.*.*.csv'):
+            if os.path.exists(csvf):
+                os.remove(csvf)
         if os.path.exists('temp.pkl.gz'):
             os.remove('temp.pkl.gz')
         for testf in glob.glob('%s/run/cache/test.*' % CURDIR):
@@ -450,9 +450,11 @@ class TestGarminApp(unittest.TestCase):
 
     def test_garmin_cache_postgresql(self):
         """ test GarminCacheSQL """
+        if HOSTNAME != 'dilepton-tower':
+            return
         with OpenPostgreSQLsshTunnel():
-            postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
-                          '@localhost:5432/test_garmin_summary'
+            postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' \
+                          + '@localhost:5432/test_garmin_summary'
             gc_ = GarminCacheSQL(sql_string=postgre_str)
             sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
             output = '\n'.join('%s' % s for s in sorted(sl_, key=lambda x: 
