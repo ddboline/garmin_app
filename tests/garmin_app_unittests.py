@@ -80,7 +80,8 @@ class TestGarminApp(unittest.TestCase):
         outfile = convert_gmn_to_gpx(FITFILE)
         self.assertEqual('/tmp/temp.gpx', outfile)
         md5 = md5_command('tail -n1246 %s | md5sum' % outfile)
-        self.assertEqual(md5, 'e06a6217293b218b8ca1e4dbf07174ce')
+        self.assertIn(md5, ['e06a6217293b218b8ca1e4dbf07174ce',
+                            '47b9208c4ce3fed1c2da3da0ece615c1'])
 
         outfile = convert_gmn_to_gpx(TXTFILE)
         self.assertEqual(None, outfile)
@@ -92,7 +93,8 @@ class TestGarminApp(unittest.TestCase):
         outfile = convert_fit_to_tcx(FITFILE)
         self.assertEqual('/tmp/temp.tcx', outfile)
         md5 = md5_command('cat %s | md5sum' % outfile)
-        self.assertEqual(md5, '1c304e508709540ccdf44fd70b3c5dcc')
+        self.assertIn(md5, ['1c304e508709540ccdf44fd70b3c5dcc', 
+                            'd96c38457f8bc1b6782bae9f9b02fe5a'])
 
     def test_gmn_to_xml(self):
         """ test gmn to xml conversion"""
@@ -150,7 +152,7 @@ class TestGarminApp(unittest.TestCase):
         except TypeError:
             mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), ['09ea2708b749f1d756cec982f0f48bc6',
-                                         'b8879054788ab755195c771deb4ff794'])
+                                         'ea40099ceb00e4ff1f01116a106f7d4c'])
         output = '%s' % gfile.points[-1]
         try:
             mstr.update(output)
@@ -283,12 +285,13 @@ class TestGarminApp(unittest.TestCase):
                    'cache_dir': script_path}
         html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
                                          options=options)
-        file_md5 = [['index.html', '1c1abe181f36a85949974a222cc874df']]
+        file_md5 = [['index.html', ['1c1abe181f36a85949974a222cc874df',
+                                    '548581a142811d412dbf955d2e5372aa']]]
         for fn_, fmd5 in file_md5:
             md5 = get_md5('%s/%s' % (html_path, fn_))
             if hasattr(md5, 'decode'):
                 md5 = md5.decode()
-            self.assertEqual(md5, fmd5)
+            self.assertIn(md5, fmd5)
 
     def test_garmin_total_summary_report_txt(self):
         """ test GarminReport.total_summary_report_txt """
