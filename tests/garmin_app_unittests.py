@@ -248,6 +248,7 @@ class TestGarminApp(unittest.TestCase):
         gdf = GarminDataFrame(garmin_class=GarminPoint,
                               garmin_list=gfile.points).dataframe
         gdf.to_csv('temp.fit.point.csv', index=False)
+        run_command('cat temp.fit.point.csv | head -n5')
         md5 = md5_command('cat temp.fit.point.csv | md5sum')
         self.assertEqual(md5, '764f965ddbfd8d5690060e5074a1369a')
 
