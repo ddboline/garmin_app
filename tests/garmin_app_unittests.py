@@ -80,7 +80,7 @@ class TestGarminApp(unittest.TestCase):
         outfile = convert_gmn_to_gpx(FITFILE)
         self.assertEqual('/tmp/temp.gpx', outfile)
         md5 = md5_command('tail -n1246 %s | md5sum' % outfile)
-        self.assertEqual(md5, '47b9208c4ce3fed1c2da3da0ece615c1')
+        self.assertEqual(md5, 'e06a6217293b218b8ca1e4dbf07174ce')
 
         outfile = convert_gmn_to_gpx(TXTFILE)
         self.assertEqual(None, outfile)
@@ -92,7 +92,7 @@ class TestGarminApp(unittest.TestCase):
         outfile = convert_fit_to_tcx(FITFILE)
         self.assertEqual('/tmp/temp.tcx', outfile)
         md5 = md5_command('cat %s | md5sum' % outfile)
-        self.assertEqual(md5, 'd96c38457f8bc1b6782bae9f9b02fe5a')
+        self.assertEqual(md5, '1c304e508709540ccdf44fd70b3c5dcc')
 
     def test_gmn_to_xml(self):
         """ test gmn to xml conversion"""
@@ -149,14 +149,14 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['ea40099ceb00e4ff1f01116a106f7d4c',
+        self.assertIn(mstr.hexdigest(), ['09ea2708b749f1d756cec982f0f48bc6',
                                          'b8879054788ab755195c771deb4ff794'])
         output = '%s' % gfile.points[-1]
         try:
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['effa33b5721ef4b0139386295d408685',
+        self.assertIn(mstr.hexdigest(), ['c1a9125aec514caaff42d4c40480699e',
                                          'c58f162d8a64568a365161c413c003c1'])
 
     def test_cache_dataframe_xml(self):
@@ -188,17 +188,17 @@ class TestGarminApp(unittest.TestCase):
                               garmin_list=gfile.points).dataframe
         gdf.to_csv('temp.tcx.point.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.tcx.point.csv | md5sum')
-        self.assertEqual(md5, '79d5360f2790217287675524b2ac4b37')
+        self.assertEqual(md5, 'a6ecacfcf57d5251c444d45653119954')
         gdf = GarminDataFrame(garmin_class=GarminLap,
                               garmin_list=gfile.laps).dataframe
         gdf.to_csv('temp.tcx.lap.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.tcx.lap.csv | md5sum')
-        self.assertEqual(md5, 'a1d824d6a8fa1ff3eafb6192874e4a3c')
+        self.assertEqual(md5, '90402b951f4e677a07b9d04e4af94a18')
         gdf = GarminDataFrame(garmin_class=GarminSummary,
                               garmin_list=[gsum]).dataframe
         gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.sum.csv | md5sum')
-        self.assertEqual(md5, 'ea6f6dca64ad793043795ddd63c5b983')
+        self.assertEqual(md5, 'f04b7ba589c5170740fc8072513b53e1')
 
     def test_cache_dataframe_fit(self):
         """ test cache dump fit to dataframe """
@@ -208,17 +208,17 @@ class TestGarminApp(unittest.TestCase):
                               garmin_list=gfile.points).dataframe
         gdf.to_csv('temp.fit.point.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.point.csv | md5sum')
-        self.assertEqual(md5, 'be0d290b8fc032ebb8234a6cad45c681')
+        self.assertEqual(md5, '9b5dd53949c7f9555d97c4a95be1934e')
         gdf = GarminDataFrame(garmin_class=GarminLap,
                               garmin_list=gfile.laps).dataframe
         gdf.to_csv('temp.fit.lap.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.lap.csv | md5sum')
-        self.assertEqual(md5, 'f03e520689491713d4dcb4ced54e7ee2')
+        self.assertEqual(md5, 'c3c3ee7f75d11b7c64fa3b854602cdaf')
         gdf = GarminDataFrame(garmin_class=GarminSummary,
                               garmin_list=[gsum]).dataframe
         gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.sum.csv | md5sum')
-        self.assertEqual(md5, '0780e67214153cd56a566994d8a2be0c')
+        self.assertEqual(md5, 'dab731c785a7c56c649c3dfbf6e895d8')
 
     def test_cache_dataframe_fit_fill_list(self):
         """ test GarminDataFrame.fill_list """
@@ -249,7 +249,7 @@ class TestGarminApp(unittest.TestCase):
                               garmin_list=gfile.points).dataframe
         gdf.to_csv('temp.fit.point.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.point.csv | md5sum')
-        self.assertEqual(md5, 'be0d290b8fc032ebb8234a6cad45c681')
+        self.assertEqual(md5, '9b5dd53949c7f9555d97c4a95be1934e')
 
     def test_garmin_summary(self):
         """ test GarminSummary.__repr__ """
@@ -283,7 +283,7 @@ class TestGarminApp(unittest.TestCase):
                    'cache_dir': script_path}
         html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
                                          options=options)
-        file_md5 = [['index.html', '548581a142811d412dbf955d2e5372aa']]
+        file_md5 = [['index.html', '1c1abe181f36a85949974a222cc874df']]
         for fn_, fmd5 in file_md5:
             md5 = get_md5('%s/%s' % (html_path, fn_))
             if hasattr(md5, 'decode'):
