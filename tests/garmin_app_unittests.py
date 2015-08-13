@@ -159,7 +159,7 @@ class TestGarminApp(unittest.TestCase):
         except TypeError:
             mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), ['c1a9125aec514caaff42d4c40480699e',
-                                         'c58f162d8a64568a365161c413c003c1'])
+                                         'effa33b5721ef4b0139386295d408685'])
 
     def test_cache_dataframe_xml(self):
         """ test cache dump xml to dataframe """
