@@ -54,9 +54,9 @@ class TestGarminApp(unittest.TestCase):
 
     def tearDown(self):
         """ tear down """
-        for csvf in glob.glob('temp.*.*.csv'):
-            if os.path.exists(csvf):
-                os.remove(csvf)
+        #for csvf in glob.glob('temp.*.*.csv'):
+            #if os.path.exists(csvf):
+                #os.remove(csvf)
         if os.path.exists('temp.pkl.gz'):
             os.remove('temp.pkl.gz')
         for testf in glob.glob('%s/run/cache/test.*' % CURDIR):
