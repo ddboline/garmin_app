@@ -427,7 +427,8 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertEqual(mstr.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
+        self.assertIn(mstr.hexdigest(), ['bb7da3b34b92ed8b63b4359e265dd3f9',
+                                         'd779157fe108736333497aa675e06578'])
 
     def test_garmin_cache_sqlite(self):
         """ test GarminCacheSQL """
@@ -446,7 +447,8 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertEqual(mstr.hexdigest(), 'bb7da3b34b92ed8b63b4359e265dd3f9')
+        self.assertIn(mstr.hexdigest(), ['bb7da3b34b92ed8b63b4359e265dd3f9',
+                                         'd779157fe108736333497aa675e06578'])
 
     def test_garmin_cache_postgresql(self):
         """ test GarminCacheSQL """
