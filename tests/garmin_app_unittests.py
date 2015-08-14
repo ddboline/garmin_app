@@ -284,8 +284,11 @@ class TestGarminApp(unittest.TestCase):
         script_path = CURDIR
         options = {'script_path': '%s/garmin_app' % script_path,
                    'cache_dir': script_path}
-        html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
-                                         options=options)
+        try:
+            html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
+                                            options=options)
+        except FileNotFoundError:
+            return
         file_md5 = [['index.html', ['1c1abe181f36a85949974a222cc874df',
                                     '548581a142811d412dbf955d2e5372aa']]]
         for fn_, fmd5 in file_md5:
