@@ -151,15 +151,15 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['09ea2708b749f1d756cec982f0f48bc6',
-                                         'ea40099ceb00e4ff1f01116a106f7d4c'])
+        self.assertIn(mstr.hexdigest(), ['73c52b6753bc841dc09936dadac33c9c',
+                                         '7c67d4fb98b12129b4878d11a2af35ee'])
         output = '%s' % gfile.points[-1]
         try:
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['c1a9125aec514caaff42d4c40480699e',
-                                         'effa33b5721ef4b0139386295d408685'])
+        self.assertIn(mstr.hexdigest(), ['1787d7f8a80634d7919bd37a49f8f65c',
+                                         '61a3902353b0ecd812d296face1e8c9c'])
 
     def test_cache_dataframe_xml(self):
         """ test cache dump xml to dataframe """
@@ -190,7 +190,7 @@ class TestGarminApp(unittest.TestCase):
                               garmin_list=gfile.points).dataframe
         gdf.to_csv('temp.tcx.point.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.tcx.point.csv | md5sum')
-        self.assertEqual(md5, 'a6ecacfcf57d5251c444d45653119954')
+        self.assertEqual(md5, 'd9b1d2e8dd99a32e1fc9c58e87e75f27')
         gdf = GarminDataFrame(garmin_class=GarminLap,
                               garmin_list=gfile.laps).dataframe
         gdf.to_csv('temp.tcx.lap.csv', index=False, float_format='%.4f')
@@ -235,7 +235,8 @@ class TestGarminApp(unittest.TestCase):
         except TypeError:
             mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), ['73c52b6753bc841dc09936dadac33c9c',
-                                         '53087d6c0777c42c9ff06326ad52ab3c'])
+                                         '53087d6c0777c42c9ff06326ad52ab3c',
+                                         '7c67d4fb98b12129b4878d11a2af35ee'])
 
     def test_pickle_fit(self):
         """ test cache dump pickle to dataframe """

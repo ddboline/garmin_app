@@ -58,8 +58,8 @@ class GarminFile(object):
             calculate instantaneous speed (could maybe be a bit more elaborate)
         """
         if len(self.points) > 0:
-            self.points[0].avg_speed_value_permi = 0
-            self.points[0].avg_speed_value_mph = 0
+            self.points[0].avg_speed_value_permi = 0.
+            self.points[0].avg_speed_value_mph = 0.
         for point0, point1 in izip(self.points[1:], self.points):
             t1_ = point0.time
             t0_ = point1.time

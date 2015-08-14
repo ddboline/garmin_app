@@ -26,13 +26,13 @@ class GarminPoint(object):
                 setattr(self, attr, options[attr])
             else:
                 setattr(self, attr, None)
-        self.duration_from_last = 0 ### keep a running total for convenience
-        self.duration_from_begin = 0 ### keep a running total for convenience
-        self.speed_mps = 0
-        self.speed_permi = -1
-        self.speed_mph = 0
-        self.avg_speed_value_permi = -1
-        self.avg_speed_value_mph = 0
+        self.duration_from_last = 0. ### keep a running total for convenience
+        self.duration_from_begin = 0. ### keep a running total for convenience
+        self.speed_mps = 0.
+        self.speed_permi = -1.
+        self.speed_mph = 0.
+        self.avg_speed_value_permi = -1.
+        self.avg_speed_value_mph = 0.
 
     def __repr__(self):
         """ string representation """

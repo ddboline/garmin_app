@@ -130,7 +130,7 @@ class GarminParse(GarminFile):
         time_from_begin = 0
         for point_number, cur_point in enumerate(temp_points):
             if point_number == 0:
-                cur_point.duration_from_last = 0
+                cur_point.duration_from_last = 0.
             else:
                 cur_point.duration_from_last = \
                     (cur_point.time - temp_points[point_number-1].time)\
@@ -219,7 +219,7 @@ class GarminParse(GarminFile):
         time_from_begin = 0
         for point_number, cur_point in enumerate(temp_points):
             if point_number == 0:
-                cur_point.duration_from_last = 0
+                cur_point.duration_from_last = 0.
             else:
                 cur_point.duration_from_last = \
                     (cur_point.time - temp_points[point_number-1].time)\
