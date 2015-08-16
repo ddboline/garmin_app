@@ -390,7 +390,9 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             elif arg == 'bike':
                 options['do_sport'] = 'biking'
             elif '-' in arg:
-                files = glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg))
+                files = glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg))\
+                        + glob.glob('%s/run/gps_tracks/%s*'
+                                    % (cache_dir, arg.replace('-', '')))
                 basenames = [f.split('/')[-1] for f in sorted(files)]
                 if len([x for x in basenames if x[:10] == basenames[0][:10]])\
                         == len(basenames):
