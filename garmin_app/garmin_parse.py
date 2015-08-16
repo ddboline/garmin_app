@@ -41,17 +41,17 @@ class GarminParse(GarminFile):
 
     def _determine_file_type(self):
         """ determine file type """
-        if '.tcx' in self.filename.lower():
+        if '.tcx' in self.orig_filename.lower():
             self.filetype = 'tcx'
-        elif '.txt' in self.filename.lower():
+        elif '.txt' in self.orig_filename.lower():
             self.filetype = 'txt'
-        elif '.fit' in self.filename.lower():
-            self.filename = convert_fit_to_tcx(self.filename)
+        elif '.fit' in self.orig_filename.lower():
+            self.orig_filename = convert_fit_to_tcx(self.orig_filename)
             self.filetype = 'fit'
-        elif '.gmn' in self.filename.lower():
+        elif '.gmn' in self.orig_filename.lower():
             self.filetype = 'gmn'
-            self.filename = convert_gmn_to_xml(self.filename)
-        elif '.gpx' in self.filename.lower():
+            self.orig_filename = convert_gmn_to_xml(self.orig_filename)
+        elif '.gpx' in self.orig_filename.lower():
             self.filetype = 'gpx'
 
     def read_file(self):
@@ -75,7 +75,7 @@ class GarminParse(GarminFile):
         cur_point = None
         last_ent = None
         temp_points = []
-        with run_command('xml2 < %s' % self.filename, do_popen=True) as pop_:
+        with run_command('xml2 < %s' % self.orig_filename, do_popen=True) as pop_:
             for line in pop_.stdout:
                 try:
                     ent = line.strip().split('/')
@@ -164,7 +164,7 @@ class GarminParse(GarminFile):
         cur_lap = None
         cur_point = None
         temp_points = []
-        with run_command('xml2 < %s' % self.filename, do_popen=True) as pop_:
+        with run_command('xml2 < %s' % self.orig_filename, do_popen=True) as pop_:
             for line in pop_.stdout:
                 try:
                     ent = line.strip().split('/')
@@ -234,7 +234,7 @@ class GarminParse(GarminFile):
 
     def read_file_txt(self):
         """ read txt file, these just contain summary information """
-        with open(self.filename, 'rt') as infile:
+        with open(self.orig_filename, 'rt') as infile:
             for line in infile:
                 if len(line.strip()) == 0:
                     continue

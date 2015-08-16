@@ -23,7 +23,7 @@ class GarminDataFrame(object):
         for it_ in arr:
             columns = []
             tmp_array = []
-            for attr in self.garminclass.__slots__:
+            for attr in self.garminclass._db_entries:
                 if attr == 'corr_list':
                     continue
                 columns.append(attr)
@@ -36,7 +36,7 @@ class GarminDataFrame(object):
         output = []
         for _, row in self.dataframe.iterrows():
             tmpobj = self.garminclass()
-            for attr in self.garminclass.__slots__:
+            for attr in self.garminclass._db_entries:
                 setattr(tmpobj, attr, row[attr])
             output.append(tmpobj)
         return output

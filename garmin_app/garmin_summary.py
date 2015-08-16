@@ -8,19 +8,22 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 from .garmin_utils import (get_md5, expected_calories,
                                      SPORT_TYPES, METERS_PER_MILE)
 
 class GarminSummary(object):
     """ summary class for a file """
-    __slots__ = ['filename', 'begin_datetime', 'sport',
-                 'total_calories', 'total_distance', 'total_duration',
-                 'total_hr_dur', 'total_hr_dis', 'number_of_items',
-                 'md5sum', 'corr_list']
+    _db_entries = ['filename', 'begin_datetime', 'sport', 'total_calories',
+                   'total_distance', 'total_duration', 'total_hr_dur',
+                   'total_hr_dis', 'number_of_items', 'md5sum']
+    __slots__ = _db_entries + ['pathname', 'fullfname', 'corr_list']
 
     def __init__(self, filename='', md5sum=None, corr_list=None):
         """ Init Method """
-        self.filename = filename
+        self.fullfname = filename
+        self.pathname = os.path.abspath(filename)
+        self.filename = os.path.basename(filename)
         self.begin_datetime = None
         self.sport = None
         self.total_calories = 0
@@ -29,10 +32,9 @@ class GarminSummary(object):
         self.total_hr_dur = 0
         self.total_hr_dis = 0
         self.number_of_items = 0
-        if md5sum:
-            self.md5sum = md5sum
-        elif self.filename != '':
-            self.md5sum = get_md5(self.filename)
+        self.md5sum = md5sum
+        if not md5sum and self.fullfname:
+            self.md5sum = get_md5(self.fullfname)
         self.corr_list = []
         if corr_list:
             self.corr_list = corr_list
@@ -40,13 +42,12 @@ class GarminSummary(object):
     def __repr__(self):
         """ string representation """
         return 'GarminSummary<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self.__slots__
-                                            if x != 'corr_list')
+            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
 
     def read_file(self):
         """  read the file, calculate some stuff """
         from .garmin_parse import GarminParse
-        temp_gfile = GarminParse(self.filename, corr_list=self.corr_list)
+        temp_gfile = GarminParse(self.fullfname, corr_list=self.corr_list)
         temp_gfile.read_file()
         self.begin_datetime = temp_gfile.begin_datetime
         self.sport = temp_gfile.sport

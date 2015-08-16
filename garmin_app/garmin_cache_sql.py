@@ -35,8 +35,7 @@ class GarminSummaryTable(Base):
 
     def __repr__(self):
         return 'GarminSummaryTable<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in GarminSummary.__slots__
-            if x != 'corr_list')
+            '%s=%s' % (x, getattr(self, x)) for x in GarminSummary._db_entries)
 
 
 class GarminCacheSQL:
@@ -68,9 +67,8 @@ class GarminCacheSQL:
 
         for row in session.query(GarminSummaryTable).all():
             gsum = GarminSummary()
-            for sl_ in gsum.__slots__:
-                if sl_ != 'corr_list':
-                    setattr(gsum, sl_, getattr(gsum, sl_))
+            for sl_ in gsum._db_entries:
+                setattr(gsum, sl_, getattr(gsum, sl_))
             self.summary_list.append(gsum)
         session.close()
         return self.summary_list
@@ -81,8 +79,7 @@ class GarminCacheSQL:
 
         slists = []
         for sl_ in summary_list:
-            sld = {x: getattr(sl_, x) for x in sl_.__slots__
-                   if x != 'corr_list'}
+            sld = {x: getattr(sl_, x) for x in sl_._db_entries}
             slists.append(GarminSummaryTable(**sld))
 
         session.add_all(slists)

@@ -293,7 +293,7 @@ def do_summary(directory_, msg_q=None, options=None):
         return None
     _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
     print(_report.summary_report(_summary_list, options=options))
-    
+
 #    postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost:5432/' + \
 #                  'garmin_summary'
 #    with OpenPostgreSQLsshTunnel():

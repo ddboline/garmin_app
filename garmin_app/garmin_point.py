@@ -14,10 +14,11 @@ class GarminPoint(object):
     """
         point representing each gps point
     """
-    __slots__ = ['time', 'latitude', 'longitude', 'altitude', 'distance',
-                 'heart_rate', 'duration_from_last', 'duration_from_begin',
-                 'speed_mps', 'speed_permi', 'speed_mph',
-                 'avg_speed_value_permi', 'avg_speed_value_mph']
+    _db_entries = ['time', 'latitude', 'longitude', 'altitude', 'distance',
+                   'heart_rate', 'duration_from_last', 'duration_from_begin',
+                   'speed_mps', 'speed_permi', 'speed_mph',
+                   'avg_speed_value_permi', 'avg_speed_value_mph']
+    __slots__ = _db_entries
 
     def __init__(self, **options):
         """ Init Method """

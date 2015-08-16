@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-    module holds classes:
-        GarminPoint
-        GarminLap
-        GarminFile
+    module holds GarminFile class
 """
 from __future__ import print_function
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 try:
     from itertools import izip
 except ImportError:
@@ -25,15 +23,16 @@ class GarminFile(object):
                 read_file(), read_file_tcx(), read_file_xml(),
                 print_file_string(), calculate_speed(), print_splits()
     """
-    __slots__ = ['filename', 'orig_filename', 'filetype', 'begin_datetime',
-                 'sport', 'total_calories', 'total_distance', 'total_duration',
-                 'total_hr_dur', 'total_hr_dis', 'laps', 'points']
+    _db_entries = ['filename', 'filetype', 'begin_datetime', 'sport',
+                   'total_calories', 'total_distance', 'total_duration',
+                   'total_hr_dur', 'total_hr_dis',]
+    __slots__ = _db_entries + ['orig_filename', 'laps', 'points']
     garmin_file_types = ('txt', 'tcx', 'fit', 'gpx', 'gmn')
 
     def __init__(self, filename='', filetype=''):
         """ Init Method """
         self.orig_filename = filename
-        self.filename = filename
+        self.filename = os.path.basename(filename)
         self.filetype = ''
         if filetype in self.garmin_file_types:
             self.filetype = filetype
@@ -50,8 +49,7 @@ class GarminFile(object):
     def __repr__(self):
         """ string representation """
         return 'GarminFile<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self.__slots__
-                                            if x not in ['points', 'laps'])
+            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
 
     def calculate_speed(self):
         """

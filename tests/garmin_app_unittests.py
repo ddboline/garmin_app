@@ -18,6 +18,13 @@ TCXFILE = 'tests/test.tcx'
 FITFILE = 'tests/test.fit'
 TXTFILE = 'tests/test.txt'
 
+GARMINSUMMARYSTR = 'GarminSummary<filename=test.fit, ' + \
+                   'begin_datetime=2014-01-12 16:00:05, sport=running, ' + \
+                   'total_calories=351, total_distance=5081.34, ' + \
+                   'total_duration=1451.55, total_hr_dur=220635.6, ' + \
+                   'total_hr_dis=1451.55, number_of_items=1, ' + \
+                   'md5sum=b543c34cc80daf234b389e7d2ccbcbad>'
+
 ### terrible hack
 if os.path.exists('garmin_app_unittests.py'):
     os.chdir('../')
@@ -93,7 +100,7 @@ class TestGarminApp(unittest.TestCase):
         outfile = convert_fit_to_tcx(FITFILE)
         self.assertEqual('/tmp/temp.tcx', outfile)
         md5 = md5_command('cat %s | md5sum' % outfile)
-        self.assertIn(md5, ['1c304e508709540ccdf44fd70b3c5dcc', 
+        self.assertIn(md5, ['1c304e508709540ccdf44fd70b3c5dcc',
                             'd96c38457f8bc1b6782bae9f9b02fe5a'])
 
     def test_gmn_to_xml(self):
@@ -147,6 +154,7 @@ class TestGarminApp(unittest.TestCase):
         gfile.calculate_speed()
         mstr = hashlib.md5()
         output = '%s' % gfile.points[0]
+
         try:
             mstr.update(output)
         except TypeError:
@@ -154,6 +162,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertIn(mstr.hexdigest(), ['73c52b6753bc841dc09936dadac33c9c',
                                          '7c67d4fb98b12129b4878d11a2af35ee'])
         output = '%s' % gfile.points[-1]
+
         try:
             mstr.update(output)
         except TypeError:
@@ -200,7 +209,7 @@ class TestGarminApp(unittest.TestCase):
                               garmin_list=[gsum]).dataframe
         gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.sum.csv | md5sum')
-        self.assertEqual(md5, 'f04b7ba589c5170740fc8072513b53e1')
+        self.assertEqual(md5, 'aff4a61c7568d6ecbc4db36f79cb1e74')
 
     def test_cache_dataframe_fit(self):
         """ test cache dump fit to dataframe """
@@ -220,7 +229,7 @@ class TestGarminApp(unittest.TestCase):
                               garmin_list=[gsum]).dataframe
         gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.sum.csv | md5sum')
-        self.assertEqual(md5, 'dab731c785a7c56c649c3dfbf6e895d8')
+        self.assertEqual(md5, 'c65b0b55423651f06c43f3e408ff5aeb')
 
     def test_cache_dataframe_fit_fill_list(self):
         """ test GarminDataFrame.fill_list """
@@ -229,6 +238,7 @@ class TestGarminApp(unittest.TestCase):
         gdf = GarminDataFrame(garmin_class=GarminPoint,
                               garmin_list=gfile.points)
         output = '%s' % gdf.fill_list()[0]
+
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -259,9 +269,10 @@ class TestGarminApp(unittest.TestCase):
         gsum = GarminSummary(FITFILE)
         gsum.read_file()
         output = '%s' % gsum
+        self.assertEqual(output, GARMINSUMMARYSTR)
         mstr = hashlib.md5()
         mstr.update(output.encode())
-        self.assertEqual(mstr.hexdigest(), 'f73293da4f5d64545ad4a1d5a1efb283')
+#        self.assertEqual(mstr.hexdigest(), 'f73293da4f5d64545ad4a1d5a1efb283')
 
     def test_garmin_file_report_txt(self):
         """ test GarminReport.file_report_txt """
@@ -269,6 +280,7 @@ class TestGarminApp(unittest.TestCase):
         gfile.read_file()
         gr_ = GarminReport()
         output = gr_.file_report_txt(gfile)
+
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -303,6 +315,7 @@ class TestGarminApp(unittest.TestCase):
         gsum.read_file()
         gr_ = GarminReport()
         output = gr_.total_summary_report_txt(gsum, sport='running')
+
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -317,6 +330,7 @@ class TestGarminApp(unittest.TestCase):
         gr_ = GarminReport()
         output = gr_.day_summary_report_txt(
                     gsum, sport='running', cur_date=gsum.begin_datetime.date())
+
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -331,6 +345,7 @@ class TestGarminApp(unittest.TestCase):
         gr_ = GarminReport()
         output = gr_.day_average_report_txt(gsum, sport='running',
                                             number_days=1)
+
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -348,6 +363,7 @@ class TestGarminApp(unittest.TestCase):
                                              isoyear=ic_[0], isoweek=ic_[1],
                                              number_in_week=1,
                                              date=gsum.begin_datetime)
+
         mstr = hashlib.md5()
         try:
             mstr.update(output)
@@ -421,18 +437,12 @@ class TestGarminApp(unittest.TestCase):
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
         output = '\n'.join('%s' % s for s in sorted(sl_,
                                                     key=lambda x: x.filename))
-        output = output.replace('/home/ubuntu',
-                                '/home/ddboline/setup_files/build')\
-                       .replace('ubuntu', 'ddboline')\
-                       .replace('/home/ddboline/Downloads/backup',
-                                '/home/ddboline/setup_files/build')
         mstr = hashlib.md5()
         try:
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['bb7da3b34b92ed8b63b4359e265dd3f9',
-                                         'd779157fe108736333497aa675e06578'])
+        self.assertIn(mstr.hexdigest(), ['a11c3daee97eb8379dae2cd014a8076b'])
 
     def test_garmin_cache_sqlite(self):
         """ test GarminCacheSQL """
@@ -441,18 +451,12 @@ class TestGarminApp(unittest.TestCase):
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
         output = '\n'.join('%s' % s for s in sorted(sl_,
                                                     key=lambda x: x.filename))
-        output = output.replace('/home/ubuntu',
-                                '/home/ddboline/setup_files/build')\
-                       .replace('ubuntu', 'ddboline')\
-                       .replace('/home/ddboline/Downloads/backup',
-                                '/home/ddboline/setup_files/build')
         mstr = hashlib.md5()
         try:
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['bb7da3b34b92ed8b63b4359e265dd3f9',
-                                         'd779157fe108736333497aa675e06578'])
+        self.assertIn(mstr.hexdigest(), ['a11c3daee97eb8379dae2cd014a8076b'])
 
     def test_garmin_cache_postgresql(self):
         """ test GarminCacheSQL """
@@ -463,22 +467,16 @@ class TestGarminApp(unittest.TestCase):
                           + '@localhost:5432/test_garmin_summary'
             gc_ = GarminCacheSQL(sql_string=postgre_str)
             sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
-            output = '\n'.join('%s' % s for s in sorted(sl_, key=lambda x: 
+            output = '\n'.join('%s' % s for s in sorted(sl_, key=lambda x:
                                                                    x.filename))
-            output = output.replace('/home/ubuntu',
-                                    '/home/ddboline/setup_files/build')\
-                           .replace('ubuntu', 'ddboline')\
-                           .replace('/home/ddboline/Downloads/backup',
-                                    '/home/ddboline/setup_files/build')
+            gc_.delete_table()
             mstr = hashlib.md5()
             try:
                 mstr.update(output)
             except TypeError:
                 mstr.update(output.encode())
             self.assertEqual(mstr.hexdigest(),
-                             'bb7da3b34b92ed8b63b4359e265dd3f9')
-    
-            gc_.delete_table()
+                             'a11c3daee97eb8379dae2cd014a8076b')
 
     def test_cached_gfile(self):
         """ test GarminCache.read_cached_gfile """
