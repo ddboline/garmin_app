@@ -41,15 +41,16 @@ def read_keys():
 AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY = read_keys()
 
 def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
-    """ function to save to s3 """
+    """ 
+        function to save to s3, bname is bucket name
+        filelist is list of files to add or overwrite
+    """
     s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     bucket = s3_.create_bucket(bucket_name=bname)
-    list_of_keys = {}
+    list_of_keys = get_list_of_keys()
     if not filelist:
         filelist = []
-    for k in bucket.list():
-        list_of_keys[k.key] = k.etag.replace('"', '')
     for fn_ in filelist:
         kn_ = fn_.split('/')[-1]
         with open(fn_, 'rb') as infile:
@@ -60,5 +61,30 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
             print('upload to s3:', kn_, fn_, list_of_keys[k.key])
     return list_of_keys
 
+def get_list_of_keys(bname='garmin_scripts_gps_files_ddboline'):
+    """ get list of keys """
+    s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
+                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    bucket = s3_.get_bucket(bucket_name=bname)
+    list_of_keys = {}
+    for key in bucket.list():
+        list_of_keys[key.key] = key.etag.replace('"', '')
+    return list_of_keys
+
+def download_from_s3(self, bucket_name='garmin_scripts_gps_files_ddboline',
+             key_name='', fname=''):
+    """ download file """
+    s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
+                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    if not key_name or not fname:
+        return False
+    dname = os.path.dirname(fname)
+    if not os.path.exists(dname):
+        os.makedirs(dname)
+    bucket = s3_.get_bucket(bucket_name)
+    key = bucket.get_key(key_name)
+    return key.get_contents_to_filename(fname)
+
+
 if __name__ == '__main__':
-    save_to_s3('garmin_scripts_gps_files_ddboline', glob.glob('run/*/*/*'))
+    save_to_s3('garmin_scripts_gps_files_ddboline', glob.glob('gps_tracks/*'))
