@@ -15,11 +15,11 @@ import glob
 import hashlib
 import datetime
 import argparse
+from tempfile import NamedTemporaryFile
 
 from .garmin_server import GarminServer
 from .util import (run_command, datetimefromstring, openurl,
-                   dump_to_file, HOMEDIR, walk_wrapper,
-                   OpenPostgreSQLsshTunnel)
+                   dump_to_file, HOMEDIR, walk_wrapper)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -103,32 +103,37 @@ def print_h_m_s(second, do_hours=True):
 
 def convert_gmn_to_gpx(gmn_filename):
     """ create temporary gpx file from gmn or tcx files """
-    if '.fit' in gmn_filename.lower():
-        tcx_filename = convert_fit_to_tcx(gmn_filename)
-        run_command('gpsbabel -i gtrnctr -f %s -o gpx -F /tmp/temp.gpx '
-            % (tcx_filename))
-    elif '.tcx' in gmn_filename.lower():
-        run_command('gpsbabel -i gtrnctr -f %s -o gpx -F /tmp/temp.gpx'
-            % gmn_filename)
-    elif '.txt' in gmn_filename.lower():
+    if '.txt' in gmn_filename.lower():
         return None
-    else:
-        run_command('garmin_gpx %s > /tmp/temp.gpx' % gmn_filename)
-    return '/tmp/temp.gpx'
+    with NamedTemporaryFile(prefix='temp', suffix='.gpx', delete=False) as fn_:
+        if '.fit' in gmn_filename.lower():
+            tcx_filename = convert_fit_to_tcx(gmn_filename)
+            run_command('gpsbabel -i gtrnctr -f %s -o gpx -F %s '
+                        % (tcx_filename, fn_.name))
+        elif '.tcx' in gmn_filename.lower():
+            run_command('gpsbabel -i gtrnctr -f %s -o gpx -F %s'
+                        % (gmn_filename, fn_.name))
+        else:
+            run_command('garmin_gpx %s > %s' % (gmn_filename, fn_.name))
+        os.rename(fn_.name, '/tmp/temp.gpx')
+        return '/tmp/temp.gpx'
 
 def convert_fit_to_tcx(fit_filename):
     """ fit files to tcx files """
-    if '.fit' in fit_filename.lower():
-        if os.path.exists('/usr/bin/fit2tcx'):
-            run_command('/usr/bin/fit2tcx -i %s ' % fit_filename +
-                        '-o /tmp/temp.tcx 2>&1 > /dev/null')
-        elif os.path.exists('%s/bin/fit2tcx' % os.getenv('HOME')):
-            run_command('fit2tcx %s > /tmp/temp.tcx' % fit_filename)
-        elif os.path.exists('./bin/fit2tcx'):
-            run_command('./bin/fit2tcx %s > /tmp/temp.tcx' % fit_filename)
-    else:
-        return False
-    return '/tmp/temp.tcx'
+    with NamedTemporaryFile(prefix='temp', suffix='.tcx', delete=False,
+                            mode='wt') as fn_:
+        if '.fit' in fit_filename.lower():
+            if os.path.exists('/usr/bin/fit2tcx'):
+                run_command('/usr/bin/fit2tcx -i %s ' % fit_filename +
+                            '-o %s 2>&1 > /dev/null' % fn_.name)
+            elif os.path.exists('%s/bin/fit2tcx' % os.getenv('HOME')):
+                run_command('fit2tcx %s > %s' % (fit_filename, fn_.name))
+            elif os.path.exists('./bin/fit2tcx'):
+                run_command('./bin/fit2tcx %s > %s' % (fit_filename, fn_.name))
+            os.rename(fn_.name, '/tmp/temp.tcx')
+            return '/tmp/temp.tcx'
+        else:
+            return None
 
 def convert_gmn_to_xml(gmn_filename):
     """
@@ -137,7 +142,8 @@ def convert_gmn_to_xml(gmn_filename):
     if any([a in gmn_filename
             for a in ('.tcx', '.TCX', '.fit', '.FIT', '.xml', '.txt')]):
         return gmn_filename
-    with open('/tmp/.temp.xml', 'wt') as xml_file:
+    with NamedTemporaryFile(prefix='temp', suffix='.xml', delete=False,
+                            mode='wt') as xml_file:
         xml_file.write('<root>\n')
         with run_command('garmin_dump %s' % gmn_filename, do_popen=True) as \
                 pop_:
@@ -147,8 +153,8 @@ def convert_gmn_to_xml(gmn_filename):
                 except TypeError:
                     xml_file.write(line.decode())
         xml_file.write('</root>\n')
-    run_command('mv /tmp/.temp.xml /tmp/temp.xml')
-    return '/tmp/temp.xml'
+        os.rename(xml_file.name, '/tmp/temp.xml')
+        return '/tmp/temp.xml'
 
 def get_md5_old(fname):
     """ md5 function using hashlib.md5 """
@@ -271,7 +277,6 @@ def read_garmin_file(fname, msg_q=None, options=None):
 
 def do_summary(directory_, msg_q=None, options=None):
     from .garmin_cache import GarminCache
-    from .garmin_cache_sql import GarminCacheSQL
     from .garmin_report import GarminReport
     from .garmin_corrections import list_of_corrected_laps
     if options is None:
@@ -293,14 +298,6 @@ def do_summary(directory_, msg_q=None, options=None):
         return None
     _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
     print(_report.summary_report(_summary_list, options=options))
-
-#    postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost:5432/' + \
-#                  'garmin_summary'
-#    with OpenPostgreSQLsshTunnel():
-#        sql_cache = GarminCacheSQL(sql_string=postgre_str)
-#        sql_cache.delete_table()
-#        sql_cache.create_table()
-#        sql_cache.write_sql_table(_cache.cache_summary_list)
 
     return True
 
@@ -340,7 +337,8 @@ def add_correction(correction_str, json_path=None):
     save_corrections(l_corr)
     save_corrections(l_corr, json_path=json_path)
     if os.path.exists('%s/public_html/garmin/files' % HOMEDIR):
-        save_corrections(l_corr, json_path='%s/public_html/garmin/files' % HOMEDIR)
+        save_corrections(l_corr, json_path='%s/public_html/garmin/files'
+                                            % HOMEDIR)
     return l_corr
 
 
@@ -361,7 +359,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             fname = '%s/garmin_data_%s.tar.gz'\
                      % (cache_dir, datetime.date.today().strftime('%Y%m%d'))
             run_command('cd %s/run/ ; ' % cache_dir +
-                        'tar zcvf %s 2* garmin.pkl* ' % fname +
+                        'tar zcvf %s gps_tracks/ garmin.pkl* ' % fname +
                         'garmin_corrections.json cache/')
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
                 run_command('cp %s %s/public_html/backup/garmin_data.tar.gz'
@@ -392,16 +390,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             elif arg == 'bike':
                 options['do_sport'] = 'biking'
             elif '-' in arg:
-                ent = arg.split('-')
-                year = ent[0]
-                if len(ent) > 1:
-                    month = ent[1]
-                else:
-                    month = '*'
-                files = glob.glob('%s/run/%s/%s/%s*' % (cache_dir, year,
-                                                        month, arg))\
-                        + glob.glob('%s/run/%s/%s/%s*' % (cache_dir, year,
-                                                          month, ''.join(ent)))
+                files = glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg))
                 basenames = [f.split('/')[-1] for f in sorted(files)]
                 if len([x for x in basenames if x[:10] == basenames[0][:10]])\
                         == len(basenames):
@@ -409,7 +398,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                         print(fn_)
                 gdir += files
             elif '.gmn' in arg or 'T' in arg:
-                files = glob.glob('%s/run/*/*/%s' % (cache_dir, arg))
+                files = glob.glob('%s/run/gps_tracks/%s' % (cache_dir, arg))
                 gdir += files
             else:
                 print('unhandled argument:', arg)
