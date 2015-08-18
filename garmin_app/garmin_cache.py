@@ -70,11 +70,11 @@ class GarminCache(object):
         if corr_list:
             self.corr_list = corr_list
 
-    def read_cached_gfile(self, gfbasename=''):
+    def read_cached_gfile(self, gfbname=''):
         """ return cached file """
-        if not gfbasename or not self.cache_directory:
+        if not gfbname or not self.cache_directory:
             return False
-        fname = '%s/%s.pkl.gz' % (self.cache_directory, gfbasename)
+        fname = '%s/%s.pkl.gz' % (self.cache_directory, gfbname)
         if not os.path.exists(fname):
             return False
         else:
@@ -84,8 +84,8 @@ class GarminCache(object):
         """ write cached file """
         if not garminfile or not self.cache_directory:
             return False
-        gfbasename = os.path.basename(garminfile.orig_filename)
-        pkl_file = '%s/%s.pkl.gz' % (self.cache_directory, gfbasename)
+        gfbname = os.path.basename(garminfile.orig_filename)
+        pkl_file = '%s/%s.pkl.gz' % (self.cache_directory, gfbname)
         return write_pickle_object_to_file(garminfile, pkl_file)
 
     def get_cache_summary_list(self, directory, options=None):
