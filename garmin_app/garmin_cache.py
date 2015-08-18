@@ -31,6 +31,7 @@ def read_pickle_object_in_file(pickle_file):
             try:
                 outobj = pickle.load(pkl_file)
             except UnicodeDecodeError:
+                print('failed to load from pickle, continuing')
                 return None
     return outobj
 

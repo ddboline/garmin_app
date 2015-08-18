@@ -258,8 +258,7 @@ def read_garmin_file(fname, msg_q=None, options=None):
                          corr_list=corr_list_)
     _temp_file = None
     if not options['do_update']:
-        _temp_file = _cache.read_cached_gfile(
-                        gfbasename=os.path.basename(fname))
+        _temp_file = _cache.read_cached_gfile(gfbname=os.path.basename(fname))
     if _temp_file:
         _gfile = _temp_file
     else:

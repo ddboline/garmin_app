@@ -8,8 +8,8 @@ sudo apt-get install -y --force-yes gpsbabel garmin-forerunner-tools xml2 fit2tc
 sudo /opt/conda/bin/conda install --yes pip requests pandas dateutil matplotlib boto psycopg2 sqlalchemy
 
 sudo /opt/conda/bin/pip install --upgrade pyusb
-### weird side effect of using pip...
-sudo rm -rf /home/ubuntu/.cache
+### weird side effect of using pip (font cache for matplotlib needs this directory)
+sudo chown -R ubuntu:ubuntu /home/ubuntu/.cache
 
 if [ -z $1 ] ; then
     true
