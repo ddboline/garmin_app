@@ -19,7 +19,8 @@ from tempfile import NamedTemporaryFile
 
 from .garmin_server import GarminServer
 from .util import (run_command, datetimefromstring, openurl,
-                   dump_to_file, HOMEDIR, walk_wrapper)
+                   dump_to_file, HOMEDIR, walk_wrapper,
+                   OpenPostgreSQLsshTunnel)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -252,23 +253,23 @@ def read_garmin_file(fname, msg_q=None, options=None):
 
     corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
 
-    _pickle_file = '%s/run/garmin.pkl.gz' % cache_dir
-    _cache_dir = '%s/run/cache' % cache_dir
-    _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir,
+    pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
+    cache_dir_ = '%s/run/cache' % cache_dir
+    cache_ = GarminCache(pickle_file=pickle_file_, cache_directory=cache_dir_,
                          corr_list=corr_list_)
     _temp_file = None
     if not options['do_update']:
-        _temp_file = _cache.read_cached_gfile(gfbname=os.path.basename(fname))
+        _temp_file = cache_.read_cached_gfile(gfbname=os.path.basename(fname))
     if _temp_file:
         _gfile = _temp_file
     else:
         _gfile = GarminParse(fname, corr_list=corr_list_)
         _gfile.read_file()
     if _gfile:
-        _cache.write_cached_gfile(garminfile=_gfile)
+        cache_.write_cached_gfile(garminfile=_gfile)
     else:
         return False
-    _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
+    _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.file_report_txt(_gfile))
     _report.file_report_html(_gfile, options=options)
     convert_gmn_to_gpx(fname)
@@ -284,19 +285,31 @@ def do_summary(directory_, msg_q=None, options=None):
 
     corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
 
-    _pickle_file = '%s/run/garmin.pkl.gz' % cache_dir
-    _cache_dir = '%s/run/cache' % cache_dir
-    _cache = GarminCache(pickle_file=_pickle_file, cache_directory=_cache_dir,
+    pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
+    cache_dir_ = '%s/run/cache' % cache_dir
+    cache_ = GarminCache(pickle_file=pickle_file_, cache_directory=cache_dir_,
                          corr_list=corr_list_)
     if 'build' in options and options['build']:
-        return _cache.get_cache_summary_list(directory='%s/run' % cache_dir,
-                                             options=options)
-    _summary_list = _cache.get_cache_summary_list(directory=directory_,
+        summary_list_ = cache_.get_cache_summary_list(directory='%s/run'
+                                                      % cache_dir,
+                                                      options=options)
+        ### backup garmin.pkl.gz info to postgresql database
+        with OpenPostgreSQLsshTunnel():
+            from garmin_cache_sql import GarminCacheSQL
+            postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
+                          '@localhost:5432/garmin_summary'
+            gc_ = GarminCacheSQL(sql_string=postgre_str)
+            gc_.delete_table()
+            gc_.create_table()
+            gc_.write_sql_table(summary_list_)
+        return summary_list_
+
+    summary_list_ = cache_.get_cache_summary_list(directory=directory_,
                                                   options=options)
-    if not _summary_list:
+    if not summary_list_:
         return None
-    _report = GarminReport(cache_obj=_cache, msg_q=msg_q)
-    print(_report.summary_report(_summary_list, options=options))
+    _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
+    print(_report.summary_report(summary_list_, options=options))
 
     return True
 
@@ -366,6 +379,28 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             if os.path.exists('%s/public_html/garmin/tar' % os.getenv('HOME')):
                 run_command('mv %s %s/public_html/garmin/tar'
                             % (fname, os.getenv('HOME')))
+
+            from .garmin_cache import GarminCache
+            from .garmin_corrections import list_of_corrected_laps
+
+            pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
+            cache_dir_ = '%s/run/cache' % cache_dir
+            corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
+            
+            cache_ = GarminCache(pickle_file=pickle_file_,
+                                 cache_directory=cache_dir_,
+                                 corr_list=corr_list_)
+            summary_list_ = cache_.cache_read_fn()
+            ### backup garmin.pkl.gz info to postgresql database
+            with OpenPostgreSQLsshTunnel():
+                from garmin_cache_sql import GarminCacheSQL
+                postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
+                              '@localhost:5432/garmin_summary'
+                gc_ = GarminCacheSQL(sql_string=postgre_str)
+                gc_.delete_table()
+                gc_.create_table()
+                gc_.write_sql_table(summary_list_)
+            
             return
         elif arg == 'occur':
             options['occur'] = True
@@ -388,7 +423,8 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                 options['do_sport'] = spts[0]
             elif arg == 'bike':
                 options['do_sport'] = 'biking'
-            elif '-' in arg:
+            elif '-' in arg or arg in ('%4d' % _ for _ in range(2008,
+                                                datetime.date.today().year+1)):
                 files = glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg))\
                         + glob.glob('%s/run/gps_tracks/%s*'
                                     % (cache_dir, arg.replace('-', '')))
@@ -438,6 +474,22 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 print('downloaded file')
                 run_command('tar zxf temp.tar.gz 2>&1 > /dev/null')
                 os.remove('temp.tar.gz')
+                
+                from .garmin_cache import (read_pickle_object_in_file as read_,
+                                          write_pickle_object_to_file
+                                          as write_)
+    
+                pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
+                cache_ = read_(pickle_file=pickle_file_)
+                summary_list_ = cache_.cache_read_fn()
+                if not summary_list_:
+                    with OpenPostgreSQLsshTunnel():
+                        from garmin_cache_sql import GarminCacheSQL
+                        postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
+                                      '@localhost:5432/garmin_summary'
+                        gc_ = GarminCacheSQL(sql_string=postgre_str)
+                        summary_list_ = gc_.read_sql_table()
+                        write_(summary_list_, pickle_file_)
             return
 
         if arg == 'sync':
