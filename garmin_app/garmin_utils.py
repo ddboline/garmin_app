@@ -295,7 +295,7 @@ def do_summary(directory_, msg_q=None, options=None):
                                                       options=options)
         ### backup garmin.pkl.gz info to postgresql database
         with OpenPostgreSQLsshTunnel():
-            from garmin_cache_sql import GarminCacheSQL
+            from .garmin_cache_sql import GarminCacheSQL
             postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
                           '@localhost:5432/garmin_summary'
             gc_ = GarminCacheSQL(sql_string=postgre_str)
@@ -393,7 +393,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             summary_list_ = cache_.cache_read_fn()
             ### backup garmin.pkl.gz info to postgresql database
             with OpenPostgreSQLsshTunnel():
-                from garmin_cache_sql import GarminCacheSQL
+                from .garmin_cache_sql import GarminCacheSQL
                 postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
                               '@localhost:5432/garmin_summary'
                 gc_ = GarminCacheSQL(sql_string=postgre_str)
@@ -483,7 +483,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 summary_list_ = read_(pickle_file=pickle_file_)
                 if not summary_list_:
                     with OpenPostgreSQLsshTunnel():
-                        from garmin_cache_sql import GarminCacheSQL
+                        from .garmin_cache_sql import GarminCacheSQL
                         postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
                                       '@localhost:5432/garmin_summary'
                         gc_ = GarminCacheSQL(sql_string=postgre_str)
