@@ -476,8 +476,8 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 os.remove('temp.tar.gz')
                 
                 from .garmin_cache import (read_pickle_object_in_file as read_,
-                                          write_pickle_object_to_file
-                                          as write_)
+                                           write_pickle_object_to_file
+                                           as write_)
     
                 pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
                 summary_list_ = read_(pickle_file=pickle_file_)
@@ -488,6 +488,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                                       '@localhost:5432/garmin_summary'
                         gc_ = GarminCacheSQL(sql_string=postgre_str)
                         summary_list_ = gc_.read_sql_table()
+                        print(len(summary_list_))
                         write_(summary_list_, pickle_file_)
             return
 
