@@ -68,7 +68,7 @@ class GarminCacheSQL:
         for row in session.query(GarminSummaryTable).all():
             gsum = GarminSummary()
             for sl_ in gsum._db_entries:
-                setattr(gsum, sl_, getattr(gsum, sl_))
+                setattr(gsum, sl_, getattr(row, sl_))
             self.summary_list.append(gsum)
         session.close()
         return self.summary_list
