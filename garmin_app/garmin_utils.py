@@ -488,7 +488,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                                       '@localhost:5432/garmin_summary'
                         gc_ = GarminCacheSQL(sql_string=postgre_str)
                         summary_list_ = gc_.read_sql_table()
-                        print(len(summary_list_))
+                        print(len(summary_list_), pickle_file_)
                         write_(summary_list_, pickle_file_)
             return
 
