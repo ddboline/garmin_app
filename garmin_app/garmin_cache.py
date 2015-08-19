@@ -39,7 +39,7 @@ def write_pickle_object_to_file(inpobj, pickle_file):
     """ write python object to gzipped pickle file """
     with gzip.open('%s.tmp' % pickle_file, 'wb') as pkl_file:
         pickle.dump(inpobj, pkl_file, pickle.HIGHEST_PROTOCOL)
-    run_command('mv %s.tmp %s' % (pickle_file, pickle_file))
+    os.rename('%s.tmp' % pickle_file, pickle_file)
     return True
 
 
