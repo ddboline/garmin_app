@@ -480,8 +480,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                                           as write_)
     
                 pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
-                cache_ = read_(pickle_file=pickle_file_)
-                summary_list_ = cache_.cache_read_fn()
+                summary_list_ = read_(pickle_file=pickle_file_)
                 if not summary_list_:
                     with OpenPostgreSQLsshTunnel():
                         from garmin_cache_sql import GarminCacheSQL
