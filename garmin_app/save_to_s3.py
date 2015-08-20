@@ -26,6 +26,7 @@ from __future__ import unicode_literals
 import boto
 import os
 import glob
+from dateutil.parser import parse
 
 # read aws credentials from file, then stick into global variables...
 def read_keys():
@@ -41,7 +42,7 @@ def read_keys():
 AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY = read_keys()
 
 def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
-    """ 
+    """
         function to save to s3, bname is bucket name
         filelist is list of files to add or overwrite
     """
@@ -54,8 +55,14 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
     for fn_ in filelist:
         kn_ = fn_.split('/')[-1]
         with open(fn_, 'rb') as infile:
-            k = boto.s3.key.Key(bucket)
-            k.key = kn_
+            if kn_ in list_of_keys:
+                k = bucket.get_key(kn_)
+                if parse(k.last_modified).strftime("%s") > int(os.stat(fn_).st_mtime):
+                    k.get_contents_to_filename(fn_)
+                    continue
+            else:
+                k = boto.s3.key.Key(bucket)
+                k.key = kn_
             k.set_contents_from_file(infile)
             list_of_keys[k.key] = k.etag.replace('"', '')
             print('upload to s3:', kn_, fn_, list_of_keys[k.key])
@@ -71,7 +78,7 @@ def get_list_of_keys(bname='garmin_scripts_gps_files_ddboline'):
         list_of_keys[key.key] = key.etag.replace('"', '')
     return list_of_keys
 
-def download_from_s3(self, bucket_name='garmin_scripts_gps_files_ddboline',
+def download_from_s3(bucket_name='garmin_scripts_gps_files_ddboline',
              key_name='', fname=''):
     """ download file """
     s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
