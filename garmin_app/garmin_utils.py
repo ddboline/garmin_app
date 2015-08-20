@@ -386,7 +386,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
             cache_dir_ = '%s/run/cache' % cache_dir
             corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
-            
+
             cache_ = GarminCache(pickle_file=pickle_file_,
                                  cache_directory=cache_dir_,
                                  corr_list=corr_list_)
@@ -400,7 +400,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                 gc_.delete_table()
                 gc_.create_table()
                 gc_.write_sql_table(summary_list_)
-            
+
             return
         elif arg == 'occur':
             options['occur'] = True
@@ -474,11 +474,11 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 print('downloaded file')
                 run_command('tar zxf temp.tar.gz 2>&1 > /dev/null')
                 os.remove('temp.tar.gz')
-                
+
                 from .garmin_cache import (read_pickle_object_in_file as read_,
                                            write_pickle_object_to_file
                                            as write_)
-    
+
                 pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
                 summary_list_ = read_(pickle_file=pickle_file_)
                 if not summary_list_:
