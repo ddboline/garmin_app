@@ -486,9 +486,8 @@ class TestGarminApp(unittest.TestCase):
         gsum = GarminSummary(FITFILE)
         gfile = gsum.read_file()
         test1 = '%s' % gfile
-        gfname = os.path.basename(gfile.orig_filename)
         gc_.write_cached_gfile(gfile)
-        gfile_new = gc_.read_cached_gfile(gfbname=gfname)
+        gfile_new = gc_.read_cached_gfile(gfbname=gfile.filename)
         test2 = '%s' % gfile_new
         self.assertEqual(test1, test2)
 

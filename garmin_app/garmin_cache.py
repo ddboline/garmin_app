@@ -84,8 +84,7 @@ class GarminCache(object):
         """ write cached file """
         if not garminfile or not self.cache_directory:
             return False
-        gfbname = os.path.basename(garminfile.orig_filename)
-        pkl_file = '%s/%s.pkl.gz' % (self.cache_directory, gfbname)
+        pkl_file = '%s/%s.pkl.gz' % (self.cache_directory, garminfile.filename)
         return write_pickle_object_to_file(garminfile, pkl_file)
 
     def get_cache_summary_list(self, directory, options=None):

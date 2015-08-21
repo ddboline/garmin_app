@@ -440,7 +440,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             else:
                 print('unhandled argument:', arg)
     if not gdir:
-        gdir.append('%s/run' % cache_dir)
+        gdir.append('%s/run/gps_tracks' % cache_dir)
 
     if len(gdir) == 1 and os.path.isfile(gdir[0]):
         return read_garmin_file(gdir[0], msg_q=msg_q, options=options)
