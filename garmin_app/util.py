@@ -182,3 +182,10 @@ class OpenPostgreSQLsshTunnel(object):
             return False
         else:
             return True
+
+def test_datetimefromstring():
+    import datetime
+    from pytz import UTC
+    dt0 = '1980-11-17T05:12:13Z'
+    dt1 = datetime.datetime(year=1980, month=11, day=17, hour=5, minute=12, second=13, tzinfo=UTC)
+    assert datetimefromstring(dt0) == dt1
