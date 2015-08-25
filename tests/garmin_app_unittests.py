@@ -154,21 +154,21 @@ class TestGarminApp(unittest.TestCase):
         gfile.calculate_speed()
         mstr = hashlib.md5()
         output = '%s' % gfile.points[0]
-
         try:
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), ['73c52b6753bc841dc09936dadac33c9c',
-                                         '7c67d4fb98b12129b4878d11a2af35ee'])
+                                         '7c67d4fb98b12129b4878d11a2af35ee',
+                                         '53087d6c0777c42c9ff06326ad52ab3c'])
         output = '%s' % gfile.points[-1]
-
         try:
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), ['1787d7f8a80634d7919bd37a49f8f65c',
-                                         '61a3902353b0ecd812d296face1e8c9c'])
+                                         '61a3902353b0ecd812d296face1e8c9c',
+                                         'e968dfc99ec804e48be5308ce7e108bc'])
 
     def test_cache_dataframe_xml(self):
         """ test cache dump xml to dataframe """
