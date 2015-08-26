@@ -439,7 +439,6 @@ class GarminReport(object):
             run_command(
                 'mv %s/html %s/public_html/garmin' % (cache_dir,
                                                       os.getenv('HOME')))
-
         return outstr
 
     @staticmethod
