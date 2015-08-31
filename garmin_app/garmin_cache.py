@@ -14,7 +14,7 @@ import os
 import gzip
 from functools import partial
 
-from .util import run_command, walk_wrapper
+from .util import walk_wrapper
 from .garmin_summary import GarminSummary
 from .garmin_utils import get_md5, print_date_string
 

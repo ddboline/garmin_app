@@ -304,10 +304,12 @@ def do_summary(directory_, msg_q=None, options=None):
             gc_.write_sql_table(summary_list_)
         return summary_list_
 
+
     summary_list_ = cache_.get_cache_summary_list(directory=directory_,
                                                   options=options)
     if not summary_list_:
         return None
+
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.summary_report(summary_list_, options=options))
 
@@ -359,7 +361,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
         options = {'cache_dir': CACHEDIR}
     cache_dir = options['cache_dir']
 
-    gdir = []
+    gdir = set()
     for arg in args:
         if arg == 'build':
             if msg_q != None:
@@ -405,11 +407,11 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
         elif arg == 'occur':
             options['occur'] = True
         elif os.path.isfile(arg):
-            gdir.append(arg)
+            gdir.add(arg)
         elif arg != 'run' and os.path.isdir(arg):
-            gdir.append(arg)
+            gdir.add(arg)
         elif arg != 'run' and os.path.isdir('%s/run/%s' % (cache_dir, arg)):
-            gdir.append('%s/run/%s' % (cache_dir, arg))
+            gdir.add('%s/run/%s' % (cache_dir, arg))
         elif arg == 'correction':
             add_correction(' '.join(args[1:]), json_path='%s/run' % cache_dir)
             exit(0)
@@ -433,14 +435,16 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                         == len(basenames):
                     for fn_ in basenames:
                         print(fn_)
-                gdir += files
+                gdir.update(files)
             elif '.gmn' in arg or 'T' in arg:
                 files = glob.glob('%s/run/gps_tracks/%s' % (cache_dir, arg))
-                gdir += files
+                gdir.update(files)
             else:
                 print('unhandled argument:', arg)
     if not gdir:
-        gdir.append('%s/run/gps_tracks' % cache_dir)
+        gdir.add('%s/run/gps_tracks' % cache_dir)
+
+    gdir = sorted(gdir)
 
     if len(gdir) == 1 and os.path.isfile(gdir[0]):
         return read_garmin_file(gdir[0], msg_q=msg_q, options=options)
