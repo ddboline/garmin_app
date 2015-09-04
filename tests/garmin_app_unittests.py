@@ -52,6 +52,13 @@ def md5_command(command):
         md5 = md5.decode()
     return md5
 
+def cleanup_pickle():
+    if os.path.exists('temp.pkl.gz'):
+        os.remove('temp.pkl.gz')
+    for testf in glob.glob('%s/run/cache/test.*' % CURDIR):
+        if os.path.exists(testf):
+            os.remove(testf)
+
 class TestGarminApp(unittest.TestCase):
     """ GarminApp Unittests """
     def setUp(self):
@@ -64,11 +71,7 @@ class TestGarminApp(unittest.TestCase):
         for csvf in glob.glob('temp.*.*.csv'):
             if os.path.exists(csvf):
                 os.remove(csvf)
-        if os.path.exists('temp.pkl.gz'):
-            os.remove('temp.pkl.gz')
-        for testf in glob.glob('%s/run/cache/test.*' % CURDIR):
-            if os.path.exists(testf):
-                os.remove(testf)
+        cleanup_pickle()
 
     def test_gmn_to_gpx(self):
         """ test gmn_to_gpx converter """
@@ -190,6 +193,7 @@ class TestGarminApp(unittest.TestCase):
             gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
             md5 = md5_command('cat temp.fit.sum.csv | md5sum')
             self.assertEqual(md5, 'b83e146680aa2583f9f1650c5a709b6a')
+#        cleanup_pickle()
 
     def test_cache_dataframe_tcx(self):
         """ test cache dump tcx to dataframe """
@@ -210,6 +214,7 @@ class TestGarminApp(unittest.TestCase):
         gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.sum.csv | md5sum')
         self.assertEqual(md5, 'aff4a61c7568d6ecbc4db36f79cb1e74')
+#        cleanup_pickle()
 
     def test_cache_dataframe_fit(self):
         """ test cache dump fit to dataframe """
@@ -230,6 +235,7 @@ class TestGarminApp(unittest.TestCase):
         gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.sum.csv | md5sum')
         self.assertEqual(md5, 'c65b0b55423651f06c43f3e408ff5aeb')
+#        cleanup_pickle()
 
     def test_cache_dataframe_fit_fill_list(self):
         """ test GarminDataFrame.fill_list """
@@ -247,6 +253,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertIn(mstr.hexdigest(), ['73c52b6753bc841dc09936dadac33c9c',
                                          '53087d6c0777c42c9ff06326ad52ab3c',
                                          '7c67d4fb98b12129b4878d11a2af35ee'])
+#        cleanup_pickle()
 
     def test_pickle_fit(self):
         """ test cache dump pickle to dataframe """
@@ -263,6 +270,7 @@ class TestGarminApp(unittest.TestCase):
         gdf.to_csv('temp.fit.point.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.point.csv | md5sum')
         self.assertEqual(md5, '9b5dd53949c7f9555d97c4a95be1934e')
+#        cleanup_pickle()
 
     def test_garmin_summary(self):
         """ test GarminSummary.__repr__ """
@@ -296,11 +304,8 @@ class TestGarminApp(unittest.TestCase):
         script_path = CURDIR
         options = {'script_path': '%s/garmin_app' % script_path,
                    'cache_dir': script_path}
-        try:
-            html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
+        html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
                                             options=options)
-        except FileNotFoundError:
-            return
         file_md5 = [['index.html', ['1c1abe181f36a85949974a222cc874df',
                                     '548581a142811d412dbf955d2e5372aa']]]
         for fn_, fmd5 in file_md5:
@@ -437,12 +442,13 @@ class TestGarminApp(unittest.TestCase):
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
         output = '\n'.join('%s' % s for s in sorted(sl_,
                                                     key=lambda x: x.filename))
+        test_output = open('tests/test_cache_summary.out', 'rt').read().strip()
         mstr = hashlib.md5()
         try:
             mstr.update(output)
         except TypeError:
             mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['a11c3daee97eb8379dae2cd014a8076b'])
+        self.assertEqual(output, test_output)
 
     def test_garmin_cache_sqlite(self):
         """ test GarminCacheSQL """
@@ -490,6 +496,10 @@ class TestGarminApp(unittest.TestCase):
         gfile_new = gc_.read_cached_gfile(gfbname=gfile.filename)
         test2 = '%s' % gfile_new
         self.assertEqual(test1, test2)
+
+        gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR)
+        gfile_new = gc_.read_cached_gfile(gfbname=gfile.filename)
+        self.assertEqual(gfile_new, False)
 
     def test_summary_report(self):
         """ test GarminReport.summary_report """

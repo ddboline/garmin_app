@@ -28,11 +28,7 @@ def read_pickle_object_in_file(pickle_file):
     outobj = None
     if os.path.exists(pickle_file):
         with gzip.open(pickle_file, 'rb') as pkl_file:
-            try:
-                outobj = pickle.load(pkl_file)
-            except UnicodeDecodeError:
-                print('failed to load from pickle, continuing')
-                return None
+            outobj = pickle.load(pkl_file)
     return outobj
 
 def write_pickle_object_to_file(inpobj, pickle_file):
@@ -70,9 +66,9 @@ class GarminCache(object):
         if corr_list:
             self.corr_list = corr_list
 
-    def read_cached_gfile(self, gfbname=''):
+    def read_cached_gfile(self, gfbname):
         """ return cached file """
-        if not gfbname or not self.cache_directory:
+        if not self.cache_directory:
             return False
         fname = '%s/%s.pkl.gz' % (self.cache_directory, gfbname)
         if not os.path.exists(fname):
@@ -98,12 +94,15 @@ class GarminCache(object):
 
         self.cache_file_is_modified = False
         temp_list = self.cache_read_fn()
-        if temp_list and type(temp_list) == list:
+        if temp_list:
+            if not isinstance(temp_list, list):
+                temp_list = [temp_list]
             self.cache_summary_list = temp_list
         self.cache_summary_file_dict = {os.path.basename(x.filename):
                                         x for x in self.cache_summary_list}
         self.cache_summary_md5_dict = {x.md5sum:
-                                       x for x in self.cache_summary_list}
+                                       x for x in self.cache_summary_list
+                                       if hasattr(x, 'md5sum')}
 
         def process_files(_, dirname, names):
             """ callback function for os.walk """
@@ -122,27 +121,26 @@ class GarminCache(object):
                 return
             reduced_gmn_filename = os.path.basename(gmn_filename)
             gmn_md5sum = get_md5(gmn_filename)
-            if ((reduced_gmn_filename not in self.cache_summary_file_dict) or
-                    (self.cache_summary_file_dict[reduced_gmn_filename].md5sum
-                     != gmn_md5sum) or
-                    (self.do_update
-                     and print_date_string(
-                         self.cache_summary_file_dict[reduced_gmn_filename]\
-                             .begin_datetime)
+            local_dict = self.cache_summary_file_dict
+            if ((reduced_gmn_filename not in local_dict) or
+                    (hasattr(local_dict, 'md5sum') and
+                     local_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
+                    (self.do_update and print_date_string(
+                     local_dict[reduced_gmn_filename].begin_datetime)
                         in self.corr_list)):
                 self.cache_file_is_modified = True
                 gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum,
                                      corr_list=self.corr_list)
                 gfile = gsum.read_file()
                 if gfile:
-                    self.cache_summary_file_dict[reduced_gmn_filename] = gsum
+                    local_dict[reduced_gmn_filename] = gsum
                     self.cache_summary_md5_dict[gmn_md5sum] = gsum
                     self.write_cached_gfile(garminfile=gfile)
                 else:
                     print('file %s not loaded for some reason'
                           % reduced_gmn_filename)
             else:
-                gsum = self.cache_summary_file_dict[reduced_gmn_filename]
+                gsum = local_dict[reduced_gmn_filename]
             summary_list.append(gsum)
 
 
