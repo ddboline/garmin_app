@@ -62,8 +62,6 @@ class GarminLap(object):
                 self.lap_max_hr = int(ent.split('=')[1])
             elif 'intensity' in ent:
                 self.lap_intensity = ent.split('=')[1]
-            else:
-                continue
 
     def read_lap_tcx(self, ents):
         """ read tcx lap entry """

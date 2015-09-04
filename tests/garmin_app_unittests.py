@@ -41,9 +41,11 @@ from garmin_app.garmin_point import GarminPoint
 from garmin_app.garmin_lap import GarminLap
 from garmin_app.garmin_cache import (GarminCache, read_pickle_object_in_file,
                                      write_pickle_object_to_file)
-from garmin_app.garmin_cache_sql import GarminCacheSQL
+from garmin_app.garmin_cache_sql import GarminCacheSQL, GarminSummaryTable
 from garmin_app.garmin_report import GarminReport
-
+from garmin_app.garmin_corrections import (list_of_corrected_laps,
+                                           save_corrections)
+from garmin_app.garmin_file import GarminFile
 from garmin_app.util import run_command, OpenPostgreSQLsshTunnel, HOSTNAME
 
 def md5_command(command):
@@ -57,6 +59,9 @@ def cleanup_pickle():
         os.remove('temp.pkl.gz')
     for testf in glob.glob('%s/run/cache/test.*' % CURDIR):
         if os.path.exists(testf):
+            os.remove(testf)
+    if os.path.exists('test_json'):
+        for testf in glob.glob('%s/test_json/*' % CURDIR):
             os.remove(testf)
 
 class TestGarminApp(unittest.TestCase):
@@ -172,6 +177,11 @@ class TestGarminApp(unittest.TestCase):
         self.assertIn(mstr.hexdigest(), ['1787d7f8a80634d7919bd37a49f8f65c',
                                          '61a3902353b0ecd812d296face1e8c9c',
                                          'e968dfc99ec804e48be5308ce7e108bc'])
+        gfile = GarminParse(filename=FITFILE)
+        gfile.read_file()
+        gfile.points[1].speed_permi = None
+        gfile.calculate_speed()
+        self.assertAlmostEqual(12.41778, gfile.points[1].speed_permi, places=4)
 
     def test_cache_dataframe_xml(self):
         """ test cache dump xml to dataframe """
@@ -435,11 +445,11 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'b7ab537ea3090fc44276b15bc61577b5')
 
-    def test_garmin_cache_get_summary_list(self):
+    def test_garmin_cache(self):
         """ test GarminCache.get_cache_summary_list """
         gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
                           cache_directory='%s/run/cache' % CURDIR)
-        sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
+        sl_ = gc_.get_cache_summary_list(directory=['%s/tests' % CURDIR])
         output = '\n'.join('%s' % s for s in sorted(sl_,
                                                     key=lambda x: x.filename))
         test_output = open('tests/test_cache_summary.out', 'rt').read().strip()
@@ -450,8 +460,6 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output.encode())
         self.assertEqual(output, test_output)
 
-    def test_garmin_cache_sqlite(self):
-        """ test GarminCacheSQL """
         sqlite_str = 'sqlite:///%s/run/cache/test.db' % CURDIR
         gc_ = GarminCacheSQL(sql_string=sqlite_str)
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
@@ -464,28 +472,38 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), ['a11c3daee97eb8379dae2cd014a8076b'])
 
-    def test_garmin_cache_postgresql(self):
-        """ test GarminCacheSQL """
-        if HOSTNAME != 'dilepton-tower':
-            return
-        with OpenPostgreSQLsshTunnel():
-            postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' \
-                          + '@localhost:5432/test_garmin_summary'
-            gc_ = GarminCacheSQL(sql_string=postgre_str)
-            sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
-            output = '\n'.join('%s' % s for s in sorted(sl_, key=lambda x:
-                                                                   x.filename))
-            gc_.delete_table()
-            mstr = hashlib.md5()
-            try:
-                mstr.update(output)
-            except TypeError:
-                mstr.update(output.encode())
-            self.assertEqual(mstr.hexdigest(),
-                             'a11c3daee97eb8379dae2cd014a8076b')
+        gc0 = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
+                          cache_directory='%s/run/cache' % CURDIR)
+        sl_ = gc_.get_cache_summary_list(directory=['%s/tests' % CURDIR])
+        sqlite_str = 'sqlite:///%s/run/cache/test.db' % CURDIR
+        gc1 = GarminCacheSQL(sql_string=sqlite_str, garmin_cache=gc0,
+                             summary_list=sl_)
+        output = '\n'.join('%s' % s for s in sorted(gc1.summary_list,
+                                                    key=lambda x: x.filename))
+        mstr = hashlib.md5()
+        try:
+            mstr.update(output)
+        except TypeError:
+            mstr.update(output.encode())
+        self.assertEqual(output, test_output)
 
-    def test_cached_gfile(self):
-        """ test GarminCache.read_cached_gfile """
+        if HOSTNAME == 'dilepton-tower':
+            with OpenPostgreSQLsshTunnel():
+                postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' \
+                              + '@localhost:5432/test_garmin_summary'
+                gc_ = GarminCacheSQL(sql_string=postgre_str)
+                sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
+                output = '\n'.join('%s' % s for s in sorted(sl_, key=lambda x:
+                                                                       x.filename))
+                gc_.delete_table()
+                mstr = hashlib.md5()
+                try:
+                    mstr.update(output)
+                except TypeError:
+                    mstr.update(output.encode())
+                self.assertEqual(mstr.hexdigest(),
+                                 'a11c3daee97eb8379dae2cd014a8076b')
+
         gc_ = GarminCache(
             pickle_file='%s/temp.pkl.gz' % CURDIR,
             cache_directory='%s/run/cache' % CURDIR)
@@ -501,8 +519,6 @@ class TestGarminApp(unittest.TestCase):
         gfile_new = gc_.read_cached_gfile(gfbname=gfile.filename)
         self.assertEqual(gfile_new, False)
 
-    def test_summary_report(self):
-        """ test GarminReport.summary_report """
         gc_ = GarminCache(
             pickle_file='%s/temp.pkl.gz' % CURDIR,
             cache_directory='%s/run/cache' % CURDIR)
@@ -523,6 +539,64 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '022c8b604d32c9297195ad80aef5b73c')
 
+    def test_garmin_summary_table(self):
+        tmp = '%s' % GarminSummaryTable()
+        exp = 'GarminSummaryTable<filename=None, begin_datetime=None, ' + \
+              'sport=None, total_calories=None, total_distance=None, ' + \
+              'total_duration=None, total_hr_dur=None, total_hr_dis=None, ' + \
+              'number_of_items=None, md5sum=None>'
+        self.assertEqual(tmp, exp)
+
+    def test_list_of_corrected_laps(self):
+        test_json = {u'2011-07-04T08:58:27Z': {0: 3.1068559611866697},
+                     u'2012-03-13T18:21:11Z': {0: 0.362}, u'DUMMY': {0: 0.0}}
+        save_corrections(test_json, json_path='json_test',
+                         json_file='test.json')
+        tmp = list_of_corrected_laps(json_path='json_test',
+                                     json_file='test.json')
+        md5_ = get_md5('json_test/test.json')
+        self.assertEqual(tmp, test_json)
+        self.assertEqual(md5_, 'a6ff6819f6c47a0af8334fae36c49b2d')
+
+    def test_garmin_file(self):
+        gf_ = GarminFile(filename=FITFILE, filetype='fit')
+        tmp = '%s' % gf_
+        test = 'GarminFile<filename=test.fit, filetype=fit, ' + \
+               'begin_datetime=None, sport=None, total_calories=0, ' + \
+               'total_distance=0, total_duration=0, total_hr_dur=0, ' + \
+               'total_hr_dis=0>'
+        self.assertEqual(tmp, test)
+    
+    def test_garmin_lap_fit(self):
+        gfile = GarminParse(filename=FITFILE)
+        gfile.read_file()
+        gl_ = gfile.laps[0]
+        opts = {key: getattr(gl_, key) for key in dir(gl_)}
+        gl_ = GarminLap(**opts)
+        tmp = '%s' % gl_
+        test = 'GarminLap<lap_type=None, lap_index=None, ' + \
+               'lap_start=2014-01-12 16:00:05, lap_duration=1451.55, ' + \
+               'lap_distance=5081.34, lap_trigger=Manual, ' + \
+               'lap_max_speed=4.666, lap_calories=351, lap_avg_hr=152, ' + \
+               'lap_max_hr=160, lap_intensity=Active, lap_number=0, ' + \
+               'lap_start_string=2014-01-12T16:00:05Z>'
+        self.assertEqual(tmp, test)
+
+    def test_garmin_lap_xml(self):
+        gfile = GarminParse(filename=GMNFILE)
+        gfile.read_file()
+        gl_ = gfile.laps[0]
+        opts = {key: getattr(gl_, key) for key in dir(gl_)}
+        gl_ = GarminLap(**opts)
+        gl_.read_lap_xml(['avg_hr=123', 'max_hr=170'])
+        tmp = '%s' % gl_
+        test = 'GarminLap<lap_type=1015, lap_index=108, ' + \
+               'lap_start=2011-05-07 15:43:08, lap_duration=280.38, ' + \
+               'lap_distance=1696.85999, lap_trigger=manual, ' + \
+               'lap_max_speed=7.96248627, lap_calories=61, ' + \
+               'lap_avg_hr=123, lap_max_hr=170, lap_intensity=active, ' + \
+               'lap_number=0, lap_start_string=2011-05-07T15:43:08-04:00>'
+        self.assertEqual(tmp, test)
 
 if __name__ == '__main__':
     unittest.main()

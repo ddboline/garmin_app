@@ -59,13 +59,12 @@ JSON_DIR = '%s/setup_files/build/garmin_app/garmin_app' % os.getenv('HOME')
 
 _list_of_corrected_laps = {}
 
-def list_of_corrected_laps(json_path=None):
-    if not json_path:
-        json_path = JSON_DIR
+def list_of_corrected_laps(json_path=JSON_DIR,
+                           json_file='garmin_corrections.json'):
     if not os.path.exists(json_path):
         json_path = '%s/garmin_app/garmin_app' % os.getenv('HOME')
     if len(_list_of_corrected_laps) == 0:
-        with open('%s/garmin_corrections.json' % json_path, 'rt') as jfile_:
+        with open('%s/%s' % (json_path, json_file), 'rt') as jfile_:
             tmp_dict = json.load(jfile_)
             for key, val in tmp_dict.items():
                 tmp_ = {}
@@ -76,11 +75,10 @@ def list_of_corrected_laps(json_path=None):
     return _list_of_corrected_laps
 
 
-def save_corrections(list_, json_path=None):
+def save_corrections(list_, json_path=JSON_DIR,
+                     json_file='garmin_corrections.json'):
     """ save json file """
-    if not json_path:
-        json_path = JSON_DIR
     if not os.path.exists(json_path):
         os.makedirs(json_path)
-    with open('%s/garmin_corrections.json' % json_path, 'wt') as jfile:
+    with open('%s/%s' % (json_path, json_file), 'wt') as jfile:
         json.dump(list_, jfile, indent=1, sort_keys=True)

@@ -24,8 +24,6 @@ class GarminDataFrame(object):
             columns = []
             tmp_array = []
             for attr in self.garminclass._db_entries:
-                if attr == 'corr_list':
-                    continue
                 columns.append(attr)
                 tmp_array.append(getattr(it_, attr))
             inp_array.append(tmp_array)
