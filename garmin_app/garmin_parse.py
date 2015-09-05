@@ -51,8 +51,8 @@ class GarminParse(GarminFile):
         elif '.gmn' in self.orig_filename.lower():
             self.filetype = 'gmn'
             self.orig_filename = convert_gmn_to_xml(self.orig_filename)
-        elif '.gpx' in self.orig_filename.lower():
-            self.filetype = 'gpx'
+#        elif '.gpx' in self.orig_filename.lower():
+#            self.filetype = 'gpx'
 
     def read_file(self):
         """ read file, use is_tcx/is_txt to decide which function to call """
@@ -60,7 +60,7 @@ class GarminParse(GarminFile):
             self.read_file_tcx()
         elif self.filetype == 'txt':
             self.read_file_txt()
-        else:
+        elif self.filetype == 'gmn':
             self.read_file_xml()
         self.begin_datetime = self.laps[0].lap_start
         printed_datetime = print_date_string(self.begin_datetime)
@@ -75,12 +75,12 @@ class GarminParse(GarminFile):
         cur_point = None
         last_ent = None
         temp_points = []
-        with run_command('xml2 < %s' % self.orig_filename, do_popen=True) as pop_:
-            for line in pop_.stdout:
-                try:
-                    ent = line.strip().split('/')
-                except TypeError:
-                    ent = line.decode().strip().split('/')
+        with run_command('xml2 < %s' % self.orig_filename,
+                         do_popen=True) as pop_:
+            for line in pop_:
+                if hasattr(line, 'decode'):
+                    line = line.decode()
+                ent = line.strip().split('/')
                 if ent[2] == 'run':
                     if '@sport' in ent[3]:
                         self.sport = ent[3].split('=')[1]
@@ -150,13 +150,13 @@ class GarminParse(GarminFile):
                                               * (1701/26.26) / (3390/26.43))
                     for lap in self.laps:
                         lap.lap_calories = int(lap.lap_calories * (1701/26.26)
-                                             / (3390/26.43))
+                                               / (3390/26.43))
                 if self.sport == 'running':
                     self.total_calories = int(self.total_calories
                                               * (3390/26.43) / (1701/26.26))
                     for lap in self.laps:
                         lap.lap_calories = int(lap.lap_calories * (3390/26.43)
-                                             / (1701/26.26))
+                                               / (1701/26.26))
         return None
 
     def read_file_tcx(self):
@@ -164,12 +164,12 @@ class GarminParse(GarminFile):
         cur_lap = None
         cur_point = None
         temp_points = []
-        with run_command('xml2 < %s' % self.orig_filename, do_popen=True) as pop_:
-            for line in pop_.stdout:
-                try:
-                    ent = line.strip().split('/')
-                except TypeError:
-                    ent = line.decode().strip().split('/')
+        with run_command('xml2 < %s' % self.orig_filename,
+                         do_popen=True) as pop_:
+            for line in pop_:
+                if hasattr(line, 'decode'):
+                    line = line.decode()
+                ent = line.strip().split('/')
                 if len(ent) < 5:
                     continue
                 elif 'Sport' in ent[4]:
@@ -260,12 +260,18 @@ class GarminParse(GarminFile):
                             self.points.append(cur_point)
                             cur_point = GarminPoint(time=cur_point.time)
                     if key == 'time':
-                        hour = int(val[0:2])
-                        minute = int(val[2:4])
-                        second = int(val[4:6])
-                        cur_lap.lap_start.hour = hour
-                        cur_lap.lap_start.minute = minute
-                        cur_lap.lap_start.second = second
+                        year, month, day = (cur_lap.lap_start.year,
+                                            cur_lap.lap_start.month,
+                                            cur_lap.lap_start.day)
+                        hour, minute, second = [int(x) for x in
+                                                val.split(':')[:3]]
+
+                        cur_lap.lap_start = datetime.datetime(year=year,
+                                                              month=month,
+                                                              day=day,
+                                                              hour=hour,
+                                                              minute=minute,
+                                                              second=second)
                     if key == 'type':
                         self.sport = val
                     if key == 'lap':

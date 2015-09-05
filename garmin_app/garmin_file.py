@@ -33,6 +33,8 @@ class GarminFile(object):
         """ Init Method """
         self.orig_filename = filename
         self.filename = os.path.basename(filename)
+        if not os.path.exists(filename):
+            raise IOError
         self.filetype = ''
         if filetype in self.garmin_file_types:
             self.filetype = filetype

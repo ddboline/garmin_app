@@ -16,12 +16,14 @@ class PopenWrapperClass(object):
     def __init__(self, command):
         """ init fn """
         self.command = command
-        self.pop_ = Popen(self.command, shell=True, stdout=PIPE,
-                          close_fds=True)
+        self.pop_ = Popen(self.command, shell=True, stdout=PIPE)
+
+    def __iter__(self):
+        return self.pop_.stdout
 
     def __enter__(self):
         """ enter fn """
-        return self.pop_
+        return self.pop_.stdout
 
     def __exit__(self, exc_type, exc_value, traceback):
         """ exit fn """
@@ -42,12 +44,21 @@ def run_command(command, do_popen=False, turn_on_commands=True,
         print(command)
         return command
     elif do_popen:
-        return PopenWrapperClass(command)
-    elif single_line:
-        with PopenWrapperClass(command) as pop_:
-            return pop_.stdout.read()
+        if single_line:
+            with PopenWrapperClass(command) as pop_:
+                return pop_.read()
+        else:
+            return PopenWrapperClass(command)
     else:
         return call(command, shell=True)
+
+def test_run_command():
+    cmd = 'echo "HELLO"'
+    out = run_command(cmd, do_popen=True, single_line=True).strip()
+    assert out == b'HELLO'
+
+    out = run_command(cmd, turn_on_commands=False)
+    assert out == cmd
 
 def convert_date(input_date):
     """

@@ -45,13 +45,10 @@ class GarminReport(object):
         self.cache_obj = cache_obj
         self.msg_q = msg_q
 
-    def summary_report(self, summary_list, copy_to_public_html=True,
-                       options=None):
+    def summary_report(self, summary_list, options, copy_to_public_html=True):
         """ get summary of files in directory """
         opts = ['do_year', 'do_month', 'do_week', 'do_day',
                 'do_file', 'do_sport', 'do_average']
-        if not options:
-            options = {o: None for o in opts}
         do_year, do_month, do_week, do_day, do_file, do_sport, do_average = (
                                                      options[o] for o in opts)
 
@@ -393,7 +390,7 @@ class GarminReport(object):
 
                 if not do_sport:
                     for i in sorted(occur_map):
-                        retval.append(i, occur_map[i])
+                        retval.append('%s %s' % (i, occur_map[i]))
         outstr = re.sub('\n\n+', '\n', '\n'.join(retval))
 
         htmlostr = []
@@ -1037,9 +1034,12 @@ class GarminReport(object):
                 ' %10s \t' % ('%s / km' % print_h_m_s(gsum.total_duration
                 / (gsum.total_distance / 1000.), False)))
         elif sport == 'biking':
-            retval.append(
-                ' %10s \t' % ('%.2f mph' % ((gsum.total_distance
-                / METERS_PER_MILE) / (gsum.total_duration / 60. / 60.))))
+            if gsum.total_duration > 0:
+                retval.append(
+                    ' %10s \t' % ('%.2f mph' % ((gsum.total_distance
+                    / METERS_PER_MILE) / (gsum.total_duration / 60. / 60.))))
+            else:
+                retval.append(' %10s \t' % ('0.0 mph'))
         else:
             retval.append(' %10s \t' % ' ')
         retval.append(
@@ -1137,8 +1137,8 @@ def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi',
             continue
         if point.heart_rate:
             try:
-                avg_hrt_rate += point.heart_rate * (cur_point_time
-                                                    - last_point_time)
+                avg_hrt_rate += point.heart_rate * (cur_point_time -
+                                                    last_point_time)
             except ValueError as exc:
                 print('Exception:', exc, point.heart_rate, cur_point_time,
                       last_point_me)

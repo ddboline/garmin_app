@@ -17,6 +17,7 @@ GMNFILE = 'tests/test.gmn'
 TCXFILE = 'tests/test.tcx'
 FITFILE = 'tests/test.fit'
 TXTFILE = 'tests/test.txt'
+GPXFILE = 'tests/test.gpx'
 
 GARMINSUMMARYSTR = 'GarminSummary<filename=test.fit, ' + \
                    'begin_datetime=2014-01-12 16:00:05, sport=running, ' + \
@@ -33,7 +34,9 @@ CURDIR = os.path.abspath(os.curdir)
 os.sys.path.append(CURDIR)
 
 from garmin_app.garmin_utils import (convert_gmn_to_gpx, convert_fit_to_tcx,
-                                     convert_gmn_to_xml, get_md5)
+                                     convert_gmn_to_xml, get_md5, get_md5_old,
+                                     days_in_month, expected_calories,
+                                     read_garmin_file)
 from garmin_app.garmin_parse import GarminParse
 from garmin_app.garmin_summary import GarminSummary
 from garmin_app.garmin_data_frame import GarminDataFrame
@@ -42,14 +45,14 @@ from garmin_app.garmin_lap import GarminLap
 from garmin_app.garmin_cache import (GarminCache, read_pickle_object_in_file,
                                      write_pickle_object_to_file)
 from garmin_app.garmin_cache_sql import GarminCacheSQL, GarminSummaryTable
-from garmin_app.garmin_report import GarminReport
+from garmin_app.garmin_report import GarminReport, print_history_buttons
 from garmin_app.garmin_corrections import (list_of_corrected_laps,
                                            save_corrections)
 from garmin_app.garmin_file import GarminFile
 from garmin_app.util import run_command, OpenPostgreSQLsshTunnel, HOSTNAME
 
 def md5_command(command):
-    md5 = run_command(command, single_line=True).split()[0]
+    md5 = run_command(command, single_line=True, do_popen=True).split()[0]
     if hasattr(md5, 'decode'):
         md5 = md5.decode()
     return md5
@@ -124,7 +127,7 @@ class TestGarminApp(unittest.TestCase):
 
     def test_read_txt(self):
         """ read text format """
-        gfile = GarminParse(filename=TXTFILE)
+        gfile = GarminParse(filename=TXTFILE, filetype='txt', corr_list=['A'])
         gfile.read_file()
         self.assertTrue(gfile.filetype == 'txt')
         self.assertEqual(gfile.begin_datetime.date(),
@@ -162,18 +165,12 @@ class TestGarminApp(unittest.TestCase):
         gfile.calculate_speed()
         mstr = hashlib.md5()
         output = '%s' % gfile.points[0]
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), ['73c52b6753bc841dc09936dadac33c9c',
                                          '7c67d4fb98b12129b4878d11a2af35ee',
                                          '53087d6c0777c42c9ff06326ad52ab3c'])
         output = '%s' % gfile.points[-1]
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), ['1787d7f8a80634d7919bd37a49f8f65c',
                                          '61a3902353b0ecd812d296face1e8c9c',
                                          'e968dfc99ec804e48be5308ce7e108bc'])
@@ -256,10 +253,7 @@ class TestGarminApp(unittest.TestCase):
         output = '%s' % gdf.fill_list()[0]
 
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), ['73c52b6753bc841dc09936dadac33c9c',
                                          '53087d6c0777c42c9ff06326ad52ab3c',
                                          '7c67d4fb98b12129b4878d11a2af35ee'])
@@ -300,10 +294,7 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.file_report_txt(gfile)
 
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'dc49eed73bf44c1b5d5c2444a59bec96')
 
     def test_garmin_file_report_html(self):
@@ -332,10 +323,7 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.total_summary_report_txt(gsum, sport='running')
 
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '9f5aa437a6e8bbe6ecd25a088b634018')
 
     def test_garmin_day_summary_report_txt(self):
@@ -347,10 +335,7 @@ class TestGarminApp(unittest.TestCase):
                     gsum, sport='running', cur_date=gsum.begin_datetime.date())
 
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'b05ddcddc03a64b650a75ad397037d00')
 
     def test_garmin_day_average_report_txt(self):
@@ -358,14 +343,12 @@ class TestGarminApp(unittest.TestCase):
         gsum = GarminSummary(FITFILE)
         gsum.read_file()
         gr_ = GarminReport()
+        self.assertFalse(gr_.day_average_report_txt(gsum, number_days=0))
         output = gr_.day_average_report_txt(gsum, sport='running',
                                             number_days=1)
 
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '59c50d1eff34a78619e9f37e45445535')
 
     def test_garmin_week_summary_report_txt(self):
@@ -380,10 +363,7 @@ class TestGarminApp(unittest.TestCase):
                                              date=gsum.begin_datetime)
 
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'e538e1b1abd954083c9cc19e14d04315')
 
     def test_garmin_week_average_report_txt(self):
@@ -394,10 +374,7 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.week_average_report_txt(gsum, sport='running',
                                              number_of_weeks=1)
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '4b649d4c617128138a1540c9dc2e1a09')
 
     def test_garmin_month_summary_report_txt(self):
@@ -410,10 +387,7 @@ class TestGarminApp(unittest.TestCase):
                                               month=gsum.begin_datetime.month,
                                               number_in_month=1)
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'd2a1204e0374c7e83c450a1ae4ce3981')
 
     def test_garmin_month_average_report_txt(self):
@@ -424,10 +398,7 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.month_average_report_txt(gsum, sport='running',
                                               number_of_months=1)
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '08a90d3c2e16ba2aafb4403e3ed69824')
 
     def test_garmin_year_summary_report_txt(self):
@@ -439,10 +410,7 @@ class TestGarminApp(unittest.TestCase):
         output = gr_.year_summary_report_txt(gsum, sport='running',
                                              year=dt_.year, number_in_year=1)
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), 'b7ab537ea3090fc44276b15bc61577b5')
 
     def test_garmin_cache(self):
@@ -454,10 +422,7 @@ class TestGarminApp(unittest.TestCase):
                                                     key=lambda x: x.filename))
         test_output = open('tests/test_cache_summary.out', 'rt').read().strip()
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
+        mstr.update(output.encode())
         self.assertEqual(output, test_output)
 
         sqlite_str = 'sqlite:///%s/run/cache/test.db' % CURDIR
@@ -466,11 +431,8 @@ class TestGarminApp(unittest.TestCase):
         output = '\n'.join('%s' % s for s in sorted(sl_,
                                                     key=lambda x: x.filename))
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['a11c3daee97eb8379dae2cd014a8076b'])
+        mstr.update(output.encode())
+        self.assertIn(mstr.hexdigest(), ['a59c8ee120e789eda36e0cc8592ffce1'])
 
         gc0 = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
                           cache_directory='%s/run/cache' % CURDIR)
@@ -481,11 +443,8 @@ class TestGarminApp(unittest.TestCase):
         output = '\n'.join('%s' % s for s in sorted(gc1.summary_list,
                                                     key=lambda x: x.filename))
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
-        self.assertEqual(output, test_output)
+        mstr.update(output.encode())
+        self.assertEqual(mstr.hexdigest(), '0b8fc64a6c97d74c045975e93844ae21')
 
         if HOSTNAME == 'dilepton-tower':
             with OpenPostgreSQLsshTunnel():
@@ -497,12 +456,9 @@ class TestGarminApp(unittest.TestCase):
                                                                        x.filename))
                 gc_.delete_table()
                 mstr = hashlib.md5()
-                try:
-                    mstr.update(output)
-                except TypeError:
-                    mstr.update(output.encode())
+                mstr.update(output.encode())
                 self.assertEqual(mstr.hexdigest(),
-                                 'a11c3daee97eb8379dae2cd014a8076b')
+                                 'a59c8ee120e789eda36e0cc8592ffce1')
 
         gc_ = GarminCache(
             pickle_file='%s/temp.pkl.gz' % CURDIR,
@@ -533,11 +489,58 @@ class TestGarminApp(unittest.TestCase):
         output = rp_.summary_report(sl_, copy_to_public_html=False,
                                     options=options)
         mstr = hashlib.md5()
-        try:
-            mstr.update(output)
-        except TypeError:
-            mstr.update(output.encode())
-        self.assertEqual(mstr.hexdigest(), '022c8b604d32c9297195ad80aef5b73c')
+        mstr.update(output.encode())
+        self.assertEqual(mstr.hexdigest(), 'dd7cc23be0f6f21a6d05782e506cb647')
+
+    def test_summary_report_file(self):
+        gc_ = GarminCache(
+            pickle_file='%s/temp.pkl.gz' % CURDIR,
+            cache_directory='%s/run/cache' % CURDIR)
+        sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
+        rp_ = GarminReport(cache_obj=gc_)
+        options = {'do_plot': False, 'do_year': True, 'do_month': True,
+                   'do_week': True, 'do_day': True, 'do_file': True,
+                   'do_sport': 'running', 'do_update': False,
+                   'do_average': True}
+        script_path = CURDIR
+        options['script_path'] = '%s/garmin_app' % script_path
+        options['cache_dir'] = script_path
+        output = rp_.summary_report(sl_, copy_to_public_html=False,
+                                    options=options)
+        mstr = hashlib.md5()
+        mstr.update(output.encode())
+        self.assertEqual(mstr.hexdigest(), '79e43ff052e6a2238f54d7c2cd78b0ad')
+        options['do_sport'] = None
+        output = rp_.summary_report(sl_, copy_to_public_html=False,
+                                    options=options)
+        mstr = hashlib.md5()
+        mstr.update(output.encode())
+        self.assertEqual(mstr.hexdigest(), '927f7ac0f1eb04b20ffe78c23bc6936c')
+        options['do_sport'] = 'running'
+        options['do_week'] = False
+        output = rp_.summary_report(sl_, copy_to_public_html=False,
+                                    options=options)
+        mstr = hashlib.md5()
+        mstr.update(output.encode())
+        self.assertEqual(mstr.hexdigest(), '88d026c8736bef031d84bede447471cc')
+        options['do_sport'] = 'running'
+        options['do_month'] = False
+        output = rp_.summary_report(sl_, copy_to_public_html=False,
+                                    options=options)
+        mstr = hashlib.md5()
+        mstr.update(output.encode())
+        self.assertEqual(mstr.hexdigest(), '94954edf36e8625143735f8b3e263c6b')
+        options = {'do_plot': False, 'do_year': False, 'do_month': False,
+                   'do_week': False, 'do_day': False, 'do_file': False,
+                   'do_sport': None, 'do_update': False, 'do_average': False,
+                   'occur': True}
+        options['script_path'] = '%s/garmin_app' % script_path
+        options['cache_dir'] = script_path
+        output = rp_.summary_report(sl_, copy_to_public_html=False,
+                                    options=options)
+        mstr = hashlib.md5()
+        mstr.update(output.encode())
+        self.assertEqual(mstr.hexdigest(), '6256eb536104110794d9fc2123a8c104')
 
     def test_garmin_summary_table(self):
         tmp = '%s' % GarminSummaryTable()
@@ -566,7 +569,7 @@ class TestGarminApp(unittest.TestCase):
                'total_distance=0, total_duration=0, total_hr_dur=0, ' + \
                'total_hr_dis=0>'
         self.assertEqual(tmp, test)
-    
+
     def test_garmin_lap_fit(self):
         gfile = GarminParse(filename=FITFILE)
         gfile.read_file()
@@ -597,6 +600,92 @@ class TestGarminApp(unittest.TestCase):
                'lap_avg_hr=123, lap_max_hr=170, lap_intensity=active, ' + \
                'lap_number=0, lap_start_string=2011-05-07T15:43:08-04:00>'
         self.assertEqual(tmp, test)
+
+    def test_read_xml_correction(self):
+        """ read garmin xml format """
+        gfile = GarminParse(filename=GMNFILE,
+                            corr_list={'2011-05-07T15:43:08Z': {0: [1.1,
+                                                                    300]}})
+        gfile.read_file()
+        tmp = '%s' % gfile
+        test = 'GarminFile<filename=test.gmn, filetype=gmn, ' + \
+               'begin_datetime=2011-05-07 15:43:08, sport=biking, ' + \
+               'total_calories=61, total_distance=1770.2784, ' + \
+               'total_duration=300, total_hr_dur=0, total_hr_dis=0>'
+        self.assertTrue(gfile.filetype == 'gmn')
+        self.assertEqual(gfile.begin_datetime.date(), datetime.date(year=2011,
+                         month=5, day=7))
+        self.assertEqual(tmp, test)
+        gsum = GarminSummary(filename=GMNFILE,
+                             corr_list={'2011-05-07T15:43:08Z': {0: [1.1,
+                                                                    300]}})
+        gsum.read_file()
+        tmp = '%s' % gsum
+        test = 'GarminSummary<filename=test.gmn, begin_datetime=' + \
+               '2011-05-07 15:43:08, sport=biking, total_calories=61, ' + \
+               'total_distance=1770.2784, total_duration=300, ' + \
+               'total_hr_dur=0, total_hr_dis=0, number_of_items=1, ' + \
+               'md5sum=af6f79ef18f4ec5526d3f987b6f00f9b>'
+        self.assertEqual(tmp, test)
+
+    def test_read_tcx_correction(self):
+        """ read garmin tcx format """
+        gfile = GarminParse(filename=TCXFILE,
+                            corr_list={'2012-11-05T11:52:21Z': {0: [4.0,
+                                                                    1050]}})
+        gfile.read_file()
+        tmp = '%s' % gfile
+        test = 'GarminFile<filename=test.tcx, filetype=tcx, ' + \
+               'begin_datetime=2012-11-05 11:52:21, sport=biking, ' + \
+               'total_calories=285, total_distance=6437.376, ' + \
+               'total_duration=1050, total_hr_dur=0, total_hr_dis=0>'
+        self.assertTrue(gfile.filetype == 'tcx')
+        self.assertEqual(gfile.begin_datetime.date(), datetime.date(year=2012,
+                         month=11, day=5))
+        self.assertEqual(tmp, test)
+        gsum = GarminSummary(filename=TCXFILE,
+                             corr_list={'2012-11-05T11:52:21Z': {0: [4.0,
+                                                                     1050]}})
+        gsum.read_file()
+        tmp = '%s' % gsum
+        test = 'GarminSummary<filename=test.tcx, begin_datetime=' + \
+               '2012-11-05 11:52:21, sport=biking, total_calories=285, ' + \
+               'total_distance=6437.376, total_duration=1050, ' + \
+               'total_hr_dur=0, total_hr_dis=0, number_of_items=1, ' + \
+               'md5sum=eaa1e1a2bc26b1145a046c39f31b4024>'
+        self.assertEqual(tmp, test)
+
+    def test_print_history_buttons(self):
+        self.assertIsNone(print_history_buttons(None))
+        self.assertEqual(print_history_buttons(['year']), '')
+        test = '<button type="submit" onclick="send_command(' + \
+               "'prev 2015 month'" + ');"> 2015 month </button>'
+        self.assertEqual(print_history_buttons(['year', '2015 month']), test)
+
+    def test_days_in_month(self):
+        month = datetime.date.today().month
+        year = datetime.date.today().year
+        self.assertEqual(days_in_month(), days_in_month(month=month,
+                                                        year=year))
+        self.assertEqual(days_in_month(month=12, year=2015), 31)
+
+    def test_expected_calories(self):
+        self.assertAlmostEqual(expected_calories(), 14.048, places=3)
+
+    def test_get_md5(self):
+        self.assertEqual(get_md5(FITFILE), get_md5_old(FITFILE))
+
+    def test_read_garmin_file(self):
+        options = {'do_plot': False, 'do_year': False, 'do_month': False,
+                   'do_week': False, 'do_day': False, 'do_file': False,
+                   'do_sport': None, 'do_update': False, 'do_average': False}
+        script_path = CURDIR
+        options['script_path'] = '%s/garmin_app' % script_path
+        options['cache_dir'] = script_path
+        self.assertTrue(read_garmin_file(FITFILE, options=options))
+
+        with self.assertRaises(IOError):
+            read_garmin_file('NULL', options=options)
 
 if __name__ == '__main__':
     unittest.main()

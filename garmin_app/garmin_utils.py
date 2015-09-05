@@ -148,11 +148,10 @@ def convert_gmn_to_xml(gmn_filename):
         xml_file.write('<root>\n')
         with run_command('garmin_dump %s' % gmn_filename, do_popen=True) as \
                 pop_:
-            for line in pop_.stdout:
-                try:
-                    xml_file.write(line)
-                except TypeError:
-                    xml_file.write(line.decode())
+            for line in pop_:
+                if hasattr(line, 'decode'):
+                    line = line.decode()
+                xml_file.write(line)
         xml_file.write('</root>\n')
         os.rename(xml_file.name, '/tmp/temp.xml')
         return '/tmp/temp.xml'
@@ -171,8 +170,8 @@ def get_md5(fname):
     """ md5 function using cli """
     if not os.path.exists(fname):
         return None
-    with run_command('md5sum "%s"' % fname, do_popen=True) as pop_:
-        output = pop_.stdout.read().split()[0]
+    output = run_command('md5sum "%s"' % fname, do_popen=True,
+                         single_line=True).split()[0]
     return output.decode()
 
 def compare_with_remote(cache_dir):
@@ -204,8 +203,8 @@ def compare_with_remote(cache_dir):
                 ('.pkl.gz' in fn_):
                 continue
             cmd = 'md5sum %s' % fname
-            with run_command(cmd, do_popen=True) as pop_:
-                md5sum = pop_.stdout.read().split()[0]
+            md5sum = run_command(cmd, do_popen=True,
+                                 single_line=True).read().split()[0]
             if fn_ not in local_file_chksum:
                 local_file_chksum[fn_] = md5sum
 
