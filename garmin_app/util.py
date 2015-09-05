@@ -71,12 +71,19 @@ def convert_date(input_date):
     _year = 2000 + int(input_date[4:6])
     return datetime.date(_year, _month, _day)
 
+def test_convert_date():
+    import datetime
+    assert convert_date('080515') == datetime.date(year=2015, month=8, day=5)
+
 def print_h_m_s(second):
     """ convert time from seconds to hh:mm:ss format """
     hours = int(second / 3600)
     minutes = int(second / 60) - hours * 60
     seconds = int(second) - minutes * 60 - hours * 3600
     return '%02i:%02i:%02i' % (hours, minutes, seconds)
+
+def test_print_h_m_s():
+    assert print_h_m_s(12345) == '03:25:45'
 
 def datetimefromstring(tstr, ignore_tz=False):
     """ wrapper around dateutil.parser.parse """
@@ -96,6 +103,22 @@ def openurl(url_):
         print('something bad happened %d' % urlout.status_code)
         raise HTTPError
     return urlout.text.split('\n')
+
+def test_openurl():
+    import hashlib
+    output = ''.join(openurl('https://httpbin.org/html'))
+    mstr = hashlib.md5()
+    mstr.update(output.encode(errors='replace'))
+    assert mstr.hexdigest() == 'fefa33a57febcf8a413cc252966670fb'
+
+    from requests import HTTPError
+    from nose.tools import raises
+
+    @raises(HTTPError)
+    def test_httperror():
+        openurl('https://httpbin.org/aspdoifqwpof')
+
+    test_httperror()
 
 def dump_to_file(url_, outfile_):
     """ dump url to file """

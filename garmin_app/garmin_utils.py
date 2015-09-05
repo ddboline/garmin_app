@@ -204,7 +204,7 @@ def compare_with_remote(cache_dir):
                 continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True,
-                                 single_line=True).read().split()[0]
+                                 single_line=True).split()[0]
             if fn_ not in local_file_chksum:
                 local_file_chksum[fn_] = md5sum
 
