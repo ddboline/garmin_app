@@ -63,10 +63,10 @@ def cleanup_pickle():
     for testf in glob.glob('%s/run/cache/test.*' % CURDIR):
         if os.path.exists(testf):
             os.remove(testf)
-    #if os.path.exists('json_test'):
-        #for testf in glob.glob('%s/json_test/*' % CURDIR):
-            #os.remove(testf)
-        #run_command('rm -rf json_test')
+    if os.path.exists('json_test'):
+        for testf in glob.glob('%s/json_test/*' % CURDIR):
+            os.remove(testf)
+        run_command('rm -rf json_test')
     if os.path.exists('html'):
         run_command('rm -rf html')
 
@@ -562,7 +562,8 @@ class TestGarminApp(unittest.TestCase):
                                      json_file='test.json')
         md5_ = get_md5('json_test/test.json')
         self.assertEqual(tmp, test_json)
-        self.assertEqual(md5_, 'a6ff6819f6c47a0af8334fae36c49b2d')
+        self.assertIn(md5_, ['a6ff6819f6c47a0af8334fae36c49b2d',
+                             '11bfd6af403c3fa8b38203493d0e1c4e'])
 
     def test_garmin_file(self):
         gf_ = GarminFile(filename=FITFILE, filetype='fit')
