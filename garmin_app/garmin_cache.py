@@ -27,8 +27,11 @@ def read_pickle_object_in_file(pickle_file):
     """ read python object from gzipped pickle file """
     outobj = None
     if os.path.exists(pickle_file):
-        with gzip.open(pickle_file, 'rb') as pkl_file:
-            outobj = pickle.load(pkl_file)
+        try:
+            with gzip.open(pickle_file, 'rb') as pkl_file:
+                outobj = pickle.load(pkl_file)
+        except UnicodeDecodeError:
+            pass
     return outobj
 
 def write_pickle_object_to_file(inpobj, pickle_file):

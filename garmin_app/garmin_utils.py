@@ -164,7 +164,10 @@ def get_md5_old(fname):
     with open(fname, 'rb') as infile:
         for line in infile:
             md_.update(line)
-    return md_.hexdigest().decode()
+    output = md_.hexdigest()
+    if hasattr(output, 'decode'):
+        output = output.decode()
+    return output
 
 def get_md5(fname):
     """ md5 function using cli """
