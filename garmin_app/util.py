@@ -109,7 +109,9 @@ def test_openurl():
     output = ''.join(openurl('https://httpbin.org/html'))
     mstr = hashlib.md5()
     mstr.update(output.encode(errors='replace'))
-    assert mstr.hexdigest() == 'fefa33a57febcf8a413cc252966670fb'
+    output = mstr.hexdigest()
+    print(output)
+    assert output == 'fefa33a57febcf8a413cc252966670fb'
 
     from requests import HTTPError
     from nose.tools import raises
