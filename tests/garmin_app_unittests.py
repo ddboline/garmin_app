@@ -63,10 +63,10 @@ def cleanup_pickle():
     for testf in glob.glob('%s/run/cache/test.*' % CURDIR):
         if os.path.exists(testf):
             os.remove(testf)
-    if os.path.exists('json_test'):
-        for testf in glob.glob('%s/json_test/*' % CURDIR):
-            os.remove(testf)
-        run_command('rm -rf json_test')
+    #if os.path.exists('json_test'):
+        #for testf in glob.glob('%s/json_test/*' % CURDIR):
+            #os.remove(testf)
+        #run_command('rm -rf json_test')
     if os.path.exists('html'):
         run_command('rm -rf html')
 
