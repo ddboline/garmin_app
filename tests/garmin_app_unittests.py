@@ -616,10 +616,8 @@ class TestGarminApp(unittest.TestCase):
                'begin_datetime=2011-05-07 15:43:08, sport=biking, ' + \
                'total_calories=61, total_distance=1770.2784, ' + \
                'total_duration=300, total_hr_dur=0, total_hr_dis=0>'
-        test1 = 'GarminFile<filename=test.gmn, filetype=gmn, ' + \
-               'begin_datetime=2011-05-07 15:43:08, sport=biking, ' + \
-               'total_calories=61, total_distance=1770.2784000000001, ' + \
-               'total_duration=300, total_hr_dur=0, total_hr_dis=0>'
+        test1 = test0.replace('total_distance=1770.2784',
+                              'total_distance=1770.2784000000001')
         self.assertTrue(gfile.filetype == 'gmn')
         self.assertEqual(gfile.begin_datetime.date(), datetime.date(year=2011,
                          month=5, day=7))
@@ -634,11 +632,8 @@ class TestGarminApp(unittest.TestCase):
                 'total_distance=1770.2784, total_duration=300, ' + \
                 'total_hr_dur=0, total_hr_dis=0, number_of_items=1, ' + \
                 'md5sum=af6f79ef18f4ec5526d3f987b6f00f9b>'
-        test1 = 'GarminSummary<filename=test.gmn, begin_datetime=' + \
-                '2011-05-07 15:43:08, sport=biking, total_calories=61, ' + \
-                'total_distance=1770.2784000000001, total_duration=300, ' + \
-                'total_hr_dur=0, total_hr_dis=0, number_of_items=1, ' + \
-                'md5sum=af6f79ef18f4ec5526d3f987b6f00f9b>'
+        test1 = test0.replace('total_distance=1770.2784',
+                              'total_distance=1770.2784000000001')
         self.assertIn(tmp, [test0, test1])
 
     def test_read_tcx_correction(self):
