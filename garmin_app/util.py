@@ -107,11 +107,11 @@ def openurl(url_):
 def test_openurl():
     import hashlib
     output = ''.join(openurl('https://httpbin.org/html'))
-    print(isinstance(output, str))
+    if not isinstance(output, str):
+        output = output.encode(errors='replace')
     mstr = hashlib.md5()
-    mstr.update(output.encode(errors='replace'))
+    mstr.update(output)
     output = mstr.hexdigest()
-    print(output)
     assert output == 'fefa33a57febcf8a413cc252966670fb'
 
     from requests import HTTPError
@@ -122,7 +122,6 @@ def test_openurl():
         openurl('https://httpbin.org/aspdoifqwpof')
 
     test_httperror()
-    raise False
 
 def dump_to_file(url_, outfile_):
     """ dump url to file """
