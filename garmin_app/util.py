@@ -111,7 +111,6 @@ def test_openurl():
     mstr = hashlib.md5()
     mstr.update(output)
     output = mstr.hexdigest()
-    print(output)
     assert output in ('fefa33a57febcf8a413cc252966670fb',
                       '348369d8bd0d9ae6c4cdfc9e2cfa7e99')
 
