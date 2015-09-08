@@ -634,6 +634,7 @@ class TestGarminApp(unittest.TestCase):
                'total_distance=1770.2784, total_duration=300, ' + \
                'total_hr_dur=0, total_hr_dis=0, number_of_items=1, ' + \
                'md5sum=af6f79ef18f4ec5526d3f987b6f00f9b>'
+        print(tmp)
         self.assertEqual(tmp, test)
 
     def test_read_tcx_correction(self):
