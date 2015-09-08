@@ -1,6 +1,7 @@
 #!/bin/bash
 
-nosetests3 ./tests/garmin_app_unittests.py garmin_app/*.py
+nosetests --with-coverage --cover-package=garmin_app ./tests/garmin_app_unittests.py garmin_app/*.py
+
 rm -rf ${HOME}/.garmin_cache/
 python3 ./garmin.py get
 python3 ./garmin.py year run
