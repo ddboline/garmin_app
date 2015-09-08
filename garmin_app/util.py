@@ -107,6 +107,7 @@ def openurl(url_):
 def test_openurl():
     import hashlib
     output = ''.join(openurl('https://httpbin.org/html'))
+    print(type(output))
     mstr = hashlib.md5()
     mstr.update(output.encode(errors='replace'))
     output = mstr.hexdigest()
@@ -121,6 +122,7 @@ def test_openurl():
         openurl('https://httpbin.org/aspdoifqwpof')
 
     test_httperror()
+    raise False
 
 def dump_to_file(url_, outfile_):
     """ dump url to file """
