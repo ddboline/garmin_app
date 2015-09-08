@@ -612,14 +612,18 @@ class TestGarminApp(unittest.TestCase):
                                                                     300]}})
         gfile.read_file()
         tmp = '%s' % gfile
-        test = 'GarminFile<filename=test.gmn, filetype=gmn, ' + \
+        test0 = 'GarminFile<filename=test.gmn, filetype=gmn, ' + \
                'begin_datetime=2011-05-07 15:43:08, sport=biking, ' + \
                'total_calories=61, total_distance=1770.2784, ' + \
+               'total_duration=300, total_hr_dur=0, total_hr_dis=0>'
+        test1 = 'GarminFile<filename=test.gmn, filetype=gmn, ' + \
+               'begin_datetime=2011-05-07 15:43:08, sport=biking, ' + \
+               'total_calories=61, total_distance=1770.2784000000001, ' + \
                'total_duration=300, total_hr_dur=0, total_hr_dis=0>'
         self.assertTrue(gfile.filetype == 'gmn')
         self.assertEqual(gfile.begin_datetime.date(), datetime.date(year=2011,
                          month=5, day=7))
-        self.assertEqual(tmp, test)
+        self.assertIn(tmp, [test0, test1])
         gsum = GarminSummary(filename=GMNFILE,
                              corr_list={'2011-05-07T15:43:08Z': {0: [1.1,
                                                                     300]}})
