@@ -111,6 +111,7 @@ def test_openurl():
     mstr = hashlib.md5()
     mstr.update(output)
     output = mstr.hexdigest()
+    print(output)
     assert output == 'fefa33a57febcf8a413cc252966670fb'
 
     from requests import HTTPError
