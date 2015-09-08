@@ -107,8 +107,7 @@ def openurl(url_):
 def test_openurl():
     import hashlib
     output = ''.join(openurl('https://httpbin.org/html'))
-    if not isinstance(output, str):
-        output = output.encode(errors='replace')
+    output = output.encode(errors='replace')
     mstr = hashlib.md5()
     mstr.update(output)
     output = mstr.hexdigest()
