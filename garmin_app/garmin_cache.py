@@ -98,7 +98,9 @@ class GarminCache(object):
         self.cache_file_is_modified = False
         temp_list = self.cache_read_fn()
         if temp_list:
-            if not isinstance(temp_list, list):
+            if isinstance(temp_list, dict):
+                temp_list = list(temp_list.values())
+            elif not isinstance(temp_list, list):
                 temp_list = [temp_list]
             self.cache_summary_list = temp_list
         self.cache_summary_file_dict = {os.path.basename(x.filename):

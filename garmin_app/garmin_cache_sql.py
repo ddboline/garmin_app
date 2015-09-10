@@ -28,8 +28,8 @@ class GarminSummaryTable(Base):
     total_calories = Column(Integer)
     total_distance = Column(Float)
     total_duration = Column(Float)
-    total_hr_dur = Column(Integer)
-    total_hr_dis = Column(Integer)
+    total_hr_dur = Column(Float)
+    total_hr_dis = Column(Float)
     number_of_items = Column(Integer)
     md5sum = Column(String(32))
 
@@ -50,7 +50,11 @@ class GarminCacheSQL:
                              cache_read_fn=self.read_sql_table,
                              cache_write_fn=self.write_sql_table)
         self.sql_string = sql_string
-        self.summary_list = summary_list if summary_list else []
+        self.summary_list = {}
+        if isinstance(summary_list, dict):
+            self.summary_list = summary_list
+        elif isinstance(summary_list, list):
+            self.summary_list = {v.filename: v for v in summary_list}
 
         self.engine = create_engine(self.sql_string, echo=False)
         self.create_table()
@@ -69,7 +73,7 @@ class GarminCacheSQL:
             gsum = GarminSummary()
             for sl_ in gsum._db_entries:
                 setattr(gsum, sl_, getattr(row, sl_))
-            self.summary_list.append(gsum)
+            self.summary_list[gsum.filename] = gsum
         session.close()
         return self.summary_list
 
@@ -78,9 +82,22 @@ class GarminCacheSQL:
         session = Session()
 
         slists = []
-        for sl_ in summary_list:
+        def convert_to_sql(sl_):
             sld = {x: getattr(sl_, x) for x in sl_._db_entries}
-            slists.append(GarminSummaryTable(**sld))
+            return GarminSummaryTable(**sld)
+
+        for sl_ in summary_list:
+            fn_ = sl_.filename
+            if fn_ in self.summary_list:
+                sl0 = self.summary_list[fn_]
+                if not all(getattr(sl_, x) == getattr(sl0, x)
+                           for x in sl_._db_entries):
+                    obj = session.query(GarminSummaryTable)\
+                                 .filter_by(filename=fn_).all()[0]
+                    session.delete(obj)
+                    slists.append(convert_to_sql(sl_))
+            else:
+                slists.append(convert_to_sql(sl_))
 
         session.add_all(slists)
         session.commit()
