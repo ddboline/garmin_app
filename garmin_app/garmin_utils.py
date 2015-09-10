@@ -301,8 +301,7 @@ def do_summary(directory_, msg_q=None, options=None):
             postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
                           '@localhost:5432/garmin_summary'
             gc_ = GarminCacheSQL(sql_string=postgre_str)
-            gc_.delete_table()
-            gc_.create_table()
+            gc_.read_sql_table()
             gc_.write_sql_table(summary_list_)
         return summary_list_
 
@@ -402,7 +401,6 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                               '@localhost:5432/garmin_summary'
                 gc_ = GarminCacheSQL(sql_string=postgre_str)
                 gc_.read_sql_table()
-                gc_.create_table()
                 gc_.write_sql_table(summary_list_)
 
             return
@@ -496,6 +494,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                         summary_list_ = gc_.read_sql_table()
                         print(len(summary_list_), pickle_file_)
                         print(summary_list_[0])
+                        ### Recreate cache file using list from database
                         write_(summary_list_, pickle_file_)
             return
 
