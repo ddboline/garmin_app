@@ -20,7 +20,7 @@ from tempfile import NamedTemporaryFile
 from .garmin_server import GarminServer
 from .util import (run_command, datetimefromstring, openurl,
                    dump_to_file, HOMEDIR, walk_wrapper,
-                   OpenPostgreSQLsshTunnel)
+                   OpenPostgreSQLsshTunnel, POSTGRESTRING)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -298,8 +298,7 @@ def do_summary(directory_, msg_q=None, options=None):
         ### backup garmin.pkl.gz info to postgresql database
         with OpenPostgreSQLsshTunnel():
             from .garmin_cache_sql import GarminCacheSQL
-            postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
-                          '@localhost:5432/garmin_summary'
+            postgre_str = POSTGRESTRING + '/garmin_summary'
             gc_ = GarminCacheSQL(sql_string=postgre_str)
             gc_.read_sql_table()
             gc_.write_sql_table(summary_list_)
@@ -397,8 +396,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             ### backup garmin.pkl.gz info to postgresql database
             with OpenPostgreSQLsshTunnel():
                 from .garmin_cache_sql import GarminCacheSQL
-                postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
-                              '@localhost:5432/garmin_summary'
+                postgre_str = POSTGRESTRING + '/garmin_summary'
                 gc_ = GarminCacheSQL(sql_string=postgre_str)
                 gc_.read_sql_table()
                 gc_.write_sql_table(summary_list_)
@@ -488,8 +486,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 if not summary_list_:
                     with OpenPostgreSQLsshTunnel():
                         from .garmin_cache_sql import GarminCacheSQL
-                        postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
-                                      '@localhost:5432/garmin_summary'
+                        postgre_str = POSTGRESTRING + '/garmin_summary'
                         gc_ = GarminCacheSQL(sql_string=postgre_str)
                         summary_list_ = gc_.read_sql_table()
                         print(len(summary_list_), pickle_file_)

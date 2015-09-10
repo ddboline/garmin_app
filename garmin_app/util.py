@@ -11,6 +11,8 @@ from subprocess import call, Popen, PIPE
 HOSTNAME = os.uname()[1]
 HOMEDIR = os.getenv('HOME')
 
+POSTGRESTRING = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost:5432'
+
 class PopenWrapperClass(object):
     """ context wrapper around subprocess.Popen """
     def __init__(self, command):

@@ -49,7 +49,8 @@ from garmin_app.garmin_report import GarminReport, print_history_buttons
 from garmin_app.garmin_corrections import (list_of_corrected_laps,
                                            save_corrections)
 from garmin_app.garmin_file import GarminFile
-from garmin_app.util import run_command, OpenPostgreSQLsshTunnel, HOSTNAME
+from garmin_app.util import (run_command, OpenPostgreSQLsshTunnel, HOSTNAME,
+                             POSTGRESTRING)
 
 def md5_command(command):
     md5 = run_command(command, single_line=True, do_popen=True).split()[0]
@@ -451,12 +452,11 @@ class TestGarminApp(unittest.TestCase):
 
         if HOSTNAME == 'dilepton-tower':
             with OpenPostgreSQLsshTunnel():
-                postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' \
-                              + '@localhost:5432/test_garmin_summary'
+                postgre_str = POSTGRESTRING + '/test_garmin_summary'
                 gc_ = GarminCacheSQL(sql_string=postgre_str)
                 sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
                 output = '\n'.join('%s' % s for s in sorted(sl_, key=lambda x:
-                                                                       x.filename))
+                                                                   x.filename))
                 gc_.delete_table()
                 mstr = hashlib.md5()
                 mstr.update(output.encode())
