@@ -401,7 +401,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                 postgre_str = 'postgresql://ddboline:BQGIvkKFZPejrKvX' + \
                               '@localhost:5432/garmin_summary'
                 gc_ = GarminCacheSQL(sql_string=postgre_str)
-                gc_.delete_table()
+                gc_.read_sql_table()
                 gc_.create_table()
                 gc_.write_sql_table(summary_list_)
 

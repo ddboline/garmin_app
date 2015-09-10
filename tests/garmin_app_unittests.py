@@ -443,11 +443,11 @@ class TestGarminApp(unittest.TestCase):
         sqlite_str = 'sqlite:///%s/run/cache/test.db' % CURDIR
         gc1 = GarminCacheSQL(sql_string=sqlite_str, garmin_cache=gc0,
                              summary_list=sl_)
-        output = '\n'.join('%s' % s for s in sorted(gc1.summary_list,
+        output = '\n'.join('%s' % s for s in sorted(gc1.summary_list.values(),
                                                     key=lambda x: x.filename))
         mstr = hashlib.md5()
         mstr.update(output.encode())
-        self.assertEqual(mstr.hexdigest(), '0b8fc64a6c97d74c045975e93844ae21')
+        self.assertEqual(mstr.hexdigest(), '046172056a2358821f2effd0974d5160')
 
         if HOSTNAME == 'dilepton-tower':
             with OpenPostgreSQLsshTunnel():
