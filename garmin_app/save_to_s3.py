@@ -57,7 +57,8 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
         with open(fn_, 'rb') as infile:
             if kn_ in list_of_keys:
                 k = bucket.get_key(kn_)
-                if parse(k.last_modified).strftime("%s") > int(os.stat(fn_).st_mtime):
+                if parse(k.last_modified).strftime("%s") > int(
+                                                        os.stat(fn_).st_mtime):
                     k.get_contents_to_filename(fn_)
                     continue
             else:

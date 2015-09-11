@@ -12,11 +12,13 @@ import os
 from .garmin_utils import (get_md5, expected_calories,
                                      SPORT_TYPES, METERS_PER_MILE)
 
+DB_ENTRIES = ('filename', 'begin_datetime', 'sport', 'total_calories',
+              'total_distance', 'total_duration', 'total_hr_dur',
+              'total_hr_dis', 'number_of_items', 'md5sum')
+
 class GarminSummary(object):
     """ summary class for a file """
-    _db_entries = ['filename', 'begin_datetime', 'sport', 'total_calories',
-                   'total_distance', 'total_duration', 'total_hr_dur',
-                   'total_hr_dis', 'number_of_items', 'md5sum']
+    _db_entries = list(DB_ENTRIES)
     __slots__ = _db_entries + ['pathname', 'fullfname', 'corr_list']
 
     def __init__(self, filename='', md5sum=None, corr_list=None):

@@ -55,6 +55,7 @@ def run_command(command, do_popen=False, turn_on_commands=True,
         return call(command, shell=True)
 
 def test_run_command():
+    """ test run_command """
     cmd = 'echo "HELLO"'
     out = run_command(cmd, do_popen=True, single_line=True).strip()
     assert out == b'HELLO'
@@ -74,6 +75,7 @@ def convert_date(input_date):
     return datetime.date(_year, _month, _day)
 
 def test_convert_date():
+    """ test convert_date """
     import datetime
     assert convert_date('080515') == datetime.date(year=2015, month=8, day=5)
 
@@ -85,6 +87,7 @@ def print_h_m_s(second):
     return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
 def test_print_h_m_s():
+    """ test print_h_m_s """
     assert print_h_m_s(12345) == '03:25:45'
 
 def datetimefromstring(tstr, ignore_tz=False):
@@ -107,6 +110,7 @@ def openurl(url_):
     return urlout.text.split('\n')
 
 def test_openurl():
+    """ test openurl """
     import hashlib
     output = ''.join(openurl('https://httpbin.org/html'))
     output = output.encode(errors='replace')
@@ -121,6 +125,7 @@ def test_openurl():
 
     @raises(HTTPError)
     def test_httperror():
+        """ ... """
         openurl('https://httpbin.org/aspdoifqwpof')
 
     test_httperror()
@@ -223,8 +228,10 @@ class OpenPostgreSQLsshTunnel(object):
             return True
 
 def test_datetimefromstring():
+    """ test datetimefromstring """
     import datetime
     from pytz import UTC
     dt0 = '1980-11-17T05:12:13Z'
-    dt1 = datetime.datetime(year=1980, month=11, day=17, hour=5, minute=12, second=13, tzinfo=UTC)
+    dt1 = datetime.datetime(year=1980, month=11, day=17, hour=5, minute=12,
+                            second=13, tzinfo=UTC)
     assert datetimefromstring(dt0) == dt1

@@ -19,7 +19,7 @@ from .garmin_point import GarminPoint
 from .garmin_utils import (METERS_PER_MILE, convert_time_string,
                                      print_date_string, convert_fit_to_tcx,
                                      convert_gmn_to_xml, expected_calories)
-from .garmin_corrections import list_of_mislabeled_times
+from .garmin_corrections import LIST_OF_MISLABELED_TIMES
 
 from .util import run_command
 
@@ -64,8 +64,8 @@ class GarminParse(GarminFile):
             self.read_file_xml()
         self.begin_datetime = self.laps[0].lap_start
         printed_datetime = print_date_string(self.begin_datetime)
-        for sport in list_of_mislabeled_times:
-            if printed_datetime in list_of_mislabeled_times[sport]:
+        for sport in LIST_OF_MISLABELED_TIMES:
+            if printed_datetime in LIST_OF_MISLABELED_TIMES[sport]:
                 self.sport = sport
         self.calculate_speed()
 
@@ -142,8 +142,8 @@ class GarminParse(GarminFile):
                 self.points.append(cur_point)
 
         printed_datetime = print_date_string(self.laps[0].lap_start)
-        for sport in list_of_mislabeled_times:
-            if printed_datetime in list_of_mislabeled_times[sport]:
+        for sport in LIST_OF_MISLABELED_TIMES:
+            if printed_datetime in LIST_OF_MISLABELED_TIMES[sport]:
                 self.sport = sport
                 if self.sport == 'biking':
                     self.total_calories = int(self.total_calories

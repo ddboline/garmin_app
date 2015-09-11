@@ -19,8 +19,7 @@ from tempfile import NamedTemporaryFile
 
 from .garmin_server import GarminServer
 from .util import (run_command, datetimefromstring, openurl,
-                   dump_to_file, HOMEDIR, walk_wrapper,
-                   OpenPostgreSQLsshTunnel, POSTGRESTRING)
+                   dump_to_file, HOMEDIR, walk_wrapper)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -214,7 +213,8 @@ def compare_with_remote(cache_dir):
     walk_wrapper('%s/run' % cache_dir, process_files, None)
 
     for fn_ in remote_file_chksum:
-        if fn_ not in local_file_chksum or remote_file_chksum[fn_] != local_file_chksum[fn_]:
+        if fn_ not in local_file_chksum or remote_file_chksum[fn_] != \
+                local_file_chksum[fn_]:
             print('download:', fn_, remote_file_chksum[fn_],
                   remote_file_path[fn_], cache_dir)
             if not os.path.exists('%s/run/%s/' % (cache_dir,
@@ -245,6 +245,7 @@ def compare_with_remote(cache_dir):
     return
 
 def read_garmin_file(fname, msg_q=None, options=None):
+    """ read single garmin file """
     from .garmin_cache import GarminCache
     from .garmin_report import GarminReport
     from .garmin_parse import GarminParse
@@ -278,7 +279,9 @@ def read_garmin_file(fname, msg_q=None, options=None):
     return True
 
 def do_summary(directory_, msg_q=None, options=None):
+    """ produce summary report """
     from .garmin_cache import GarminCache
+    from .garmin_cache_sql import write_postgresql_table
     from .garmin_report import GarminReport
     from .garmin_corrections import list_of_corrected_laps
     if options is None:
@@ -296,12 +299,8 @@ def do_summary(directory_, msg_q=None, options=None):
                                                       % cache_dir,
                                                       options=options)
         ### backup garmin.pkl.gz info to postgresql database
-        with OpenPostgreSQLsshTunnel():
-            from .garmin_cache_sql import GarminCacheSQL
-            postgre_str = POSTGRESTRING + '/garmin_summary'
-            gc_ = GarminCacheSQL(sql_string=postgre_str)
-            gc_.read_sql_table()
-            gc_.write_sql_table(summary_list_)
+        write_postgresql_table(summary_list_)
+
         return summary_list_
 
 
@@ -316,6 +315,7 @@ def do_summary(directory_, msg_q=None, options=None):
     return True
 
 def add_correction(correction_str, json_path=None):
+    """ add correction to json file """
     from dateutil.parser import parse
     from .garmin_corrections import (list_of_corrected_laps, save_corrections)
     l_corr = list_of_corrected_laps(json_path=json_path)
@@ -357,6 +357,7 @@ def add_correction(correction_str, json_path=None):
 
 
 def garmin_parse_arg_list(args, options=None, msg_q=None):
+    """ parse command line arguments """
     if options is None:
         options = {'cache_dir': CACHEDIR}
     cache_dir = options['cache_dir']
@@ -394,12 +395,8 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                                  corr_list=corr_list_)
             summary_list_ = cache_.cache_read_fn()
             ### backup garmin.pkl.gz info to postgresql database
-            with OpenPostgreSQLsshTunnel():
-                from .garmin_cache_sql import GarminCacheSQL
-                postgre_str = POSTGRESTRING + '/garmin_summary'
-                gc_ = GarminCacheSQL(sql_string=postgre_str)
-                gc_.read_sql_table()
-                gc_.write_sql_table(summary_list_)
+            from .garmin_cache_sql import write_postgresql_table
+            write_postgresql_table(summary_list_)
 
             return
         elif arg == 'occur':
@@ -484,15 +481,13 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
                 summary_list_ = read_(pickle_file=pickle_file_)
                 if not summary_list_:
-                    with OpenPostgreSQLsshTunnel():
-                        from .garmin_cache_sql import GarminCacheSQL
-                        postgre_str = POSTGRESTRING + '/garmin_summary'
-                        gc_ = GarminCacheSQL(sql_string=postgre_str)
-                        summary_list_ = gc_.read_sql_table()
-                        print(len(summary_list_), pickle_file_)
-                        print(summary_list_[0])
-                        ### Recreate cache file using list from database
-                        write_(summary_list_, pickle_file_)
+                    from .garmin_cache_sql import write_postgresql_table
+                    summary_list_ = write_postgresql_table([],
+                                                       get_summary_list=True)
+                    print(len(summary_list_), pickle_file_)
+                    print(summary_list_[0])
+                    ### Recreate cache file using list from database
+                    write_(summary_list_, pickle_file_)
             return
 
         if arg == 'sync':

@@ -24,6 +24,19 @@ class GarminLap(object):
 
     def __init__(self, **options):
         """ Init Method """
+        self.lap_type = None
+        self.lap_index = None
+        self.lap_start = None
+        self.lap_duration = None
+        self.lap_distance = None
+        self.lap_trigger = None
+        self.lap_max_speed = None
+        self.lap_calories = None
+        self.lap_avg_hr = None
+        self.lap_max_hr = None
+        self.lap_intensity = None
+        self.lap_number = None
+        self.lap_start_string = None
         for attr in self._db_entries:
             if attr in options:
                 setattr(self, attr, options[attr])

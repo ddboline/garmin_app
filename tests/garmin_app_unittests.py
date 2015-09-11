@@ -53,12 +53,14 @@ from garmin_app.util import (run_command, OpenPostgreSQLsshTunnel, HOSTNAME,
                              POSTGRESTRING)
 
 def md5_command(command):
+    """ convenience function """
     md5 = run_command(command, single_line=True, do_popen=True).split()[0]
     if hasattr(md5, 'decode'):
         md5 = md5.decode()
     return md5
 
 def cleanup_pickle():
+    """ remove temporary files """
     if os.path.exists('temp.pkl.gz'):
         os.remove('temp.pkl.gz')
     for testf in glob.glob('%s/run/cache/test.*' % CURDIR):
@@ -496,6 +498,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(mstr.hexdigest(), 'dd7cc23be0f6f21a6d05782e506cb647')
 
     def test_summary_report_file(self):
+        """ test GarminCache.summary_report """
         gc_ = GarminCache(
             pickle_file='%s/temp.pkl.gz' % CURDIR,
             cache_directory='%s/run/cache' % CURDIR)
@@ -546,6 +549,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(mstr.hexdigest(), '6256eb536104110794d9fc2123a8c104')
 
     def test_garmin_summary_table(self):
+        """ test GarminSummaryTable """
         tmp = '%s' % GarminSummaryTable()
         exp = 'GarminSummaryTable<filename=None, begin_datetime=None, ' + \
               'sport=None, total_calories=None, total_distance=None, ' + \
@@ -554,6 +558,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(tmp, exp)
 
     def test_list_of_corrected_laps(self):
+        """ test list_of_corrected_laps """
         test_json = {u'2011-07-04T08:58:27Z': {0: 3.1068559611866697},
                      u'2012-03-13T18:21:11Z': {0: 0.362}, u'DUMMY': {0: 0.0}}
         save_corrections(test_json, json_path='json_test',
@@ -566,6 +571,7 @@ class TestGarminApp(unittest.TestCase):
                              '11bfd6af403c3fa8b38203493d0e1c4e'])
 
     def test_garmin_file(self):
+        """ test GarminFile """
         gf_ = GarminFile(filename=FITFILE, filetype='fit')
         tmp = '%s' % gf_
         test = 'GarminFile<filename=test.fit, filetype=fit, ' + \
@@ -575,6 +581,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(tmp, test)
 
     def test_garmin_lap_fit(self):
+        """ test GarminLap """
         gfile = GarminParse(filename=FITFILE)
         gfile.read_file()
         gl_ = gfile.laps[0]
@@ -590,6 +597,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(tmp, test)
 
     def test_garmin_lap_xml(self):
+        """ test GarminLap.read_lap_xml """
         gfile = GarminParse(filename=GMNFILE)
         gfile.read_file()
         gl_ = gfile.laps[0]
@@ -664,6 +672,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(tmp, test)
 
     def test_print_history_buttons(self):
+        """ test print_history_buttons """
         self.assertIsNone(print_history_buttons(None))
         self.assertEqual(print_history_buttons(['year']), '')
         test = '<button type="submit" onclick="send_command(' + \
@@ -671,6 +680,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(print_history_buttons(['year', '2015 month']), test)
 
     def test_days_in_month(self):
+        """ test days_in_month """
         month = datetime.date.today().month
         year = datetime.date.today().year
         self.assertEqual(days_in_month(), days_in_month(month=month,
@@ -678,12 +688,15 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(days_in_month(month=12, year=2015), 31)
 
     def test_expected_calories(self):
+        """ test expected_calories """
         self.assertAlmostEqual(expected_calories(), 14.048, places=3)
 
     def test_get_md5(self):
+        """ test get_md5 """
         self.assertEqual(get_md5(FITFILE), get_md5_old(FITFILE))
 
     def test_read_garmin_file(self):
+        """ test read_garmin_file """
         options = {'do_plot': False, 'do_year': False, 'do_month': False,
                    'do_week': False, 'do_day': False, 'do_file': False,
                    'do_sport': None, 'do_update': False, 'do_average': False}

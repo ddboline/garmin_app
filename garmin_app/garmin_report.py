@@ -823,7 +823,7 @@ class GarminReport(object):
         """ print day average information """
         retval = []
         if number_days == 0:
-            return False
+            return ''
         if sport == 'running' or sport == 'walking':
             retval.append(
                 '%17s %10s \t %10s \t %10s \t %10s \t %10s \t %10s'
@@ -1014,7 +1014,7 @@ class GarminReport(object):
     def month_average_report_txt(gsum, sport=None, number_of_months=0):
         """ print month average information """
         if number_of_months == 0:
-            return False
+            return ''
         retval = []
         if sport == 'total':
             retval.append(
