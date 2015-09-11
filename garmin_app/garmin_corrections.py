@@ -14,20 +14,20 @@ from .garmin_utils import METERS_PER_MILE
 
 FIVEK_DIST = 5000/METERS_PER_MILE
 
-list_of_mislabeled_files = {'biking':
-                                ['20101120T135534.gmn', '20110507T144308.gmn',
-                                 '20110829T171218.gmn', '20111220T134356.gmn'],
-                            'running':
-                                ['20100816T175612.gmn', '20100825T165244.gmn',
-                                 '20101031T145551.gmn', '20110524T171336.gmn',
-                                 '20110627T161529.gmn', '20120504T172702.gmn'],
-                            'walking':
-                                ['20120428T112809.gmn', '20120519T103538.gmn',
-                                 '20120519T104029.gmn', '20121231T154005.gmn'],
-                            'stairs':
-                                ['20120208T204305.gmn'],}
+#LIST_OF_MISLABELED_FILES = {'biking':
+#                                ['20101120T135534.gmn', '20110507T144308.gmn',
+#                                 '20110829T171218.gmn', '20111220T134356.gmn'],
+#                            'running':
+#                                ['20100816T175612.gmn', '20100825T165244.gmn',
+#                                 '20101031T145551.gmn', '20110524T171336.gmn',
+#                                 '20110627T161529.gmn', '20120504T172702.gmn'],
+#                            'walking':
+#                                ['20120428T112809.gmn', '20120519T103538.gmn',
+#                                 '20120519T104029.gmn', '20121231T154005.gmn'],
+#                            'stairs':
+#                                ['20120208T204305.gmn'],}
 
-list_of_mislabeled_times = {'biking':
+LIST_OF_MISLABELED_TIMES = {'biking':
                                 ['2010-11-20T14:55:34Z',
                                 '2011-05-07T15:43:08Z',
                                 '2011-08-29T18:12:18Z',
@@ -57,13 +57,14 @@ list_of_mislabeled_times = {'biking':
 
 JSON_DIR = '%s/setup_files/build/garmin_app/garmin_app' % os.getenv('HOME')
 
-_list_of_corrected_laps = {}
+_LIST_OF_CORRECTED_LAPS = {}
 
 def list_of_corrected_laps(json_path=JSON_DIR,
                            json_file='garmin_corrections.json'):
+    """ return list_of_corrected_laps """
     if not os.path.exists(json_path):
         json_path = '%s/garmin_app/garmin_app' % os.getenv('HOME')
-    if len(_list_of_corrected_laps) == 0:
+    if len(_LIST_OF_CORRECTED_LAPS) == 0:
         with open('%s/%s' % (json_path, json_file), 'rt') as jfile_:
             tmp_dict = json.load(jfile_)
             for key, val in tmp_dict.items():
@@ -71,8 +72,8 @@ def list_of_corrected_laps(json_path=JSON_DIR,
                 for k2_, v2_ in val.items():
                     k2_ = int(k2_)
                     tmp_[k2_] = v2_
-                _list_of_corrected_laps[key] = tmp_
-    return _list_of_corrected_laps
+                _LIST_OF_CORRECTED_LAPS[key] = tmp_
+    return _LIST_OF_CORRECTED_LAPS
 
 
 def save_corrections(list_, json_path=JSON_DIR,
