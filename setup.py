@@ -10,7 +10,7 @@ from __future__ import division
 from __future__ import print_function
 #from __future__ import unicode_literals
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='garmin_app',
@@ -25,5 +25,6 @@ setup(
     package_dir={'garmin_app': 'garmin_app'},
     package_data={'garmin_app': ['templates/*.html',
                                  'garmin_corrections.json']},
-    scripts=['garmin.py']
+    entry_points={'console_scripts':
+                    ['garmin-app = garmin_app.garmin_utils:main']}
 )
