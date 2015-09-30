@@ -20,6 +20,7 @@ setup(
     description='garmin_app',
     long_description='Garmin App',
     license='MIT',
+    test_suite = 'nose.collector',
     install_requires=['pandas', 'numpy', 'requests', 'sqlalchemy', 'pyusb'],
     packages=['garmin_app'],
     package_dir={'garmin_app': 'garmin_app'},
