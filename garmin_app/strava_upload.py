@@ -109,7 +109,16 @@ def strava_upload():
     print("Authorized to access account of {} {} (id {:d})."
           .format(athlete.firstname, athlete.lastname, athlete.id))
 
+    activities = []
     for act in args.activities:
+        if act is stdin or os.path.exists(act):
+            activities.append(act)
+        else:
+            for arg in find_gps_tracks(act, CACHEDIR):
+                if os.path.exists(arg):
+                    activities.append(arg)
+
+    for act in activities:
         if act is stdin:
             contents = act.read()
             act = StringIO(contents)
@@ -133,8 +142,6 @@ def strava_upload():
             else:
                 base, ext = 'activity', args.type
         else:
-            if not os.path.exists(act):
-                cat = find_gps_tracks(act, CACHEDIR)[0]
             base, ext = os.path.splitext(act.name if args.type is None
                                          else 'activity.'+args.type)
             # autodetect based on extensions
