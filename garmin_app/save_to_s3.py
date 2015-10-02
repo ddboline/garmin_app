@@ -17,10 +17,8 @@
 """
     Save to AWS S3
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 # Import the SDK
 import boto
@@ -28,7 +26,7 @@ import os
 import glob
 from dateutil.parser import parse
 
-# read aws credentials from file, then stick into global variables...
+
 def read_keys():
     """ read keys from credentials file """
     with open('%s/.aws/credentials' % os.getenv('HOME'), 'rt') as cfile:
@@ -41,13 +39,14 @@ def read_keys():
 
 AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY = read_keys()
 
+
 def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
     """
         function to save to s3, bname is bucket name
         filelist is list of files to add or overwrite
     """
     s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
-                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     bucket = s3_.create_bucket(bucket_name=bname)
     list_of_keys = get_list_of_keys()
     if not filelist:
@@ -57,8 +56,8 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
         with open(fn_, 'rb') as infile:
             if kn_ in list_of_keys:
                 k = bucket.get_key(kn_)
-                if parse(k.last_modified).strftime("%s") > int(
-                                                        os.stat(fn_).st_mtime):
+                if parse(k.last_modified).strftime("%s") \
+                        > int(os.stat(fn_).st_mtime):
                     k.get_contents_to_filename(fn_)
                     continue
             else:
@@ -69,21 +68,23 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
             print('upload to s3:', kn_, fn_, list_of_keys[k.key])
     return list_of_keys
 
+
 def get_list_of_keys(bname='garmin_scripts_gps_files_ddboline'):
     """ get list of keys """
     s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
-                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     bucket = s3_.get_bucket(bucket_name=bname)
     list_of_keys = {}
     for key in bucket.list():
         list_of_keys[key.key] = key.etag.replace('"', '')
     return list_of_keys
 
+
 def download_from_s3(bucket_name='garmin_scripts_gps_files_ddboline',
-             key_name='', fname=''):
+                     key_name='', fname=''):
     """ download file """
     s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
-                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     if not key_name or not fname:
         return False
     dname = os.path.dirname(fname)

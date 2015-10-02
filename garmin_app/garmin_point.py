@@ -2,10 +2,8 @@
 """
     GarminPoint Class
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from .garmin_utils import convert_date_string, METERS_PER_MILE
 
@@ -27,8 +25,8 @@ class GarminPoint(object):
                 setattr(self, attr, options[attr])
             else:
                 setattr(self, attr, None)
-        self.duration_from_last = 0. ### keep a running total for convenience
-        self.duration_from_begin = 0. ### keep a running total for convenience
+        self.duration_from_last = 0.  # keep a running total for convenience
+        self.duration_from_begin = 0.  # keep a running total for convenience
         self.speed_mps = 0.
         self.speed_permi = -1.
         self.speed_mph = 0.
@@ -77,8 +75,8 @@ class GarminPoint(object):
                 if len(ents) > 2:
                     if 'Speed' in ents[2]:
                         self.speed_mps = float(ents[2].split('=')[1])
-                        self.speed_mph = self.speed_mps * 3600.\
-                                         / METERS_PER_MILE
+                        self.speed_mph = (self.speed_mps * 3600.
+                                          / METERS_PER_MILE)
                         if self.speed_mps > 0.:
-                            self.speed_permi = METERS_PER_MILE\
-                                               / self.speed_mps / 60.
+                            self.speed_permi = (METERS_PER_MILE
+                                                / self.speed_mps / 60.)

@@ -3,14 +3,13 @@
 """
     Daemon for garmin_app
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from .util import OpenUnixSocketServer, OpenSocketConnection
 
 GARMIN_SOCKET_FILE = '/tmp/.garmin_test_socket'
+
 
 def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
     """
@@ -35,10 +34,10 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
                     isprev = True
                     args.pop(0)
 
-                if msg_q != None:
+                if msg_q is not None:
                     print(msg_q)
 
-                if msg_q != None and isprev:
+                if msg_q is not None and isprev:
                     tmp_ = ' '.join(args)
                     print(tmp_, msg_q)
                     if tmp_ in msg_q:
@@ -63,11 +62,11 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
 
                 garmin_parse_arg_list(args, msg_q=msg_q, options=options)
 
-                if msg_q != None and not isprev:
+                if msg_q is not None and not isprev:
                     if recv_.strip() != 'prev year':
                         msg_q.append(recv_.strip())
 
-                if msg_q != None:
+                if msg_q is not None:
                     print(msg_q)
 
                 conn.send('done')

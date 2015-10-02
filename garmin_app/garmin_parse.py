@@ -2,10 +2,8 @@
 """
     parsers to read txt, xml, tcx formatted files
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 try:
     from itertools import izip
@@ -17,11 +15,12 @@ from .garmin_file import GarminFile
 from .garmin_lap import GarminLap
 from .garmin_point import GarminPoint
 from .garmin_utils import (METERS_PER_MILE, convert_time_string,
-                                     print_date_string, convert_fit_to_tcx,
-                                     convert_gmn_to_xml, expected_calories)
+                           print_date_string, convert_fit_to_tcx,
+                           convert_gmn_to_xml, expected_calories)
 from .garmin_corrections import LIST_OF_MISLABELED_TIMES
 
 from .util import run_command
+
 
 class GarminParse(GarminFile):
     """
@@ -113,11 +112,11 @@ class GarminParse(GarminFile):
             if lap_number in corrected_laps:
                 if type(corrected_laps[lap_number]) == float\
                         or len(corrected_laps[lap_number]) == 1:
-                    cur_lap.lap_distance = corrected_laps[lap_number]\
-                                           * METERS_PER_MILE
+                    cur_lap.lap_distance = (corrected_laps[lap_number]
+                                            * METERS_PER_MILE)
                 else:
-                    cur_lap.lap_distance = corrected_laps[lap_number][0]\
-                                           * METERS_PER_MILE
+                    cur_lap.lap_distance = (corrected_laps[lap_number][0]
+                                            * METERS_PER_MILE)
                     cur_lap.lap_duration = corrected_laps[lap_number][1]
             cur_lap.lap_number = lap_number
             self.total_distance += cur_lap.lap_distance
@@ -132,9 +131,9 @@ class GarminParse(GarminFile):
             if point_number == 0:
                 cur_point.duration_from_last = 0.
             else:
-                cur_point.duration_from_last = \
-                    (cur_point.time - temp_points[point_number-1].time)\
-                            .total_seconds()
+                cur_point.duration_from_last = ((cur_point.time -
+                                                 temp_points[point_number-1]
+                                                 .time).total_seconds())
             time_from_begin += cur_point.duration_from_last
             cur_point.duration_from_begin = time_from_begin
 
@@ -202,11 +201,11 @@ class GarminParse(GarminFile):
         for lap_number, cur_lap in enumerate(self.laps):
             if lap_number in corrected_laps:
                 if type(corrected_laps[lap_number]) in [float, int]:
-                    cur_lap.lap_distance = corrected_laps[lap_number]\
-                                           * METERS_PER_MILE
+                    cur_lap.lap_distance = (corrected_laps[lap_number]
+                                            * METERS_PER_MILE)
                 elif type(corrected_laps[lap_number]) == list:
-                    cur_lap.lap_distance = corrected_laps[lap_number][0]\
-                                           * METERS_PER_MILE
+                    cur_lap.lap_distance = (corrected_laps[lap_number][0]
+                                            * METERS_PER_MILE)
                     cur_lap.lap_duration = corrected_laps[lap_number][1]
             cur_lap.lap_number = lap_number
             self.total_distance += cur_lap.lap_distance
@@ -221,9 +220,9 @@ class GarminParse(GarminFile):
             if point_number == 0:
                 cur_point.duration_from_last = 0.
             else:
-                cur_point.duration_from_last = \
-                    (cur_point.time - temp_points[point_number-1].time)\
-                        .total_seconds()
+                cur_point.duration_from_last = ((cur_point.time -
+                                                 temp_points[point_number-1]
+                                                 .time).total_seconds())
             time_from_begin += cur_point.duration_from_last
             cur_point.duration_from_begin = time_from_begin
 
@@ -278,13 +277,13 @@ class GarminParse(GarminFile):
                         cur_lap.lap_number = int(val)
                     if key == 'dur':
                         cur_lap.lap_duration = float(convert_time_string(val))
-                        cur_point.time = self.points[-1].time + \
-                                         datetime.timedelta(
-                                             seconds=cur_lap.lap_duration)
+                        cur_point.time = (self.points[-1].time +
+                                          datetime.timedelta(
+                                              seconds=cur_lap.lap_duration))
                     if key == 'dis':
-                        if 'mi' in val: # specify mi, m or assume it's meters
-                            cur_lap.lap_distance = float(val.split('mi')[0])\
-                                                   * METERS_PER_MILE
+                        if 'mi' in val:  # specify mi, m or assume it's meters
+                            cur_lap.lap_distance = (float(val.split('mi')[0])
+                                                    * METERS_PER_MILE)
                         elif 'm' in val:
                             cur_lap.lap_distance = float(val.split('m')[0])
                         else:
@@ -308,20 +307,18 @@ class GarminParse(GarminFile):
                 self.total_distance += cur_lap.lap_distance
                 self.total_duration += cur_lap.lap_duration
                 if cur_lap.lap_avg_hr:
-                    self.total_hr_dur += cur_lap.lap_avg_hr * \
-                                         cur_lap.lap_duration
+                    self.total_hr_dur += (cur_lap.lap_avg_hr
+                                          * cur_lap.lap_duration)
                     self.total_hr_dis += cur_lap.lap_duration
                 self.laps.append(cur_lap)
                 self.points.append(cur_point)
 
         time_since_begin = 0
         for point0, point1 in izip(self.points[1:], self.points):
-            if point0.distance and point1.distance \
-                    and point0.distance > \
-                        point1.distance:
-                point0.duration_from_last = \
-                    (point0.time - point1.time)\
-                        .total_seconds()
+            if point0.distance and point1.distance and \
+                    point0.distance > point1.distance:
+                point0.duration_from_last = (
+                    (point0.time - point1.time).total_seconds())
                 time_since_begin += point0.duration_from_last
                 point0.duration_from_begin = time_since_begin
             else:

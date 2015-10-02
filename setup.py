@@ -14,18 +14,19 @@ from setuptools import setup
 
 setup(
     name='garmin_app',
-    version='0.0.2',
+    version='0.0.3',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='garmin_app',
     long_description='Garmin App',
     license='MIT',
-    test_suite = 'nose.collector',
+    test_suite='nose.collector',
     install_requires=['pandas', 'numpy', 'requests', 'sqlalchemy', 'pyusb'],
     packages=['garmin_app'],
     package_dir={'garmin_app': 'garmin_app'},
     package_data={'garmin_app': ['templates/*.html',
                                  'garmin_corrections.json']},
     entry_points={'console_scripts':
-                    ['garmin-app = garmin_app.garmin_utils:main']}
+                  ['garmin-app = garmin_app.garmin_utils:main',
+                   'strava-upload = garmin_app.strava_upload:strava_upload']}
 )

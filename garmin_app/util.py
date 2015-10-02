@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 """ Utility functions """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
+import time
+import shlex
+import socket
 from subprocess import call, Popen, PIPE
 
 HOSTNAME = os.uname()[1]
 HOMEDIR = os.getenv('HOME')
 
 POSTGRESTRING = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost:5432'
+
 
 class PopenWrapperClass(object):
     """ context wrapper around subprocess.Popen """
@@ -39,6 +41,7 @@ class PopenWrapperClass(object):
             else:
                 return True
 
+
 def run_command(command, do_popen=False, turn_on_commands=True,
                 single_line=False):
     """ wrapper around os.system """
@@ -54,6 +57,7 @@ def run_command(command, do_popen=False, turn_on_commands=True,
     else:
         return call(command, shell=True)
 
+
 def test_run_command():
     """ test run_command """
     cmd = 'echo "HELLO"'
@@ -62,6 +66,7 @@ def test_run_command():
 
     out = run_command(cmd, turn_on_commands=False)
     assert out == cmd
+
 
 def convert_date(input_date):
     """
@@ -74,10 +79,12 @@ def convert_date(input_date):
     _year = 2000 + int(input_date[4:6])
     return datetime.date(_year, _month, _day)
 
+
 def test_convert_date():
     """ test convert_date """
     import datetime
     assert convert_date('080515') == datetime.date(year=2015, month=8, day=5)
+
 
 def print_h_m_s(second):
     """ convert time from seconds to hh:mm:ss format """
@@ -86,14 +93,17 @@ def print_h_m_s(second):
     seconds = int(second) - minutes * 60 - hours * 3600
     return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
+
 def test_print_h_m_s():
     """ test print_h_m_s """
     assert print_h_m_s(12345) == '03:25:45'
+
 
 def datetimefromstring(tstr, ignore_tz=False):
     """ wrapper around dateutil.parser.parse """
     from dateutil.parser import parse
     return parse(tstr, ignoretz=ignore_tz)
+
 
 def openurl(url_):
     """ wrapper around requests.get.text simulating urlopen """
@@ -108,6 +118,7 @@ def openurl(url_):
         print('something bad happened %d' % urlout.status_code)
         raise HTTPError
     return urlout.text.split('\n')
+
 
 def test_openurl():
     """ test openurl """
@@ -130,6 +141,7 @@ def test_openurl():
 
     test_httperror()
 
+
 def dump_to_file(url_, outfile_):
     """ dump url to file """
     from contextlib import closing
@@ -147,7 +159,7 @@ def dump_to_file(url_, outfile_):
             outfile_.write(chunk)
     return True
 
-import socket
+
 class OpenUnixSocketServer(object):
     """ context wrapper around unix socket """
     def __init__(self, socketfile):
@@ -195,6 +207,7 @@ class OpenSocketConnection(object):
         else:
             return True
 
+
 def walk_wrapper(direc, callback, arg):
     """ wrapper around walk to allow consistent execution for py2/py3 """
     if hasattr(os.path, 'walk'):
@@ -204,13 +217,13 @@ def walk_wrapper(direc, callback, arg):
             callback(arg, dirpath, dirnames + filenames)
     return
 
+
 class OpenPostgreSQLsshTunnel(object):
     """ Class to let us open an ssh tunnel, then close it when done """
     def __init__(self):
         self.tunnel_process = None
 
     def __enter__(self):
-        import shlex, time
         if HOSTNAME != 'dilepton-tower':
             _cmd = 'ssh -N -L localhost:5432:localhost:5432 ' \
                    + 'ddboline@ddbolineathome.mooo.com'
@@ -226,6 +239,7 @@ class OpenPostgreSQLsshTunnel(object):
             return False
         else:
             return True
+
 
 def test_datetimefromstring():
     """ test datetimefromstring """

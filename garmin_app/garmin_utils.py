@@ -5,10 +5,8 @@
         gmn to xml
         fit to tcx
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 import glob
@@ -18,8 +16,8 @@ import argparse
 from tempfile import NamedTemporaryFile
 
 from .garmin_server import GarminServer
-from .util import (run_command, datetimefromstring, openurl,
-                   dump_to_file, HOMEDIR, walk_wrapper)
+from .util import (run_command, openurl, dump_to_file, HOMEDIR, walk_wrapper,
+                   datetimefromstring)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -29,9 +27,9 @@ if not os.path.exists(CACHEDIR):
     os.makedirs(CACHEDIR)
 
 ### Useful constants
-METERS_PER_MILE = 1609.344 # meters
-MARATHON_DISTANCE_M = 42195 # meters
-MARATHON_DISTANCE_MI = MARATHON_DISTANCE_M / METERS_PER_MILE # meters
+METERS_PER_MILE = 1609.344  # meters
+MARATHON_DISTANCE_M = 42195  # meters
+MARATHON_DISTANCE_MI = MARATHON_DISTANCE_M / METERS_PER_MILE  # meters
 
 ### explicitly specify available types...
 SPORT_TYPES = ('running', 'biking', 'walking', 'ultimate', 'elliptical',
@@ -50,6 +48,7 @@ def days_in_year(year=datetime.date.today().year):
     return (datetime.date(year=year+1, month=1, day=1)
             - datetime.date(year=year, month=1, day=1)).days
 
+
 def days_in_month(month=None, year=None):
     """ return number of days in a given month """
     if not month:
@@ -62,10 +61,6 @@ def days_in_month(month=None, year=None):
     return (datetime.date(year=y1_, month=m1_, day=1)
             - datetime.date(year=year, month=month, day=1)).days
 
-### maybe change output to datetime object?
-def convert_date_string(date_str, ignore_tz=True):
-    """ convert date string to datetime object """
-    return datetimefromstring(date_str, ignore_tz=ignore_tz)
 
 def expected_calories(weight=175, pace_min_per_mile=10.0, distance=1.0):
     """ return expected calories for running at a given pace """
@@ -73,12 +68,19 @@ def expected_calories(weight=175, pace_min_per_mile=10.0, distance=1.0):
                            + 0.000455 * (60./pace_min_per_mile)**2
                            + 0.000801 * ((weight/154) * 0.425 / weight
                                          * (60./pace_min_per_mile)**3)
-                                         * 60. / (60./pace_min_per_mile))
+                           * 60. / (60./pace_min_per_mile))
     return cal_per_mi * distance
+
 
 def print_date_string(dt_):
     """ datetime object to standardized string """
     return dt_.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
+def convert_date_string(date_str, ignore_tz=True):
+    """ wrapper around garmin_app.util.datetimefromstring """
+    return datetimefromstring(date_str, ignore_tz=ignore_tz)
+
 
 def convert_time_string(time_str):
     """ time string to seconds """
@@ -86,6 +88,7 @@ def convert_time_string(time_str):
     minute = int(time_str.split(':')[1])
     second = float(time_str.split(':')[2])
     return second + 60*(minute + 60 * (hour))
+
 
 def print_h_m_s(second, do_hours=True):
     """ seconds to hh:mm:ss string """
@@ -118,6 +121,7 @@ def convert_gmn_to_gpx(gmn_filename):
         os.rename(fn_.name, '/tmp/temp.gpx')
         return '/tmp/temp.gpx'
 
+
 def convert_fit_to_tcx(fit_filename):
     """ fit files to tcx files """
     with NamedTemporaryFile(prefix='temp', suffix='.tcx', delete=False,
@@ -134,6 +138,7 @@ def convert_fit_to_tcx(fit_filename):
             return '/tmp/temp.tcx'
         else:
             return None
+
 
 def convert_gmn_to_xml(gmn_filename):
     """
@@ -155,6 +160,7 @@ def convert_gmn_to_xml(gmn_filename):
         os.rename(xml_file.name, '/tmp/temp.xml')
         return '/tmp/temp.xml'
 
+
 def get_md5_old(fname):
     """ md5 function using hashlib.md5 """
     if not os.path.exists(fname):
@@ -168,6 +174,7 @@ def get_md5_old(fname):
         output = output.decode()
     return output
 
+
 def get_md5(fname):
     """ md5 function using cli """
     if not os.path.exists(fname):
@@ -175,6 +182,7 @@ def get_md5(fname):
     output = run_command('md5sum "%s"' % fname, do_popen=True,
                          single_line=True).split()[0]
     return output.decode()
+
 
 def compare_with_remote(cache_dir):
     """ sync files at script_path with files at BASEURL """
@@ -200,9 +208,9 @@ def compare_with_remote(cache_dir):
         for fn_ in names:
             fname = '%s/%s' % (dirname, fn_)
             if os.path.isdir(fname) or \
-                ('garmin.pkl' in fn_) or \
-                ('garmin.list' in fn_) or \
-                ('.pkl.gz' in fn_):
+                    ('garmin.pkl' in fn_) or \
+                    ('garmin.list' in fn_) or \
+                    ('.pkl.gz' in fn_):
                 continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True,
@@ -244,6 +252,7 @@ def compare_with_remote(cache_dir):
         print('missing files', s3_files_not_in_local)
     return
 
+
 def read_garmin_file(fname, msg_q=None, options=None):
     """ read single garmin file """
     from .garmin_cache import GarminCache
@@ -278,6 +287,7 @@ def read_garmin_file(fname, msg_q=None, options=None):
     convert_gmn_to_gpx(fname)
     return True
 
+
 def do_summary(directory_, msg_q=None, options=None):
     """ produce summary report """
     from .garmin_cache import GarminCache
@@ -303,7 +313,6 @@ def do_summary(directory_, msg_q=None, options=None):
 
         return summary_list_
 
-
     summary_list_ = cache_.get_cache_summary_list(directory=directory_,
                                                   options=options)
     if not summary_list_:
@@ -313,6 +322,7 @@ def do_summary(directory_, msg_q=None, options=None):
     print(_report.summary_report(summary_list_, options=options))
 
     return True
+
 
 def add_correction(correction_str, json_path=None):
     """ add correction to json file """
@@ -351,8 +361,8 @@ def add_correction(correction_str, json_path=None):
     save_corrections(l_corr)
     save_corrections(l_corr, json_path=json_path)
     if os.path.exists('%s/public_html/garmin/files' % HOMEDIR):
-        save_corrections(l_corr, json_path='%s/public_html/garmin/files'
-                                            % HOMEDIR)
+        save_corrections(l_corr,
+                         json_path='%s/public_html/garmin/files' % HOMEDIR)
     return l_corr
 
 
@@ -365,14 +375,14 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
     gdir = set()
     for arg in args:
         if arg == 'build':
-            if msg_q != None:
+            if msg_q is not None:
                 return
             options['build'] = True
         elif arg == 'backup':
-            if msg_q != None:
+            if msg_q is not None:
                 return
             fname = '%s/garmin_data_%s.tar.gz'\
-                     % (cache_dir, datetime.date.today().strftime('%Y%m%d'))
+                    % (cache_dir, datetime.date.today().strftime('%Y%m%d'))
             run_command('cd %s/run/ ; ' % cache_dir +
                         'tar zcvf %s gps_tracks/ garmin.pkl* ' % fname +
                         'garmin_corrections.json cache/')
@@ -421,10 +431,11 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             elif arg == 'bike':
                 options['do_sport'] = 'biking'
             elif '-' in arg or arg in ('%4d' % _ for _ in range(2008,
-                                                datetime.date.today().year+1)):
-                files = glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg))\
-                        + glob.glob('%s/run/gps_tracks/%s*'
-                                    % (cache_dir, arg.replace('-', '')))
+                                       datetime.date.today().year+1)):
+                files = glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg))
+                files += glob.glob('%s/run/gps_tracks/%s*' % (cache_dir,
+                                                              arg.replace('-',
+                                                                          '')))
                 basenames = [f.split('/')[-1] for f in sorted(files)]
                 if len([x for x in basenames if x[:10] == basenames[0][:10]])\
                         == len(basenames):
@@ -446,6 +457,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
     else:
         return do_summary(gdir, msg_q=msg_q, options=options)
 
+
 def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     """ parse command line arguments """
     help_text = 'usage: ./garmin.py <%s>' % '|'.join(COMMANDS)
@@ -454,8 +466,6 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     parser.add_argument('--daemon', '-d', action='store_true',
                         help='run as daemon')
     args = parser.parse_args()
-
-    options = ['build', 'sync', 'backup']
 
     for arg in getattr(args, 'command'):
         if any(arg == x for x in ['h', 'help', '-h', '--help']):
@@ -482,8 +492,8 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 summary_list_ = read_(pickle_file=pickle_file_)
                 if not summary_list_:
                     from .garmin_cache_sql import write_postgresql_table
-                    summary_list_ = write_postgresql_table([],
-                                                       get_summary_list=True)
+                    summary_list_ = write_postgresql_table(
+                        [], get_summary_list=True)
                     print(len(summary_list_), pickle_file_)
                     print(summary_list_[0])
                     ### Recreate cache file using list from database
@@ -509,7 +519,3 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
             return gar
     else:
         return garmin_parse_arg_list(getattr(args, 'command'), options=options)
-
-def main():
-    import garmin_app
-    return garmin_arg_parse(script_path=garmin_app.__path__[0])

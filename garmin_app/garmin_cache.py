@@ -4,10 +4,8 @@
     functions to read and write
     GarminFile, GarminSummary objects to and from pickle cache
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
 
@@ -23,6 +21,7 @@ try:
 except ImportError:
     import pickle
 
+
 def read_pickle_object_in_file(pickle_file):
     """ read python object from gzipped pickle file """
     outobj = None
@@ -33,6 +32,7 @@ def read_pickle_object_in_file(pickle_file):
         except UnicodeDecodeError:
             pass
     return outobj
+
 
 def write_pickle_object_to_file(inpobj, pickle_file):
     """ write python object to gzipped pickle file """
@@ -147,7 +147,6 @@ class GarminCache(object):
             else:
                 gsum = local_dict[reduced_gmn_filename]
             summary_list.append(gsum)
-
 
         if type(directory) == list:
             for dr_ in directory:

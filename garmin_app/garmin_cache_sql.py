@@ -3,10 +3,8 @@
 """
     write cache objects to sql database
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from .garmin_cache import GarminCache
 from .garmin_summary import GarminSummary, DB_ENTRIES
@@ -18,6 +16,7 @@ from sqlalchemy.orm import sessionmaker
 from .util import OpenPostgreSQLsshTunnel, POSTGRESTRING
 
 Base = declarative_base()
+
 
 class GarminSummaryTable(Base):
     """ ORM class for garmin_summary table """
@@ -47,10 +46,10 @@ class GarminCacheSQL(object):
             self.garmin_cache = garmin_cache
         else:
             self.garmin_cache = GarminCache(pickle_file=pickle_file,
-                             cache_directory=cache_directory,
-                             corr_list=corr_list,
-                             cache_read_fn=self.read_sql_table,
-                             cache_write_fn=self.write_sql_table)
+                                            cache_directory=cache_directory,
+                                            corr_list=corr_list,
+                                            cache_read_fn=self.read_sql_table,
+                                            cache_write_fn=self.write_sql_table)
         self.sql_string = sql_string
         self.summary_list = {}
         if isinstance(summary_list, dict):
@@ -88,6 +87,7 @@ class GarminCacheSQL(object):
         session = session()
 
         slists = []
+
         def convert_to_sql(sl_):
             """ ... """
             sld = {x: getattr(sl_, x) for x in DB_ENTRIES}

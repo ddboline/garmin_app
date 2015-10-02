@@ -3,13 +3,12 @@
 """
     Garmin Server Class
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import multiprocessing
 from .garmin_daemon import server_thread, GARMIN_SOCKET_FILE
+
 
 class GarminServer(object):
     """ Garmin Server Class """

@@ -3,18 +3,17 @@
 """
     module holds GarminSummary class
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
-from .garmin_utils import (get_md5, expected_calories,
-                                     SPORT_TYPES, METERS_PER_MILE)
+from .garmin_utils import (get_md5, expected_calories, SPORT_TYPES,
+                           METERS_PER_MILE)
 
 DB_ENTRIES = ('filename', 'begin_datetime', 'sport', 'total_calories',
               'total_distance', 'total_duration', 'total_hr_dur',
               'total_hr_dis', 'number_of_items', 'md5sum')
+
 
 class GarminSummary(object):
     """ summary class for a file """
@@ -64,10 +63,11 @@ class GarminSummary(object):
                 and self.total_distance > 0.0:
             _ppermile = (self.total_duration / 60.) / (self.total_distance
                                                        / METERS_PER_MILE)
-            self.total_calories = int(expected_calories(weight=175,
-                                                pace_min_per_mile=_ppermile,
-                                                distance=self.total_distance
-                                                / METERS_PER_MILE))
+            _cal = expected_calories(weight=175,
+                                     pace_min_per_mile=_ppermile,
+                                     distance=(self.total_distance
+                                               / METERS_PER_MILE))
+            self.total_calories = int(_cal)
         elif self.total_calories == 0 and self.sport == 'stairs'\
                 and self.total_duration > 0:
             self.total_calories = 325 * (self.total_duration / 1100.89)
