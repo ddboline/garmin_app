@@ -20,7 +20,7 @@ setup(
     tests_require=['nose'],
     test_suite='tests',
     install_requires=['pandas', 'numpy', 'requests', 'sqlalchemy', 'pyusb',
-                      'dateutil', 'psycopg2', 'matplotlib', 'boto'],
+                      'psycopg2', 'matplotlib', 'boto'],
     packages=['garmin_app'],
     package_dir={'garmin_app': 'garmin_app'},
     package_data={'garmin_app': ['templates/*.html',
