@@ -19,8 +19,6 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
-from .garmin_utils import find_gps_tracks, CACHEDIR
-
 
 def strava_upload():
     """
@@ -109,16 +107,7 @@ def strava_upload():
     print("Authorized to access account of {} {} (id {:d})."
           .format(athlete.firstname, athlete.lastname, athlete.id))
 
-    activities = []
     for act in args.activities:
-        if act is stdin or os.path.exists(act):
-            activities.append(act)
-        else:
-            for arg in find_gps_tracks(act, CACHEDIR):
-                if os.path.exists(arg):
-                    activities.append(arg)
-
-    for act in activities:
         if act is stdin:
             contents = act.read()
             act = StringIO(contents)
