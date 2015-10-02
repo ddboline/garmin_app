@@ -19,6 +19,8 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
+from .garmin_utils import find_gps_tracks, CACHEDIR
+
 
 def strava_upload():
     """
@@ -62,30 +64,27 @@ def strava_upload():
 
     if args.xml_desc:
         if args.title:
-            par.error('argument -T/--title not allowed with argument '
-                      '-x/--xml-desc')
+            print('argument -T/--title not allowed with argument '
+                  '-x/--xml-desc', file=stderr)
         if args.description:
-            par.error('argument -D/--desc not allowed with argument '
-                      '-x/--xml-desc')
+            print('argument -D/--desc not allowed with argument '
+                  '-x/--xml-desc', file=stderr)
 
     # Authorize Strava
     cid = 3163  # CLIENT_ID
-    if args.env:
-        cat = os.environ.get('ACCESS_TOKEN')
-    else:
-        cp_ = ConfigParser.ConfigParser()
-        cp_.read(os.path.expanduser('~/.stravacli'))
-        cat = None
-        if cp_.has_section('API'):
-            if 'access_token' in cp_.options('API'):
-                cat = cp_.get('API', 'ACCESS_TOKEN')
+    cp_ = ConfigParser.ConfigParser()
+    cp_.read(os.path.expanduser('~/.stravacli'))
+    cat = None
+    if cp_.has_section('API'):
+        if 'access_token' in cp_.options('API'):
+            cat = cp_.get('API', 'ACCESS_TOKEN')
 
     while True:
         client = Client(cat)
         try:
             athlete = client.get_athlete()
         except requests.exceptions.ConnectionError:
-            par.error("Could not connect to Strava API")
+            print("Could not connect to Strava API", file=stderr)
         except Exception as e:
             print("NOT AUTHORIZED %s" % e, file=stderr)
             print("Need Strava API access token. Launching web browser to "
@@ -129,10 +128,13 @@ def strava_upload():
                               .format(ext+gz_))
                         break
                 else:
-                    par.error("Could not determine file type of stdin")
+                    print("Could not determine file type of stdin",
+                          file=stderr)
             else:
                 base, ext = 'activity', args.type
         else:
+            if not os.path.exists(act):
+                cat = find_gps_tracks(act, CACHEDIR)[0]
             base, ext = os.path.splitext(act.name if args.type is None
                                          else 'activity.'+args.type)
             # autodetect based on extensions
@@ -145,10 +147,10 @@ def strava_upload():
                 gz_, uf_, cf_ = '', act, NamedTemporaryFile(suffix='.gz')
                 gzip.GzipFile(fileobj=cf_, mode='w+b').writelines(act)
             if ext.lower() not in allowed_exts:
-                par.error("Don't know how to handle extension "
-                          "{} (allowed are {}).".format(ext,
-                                                        ', '
-                                                        .join(allowed_exts)))
+                print("Don't know how to handle extension "
+                      "{} (allowed are {}).".format(ext, ', '
+                                                         .join(allowed_exts)),
+                      file=stderr)
             print("Uploading {} activity from {}...".format(ext+gz_, act.name))
 
         # try to parse activity name, description from file if requested

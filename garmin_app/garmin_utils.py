@@ -432,16 +432,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                 options['do_sport'] = 'biking'
             elif '-' in arg or arg in ('%4d' % _ for _ in range(2008,
                                        datetime.date.today().year+1)):
-                files = glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg))
-                files += glob.glob('%s/run/gps_tracks/%s*' % (cache_dir,
-                                                              arg.replace('-',
-                                                                          '')))
-                basenames = [f.split('/')[-1] for f in sorted(files)]
-                if len([x for x in basenames if x[:10] == basenames[0][:10]])\
-                        == len(basenames):
-                    for fn_ in basenames:
-                        print(fn_)
-                gdir.update(files)
+                gdir.update(find_gps_tracks(arg, cache_dir))
             elif '.gmn' in arg or 'T' in arg:
                 files = glob.glob('%s/run/gps_tracks/%s' % (cache_dir, arg))
                 gdir.update(files)
@@ -456,6 +447,28 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
         return read_garmin_file(gdir[0], msg_q=msg_q, options=options)
     else:
         return do_summary(gdir, msg_q=msg_q, options=options)
+
+
+def find_gps_tracks(arg, cache_dir):
+    """ find gps files matching pattern in cache_dir """
+    files = glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg))
+    files += glob.glob('%s/run/gps_tracks/%s*' % (cache_dir,
+                                                  arg.replace('-', '')))
+    basenames = [f.split('/')[-1] for f in sorted(files)]
+    if len([x for x in basenames if x[:10] == basenames[0][:10]]) == \
+            len(basenames):
+        for fn_ in basenames:
+            print(fn_)
+    return files
+
+
+def test_find_gps_tracks():
+    expect = ['2014-07-04_08-27-37-80-5163.fit',
+              '2014-07-04_09-02-20-80-10565.fit',
+              '2014-07-04_09-20-35-80-4251.fit']
+    expect = sorted('%s/run/gps_tracks/%s' % (CACHEDIR, x) for x in expect)
+    test = sorted(find_gps_tracks('2014-07-04', CACHEDIR))
+    assert test == expect
 
 
 def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
