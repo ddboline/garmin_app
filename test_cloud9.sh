@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -d "/home/${USER}/.garmin_cache/run/gps_tracks" ]; then
-    pass
+    true
 else
     ./garmin.py get
 fi
