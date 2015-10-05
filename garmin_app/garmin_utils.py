@@ -468,6 +468,8 @@ def test_find_gps_tracks():
               '2014-07-04_09-20-35-80-4251.fit']
     expect = sorted('%s/run/gps_tracks/%s' % (CACHEDIR, x) for x in expect)
     test = sorted(find_gps_tracks('2014-07-04', CACHEDIR))
+    print(test)
+    print(expect)
     assert test == expect
 
 
