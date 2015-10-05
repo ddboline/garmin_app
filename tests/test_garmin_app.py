@@ -52,12 +52,14 @@ from garmin_app.garmin_file import GarminFile
 from garmin_app.util import (run_command, OpenPostgreSQLsshTunnel, HOSTNAME,
                              POSTGRESTRING)
 
+
 def md5_command(command):
     """ convenience function """
     md5 = run_command(command, single_line=True, do_popen=True).split()[0]
     if hasattr(md5, 'decode'):
         md5 = md5.decode()
     return md5
+
 
 def cleanup_pickle():
     """ remove temporary files """
@@ -72,6 +74,7 @@ def cleanup_pickle():
         run_command('rm -rf json_test')
     if os.path.exists('html'):
         run_command('rm -rf html')
+
 
 class TestGarminApp(unittest.TestCase):
     """ GarminApp Unittests """
@@ -138,7 +141,6 @@ class TestGarminApp(unittest.TestCase):
         self.assertTrue(gfile.filetype == 'txt')
         self.assertEqual(gfile.begin_datetime.date(),
                          datetime.date(year=2013, month=1, day=16))
-
 
     def test_read_xml(self):
         """ read xml format """
@@ -312,7 +314,7 @@ class TestGarminApp(unittest.TestCase):
         options = {'script_path': '%s/garmin_app' % script_path,
                    'cache_dir': script_path}
         html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
-                                            options=options)
+                                         options=options)
         file_md5 = [['index.html', ['1c1abe181f36a85949974a222cc874df',
                                     '548581a142811d412dbf955d2e5372aa']]]
         for fn_, fmd5 in file_md5:
@@ -338,7 +340,7 @@ class TestGarminApp(unittest.TestCase):
         gsum.read_file()
         gr_ = GarminReport()
         output = gr_.day_summary_report_txt(
-                    gsum, sport='running', cur_date=gsum.begin_datetime.date())
+            gsum, sport='running', cur_date=gsum.begin_datetime.date())
 
         mstr = hashlib.md5()
         mstr.update(output.encode())
@@ -457,8 +459,9 @@ class TestGarminApp(unittest.TestCase):
                 postgre_str = POSTGRESTRING + '/test_garmin_summary'
                 gc_ = GarminCacheSQL(sql_string=postgre_str)
                 sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
-                output = '\n'.join('%s' % s for s in sorted(sl_, key=lambda x:
-                                                                   x.filename))
+                output = '\n'.join('%s' % s
+                                   for s in sorted(sl_,
+                                                   key=lambda x: x.filename))
                 gc_.delete_table()
                 mstr = hashlib.md5()
                 mstr.update(output.encode())
@@ -621,18 +624,18 @@ class TestGarminApp(unittest.TestCase):
         gfile.read_file()
         tmp = '%s' % gfile
         test0 = 'GarminFile<filename=test.gmn, filetype=gmn, ' + \
-               'begin_datetime=2011-05-07 15:43:08, sport=biking, ' + \
-               'total_calories=61, total_distance=1770.2784, ' + \
-               'total_duration=300, total_hr_dur=0, total_hr_dis=0>'
+                'begin_datetime=2011-05-07 15:43:08, sport=biking, ' + \
+                'total_calories=61, total_distance=1770.2784, ' + \
+                'total_duration=300, total_hr_dur=0, total_hr_dis=0>'
         test1 = test0.replace('total_distance=1770.2784',
                               'total_distance=1770.2784000000001')
         self.assertTrue(gfile.filetype == 'gmn')
         self.assertEqual(gfile.begin_datetime.date(), datetime.date(year=2011,
                          month=5, day=7))
         self.assertIn(tmp, [test0, test1])
-        gsum = GarminSummary(filename=GMNFILE,
-                             corr_list={'2011-05-07T15:43:08Z': {0: [1.1,
-                                                                    300]}})
+        gsum = GarminSummary(
+            filename=GMNFILE,
+            corr_list={'2011-05-07T15:43:08Z': {0: [1.1, 300]}})
         gsum.read_file()
         tmp = '%s' % gsum
         test0 = 'GarminSummary<filename=test.gmn, begin_datetime=' + \
