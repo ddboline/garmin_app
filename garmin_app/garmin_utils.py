@@ -319,7 +319,7 @@ def do_summary(directory_, msg_q=None, options=None):
         return None
 
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
-    print(_report.summary_report(summary_list_, options=options))
+    print(_report.summary_report(summary_list_.values(), options=options))
 
     return True
 
@@ -472,6 +472,7 @@ def test_find_gps_tracks():
         print(test)
         print(expect)
         assert test == expect
+
 
 def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     """ parse command line arguments """

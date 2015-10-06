@@ -93,7 +93,7 @@ class GarminCache(object):
             options = {}
         if 'do_update' in options and options['do_update']:
             self.do_update = True
-        summary_list = []
+        summary_list = {}
 
         self.cache_file_is_modified = False
         temp_list = self.cache_read_fn()
@@ -146,7 +146,7 @@ class GarminCache(object):
                           % reduced_gmn_filename)
             else:
                 gsum = local_dict[reduced_gmn_filename]
-            summary_list.append(gsum)
+            summary_list[gsum.filename] = gsum
 
         if type(directory) == list:
             for dr_ in directory:
@@ -163,5 +163,5 @@ class GarminCache(object):
         self.cache_summary_list = list(self.cache_summary_file_dict.values())
 
         if self.cache_file_is_modified:
-            self.cache_write_fn(self.cache_summary_list)
+            self.cache_write_fn(self.cache_summary_file_dict)
         return summary_list
