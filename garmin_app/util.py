@@ -12,7 +12,7 @@ from subprocess import call, Popen, PIPE
 HOSTNAME = os.uname()[1]
 HOMEDIR = os.getenv('HOME')
 
-POSTGRESTRING = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost:5432'
+POSTGRESTRING = 'postgresql://ddboline:BQGIvkKFZPejrKvX@localhost'
 
 
 class PopenWrapperClass(object):
@@ -222,15 +222,17 @@ class OpenPostgreSQLsshTunnel(object):
     """ Class to let us open an ssh tunnel, then close it when done """
     def __init__(self):
         self.tunnel_process = None
+        self.postgre_port = 5432
 
     def __enter__(self):
         if HOSTNAME != 'dilepton-tower':
-            _cmd = 'ssh -N -L localhost:5432:localhost:5432 ' \
-                   + 'ddboline@ddbolineathome.mooo.com'
+            self.postgre_port = 5435
+            _cmd = 'ssh -N -L localhost:' + self.postgre_port + \
+                   ':localhost:5432 ddboline@ddbolineathome.mooo.com'
             args = shlex.split(_cmd)
             self.tunnel_process = Popen(args, shell=False)
             time.sleep(5)
-        return self.tunnel_process
+        return self.postgre_port
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self.tunnel_process:

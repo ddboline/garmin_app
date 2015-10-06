@@ -118,9 +118,9 @@ class GarminCacheSQL(object):
 
 def write_postgresql_table(summary_list, get_summary_list=False):
     """ convenience function """
-    with OpenPostgreSQLsshTunnel():
+    with OpenPostgreSQLsshTunnel() as pport:
         from .garmin_cache_sql import GarminCacheSQL
-        postgre_str = POSTGRESTRING + '/garmin_summary'
+        postgre_str = '%s:%d/garmin_summary' % (POSTGRESTRING, pport)
         gc_ = GarminCacheSQL(sql_string=postgre_str)
         sl_ = gc_.read_sql_table()
         if get_summary_list:

@@ -455,8 +455,9 @@ class TestGarminApp(unittest.TestCase):
         self.assertEqual(mstr.hexdigest(), '046172056a2358821f2effd0974d5160')
 
         if HOSTNAME == 'dilepton-tower':
-            with OpenPostgreSQLsshTunnel():
-                postgre_str = POSTGRESTRING + '/test_garmin_summary'
+            with OpenPostgreSQLsshTunnel() as pport:
+                postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING, 
+                                                             pport)
                 gc_ = GarminCacheSQL(sql_string=postgre_str)
                 sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
                 output = '\n'.join('%s' % s
