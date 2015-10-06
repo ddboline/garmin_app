@@ -44,7 +44,8 @@ from garmin_app.garmin_point import GarminPoint
 from garmin_app.garmin_lap import GarminLap
 from garmin_app.garmin_cache import (GarminCache, read_pickle_object_in_file,
                                      write_pickle_object_to_file)
-from garmin_app.garmin_cache_sql import GarminCacheSQL, GarminSummaryTable
+from garmin_app.garmin_cache_sql import (GarminCacheSQL, GarminSummaryTable,
+                                         _write_postgresql_table)
 from garmin_app.garmin_report import GarminReport, print_history_buttons
 from garmin_app.garmin_corrections import (list_of_corrected_laps,
                                            save_corrections)
@@ -425,8 +426,8 @@ class TestGarminApp(unittest.TestCase):
         """ test GarminCache.get_cache_summary_list """
         gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
                           cache_directory='%s/run/cache' % CURDIR)
-        sl_ = gc_.get_cache_summary_list(directory=['%s/tests' % CURDIR])
-        output = '\n'.join('%s' % s for s in sorted(sl_,
+        sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
+        output = '\n'.join('%s' % s for s in sorted(sl_.values(),
                                                     key=lambda x: x.filename))
         test_output = open('tests/test_cache_summary.out', 'rt').read().strip()
         mstr = hashlib.md5()
@@ -436,7 +437,7 @@ class TestGarminApp(unittest.TestCase):
         sqlite_str = 'sqlite:///%s/run/cache/test.db' % CURDIR
         gc_ = GarminCacheSQL(sql_string=sqlite_str)
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
-        output = '\n'.join('%s' % s for s in sorted(sl_,
+        output = '\n'.join('%s' % s for s in sorted(sl_.values(),
                                                     key=lambda x: x.filename))
         mstr = hashlib.md5()
         mstr.update(output.encode())
@@ -444,7 +445,7 @@ class TestGarminApp(unittest.TestCase):
 
         gc0 = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
                           cache_directory='%s/run/cache' % CURDIR)
-        sl_ = gc_.get_cache_summary_list(directory=['%s/tests' % CURDIR])
+        sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
         sqlite_str = 'sqlite:///%s/run/cache/test.db' % CURDIR
         gc1 = GarminCacheSQL(sql_string=sqlite_str, garmin_cache=gc0,
                              summary_list=sl_)
@@ -454,20 +455,39 @@ class TestGarminApp(unittest.TestCase):
         mstr.update(output.encode())
         self.assertEqual(mstr.hexdigest(), '046172056a2358821f2effd0974d5160')
 
-        if HOSTNAME == 'dilepton-tower':
-            with OpenPostgreSQLsshTunnel() as pport:
-                postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING,
-                                                             pport)
-                gc_ = GarminCacheSQL(sql_string=postgre_str)
-                sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
-                output = '\n'.join('%s' % s
-                                   for s in sorted(sl_,
-                                                   key=lambda x: x.filename))
-                gc_.delete_table()
-                mstr = hashlib.md5()
-                mstr.update(output.encode())
-                self.assertEqual(mstr.hexdigest(),
-                                 'a59c8ee120e789eda36e0cc8592ffce1')
+        with OpenPostgreSQLsshTunnel() as pport:
+            postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING,
+                                                         pport)
+            gc_ = GarminCacheSQL(sql_string=postgre_str)
+            sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
+            output = '\n'.join('%s' % s for s in sorted(sl_.values(),
+                               key=lambda x: x.filename))
+            print(output)
+            mstr = hashlib.md5()
+            mstr.update(output.encode())
+            self.assertEqual(mstr.hexdigest(),
+                             '046172056a2358821f2effd0974d5160')
+
+        with OpenPostgreSQLsshTunnel() as pport:
+            postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING,
+                                                         pport)
+            gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
+                              cache_directory='%s/run/cache' % CURDIR)
+            sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
+            sl_ = _write_postgresql_table(sl_, get_summary_list=True,
+                                          dbname='test_garmin_summary',
+                                          port=pport)
+            sl_ = _write_postgresql_table(sl_, dbname='test_garmin_summary',
+                                          port=pport)
+            print(len(sl_))
+            output = '\n'.join('%s' % s for s in sorted(sl_.values(),
+                               key=lambda x: x.filename))
+            gc_ = GarminCacheSQL(sql_string=postgre_str)
+            gc_.delete_table()
+            mstr = hashlib.md5()
+            mstr.update(output.encode())
+            self.assertEqual(mstr.hexdigest(),
+                             '046172056a2358821f2effd0974d5160')
 
         gc_ = GarminCache(
             pickle_file='%s/temp.pkl.gz' % CURDIR,

@@ -92,7 +92,9 @@ class GarminCacheSQL(object):
             sld = {x: getattr(sl_, x) for x in DB_ENTRIES}
             return GarminSummaryTable(**sld)
 
-        for sl_ in summary_list:
+        for fn_, sl_ in summary_list.items():
+            if not isinstance(sl_, GarminSummary):
+                print(type(sl_))
             assert isinstance(sl_, GarminSummary)
             fn_ = sl_.filename
             if fn_ in self.summary_list:
@@ -116,13 +118,22 @@ class GarminCacheSQL(object):
                                                         options=options)
 
 
-def write_postgresql_table(summary_list, get_summary_list=False):
+def write_postgresql_table(summary_list, get_summary_list=False,
+                           dbname='garmin_summary'):
     """ convenience function """
     with OpenPostgreSQLsshTunnel() as pport:
-        from .garmin_cache_sql import GarminCacheSQL
-        postgre_str = '%s:%d/garmin_summary' % (POSTGRESTRING, pport)
-        gc_ = GarminCacheSQL(sql_string=postgre_str)
-        sl_ = gc_.read_sql_table()
-        if get_summary_list:
-            return sl_
+        return _write_postgresql_table(summary_list,
+                                       get_summary_list=get_summary_list,
+                                       dbname=dbname, port=pport)
+
+
+def _write_postgresql_table(summary_list, get_summary_list=False,
+                            dbname='garmin_summary', port=5432):
+    """ ... """
+    from .garmin_cache_sql import GarminCacheSQL
+    postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
+    gc_ = GarminCacheSQL(sql_string=postgre_str)
+    sl_ = gc_.read_sql_table()
+    if not get_summary_list:
         gc_.write_sql_table(summary_list)
+    return sl_

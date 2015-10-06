@@ -53,7 +53,11 @@ class GarminReport(object):
         do_year, do_month, do_week, do_day, do_file, do_sport, do_average = \
             (options[o] for o in opts)
 
-        summary_list = sorted(summary_list, key=lambda x: x.begin_datetime)
+        if isinstance(summary_list, dict):
+            summary_list = sorted(summary_list.values(),
+                                  key=lambda x: x.begin_datetime)
+        else:
+            summary_list = sorted(summary_list, key=lambda x: x.begin_datetime)
 
         year_set = list(set(x.begin_datetime.year for x in summary_list))
         month_set = list(set((x.begin_datetime.year*100 +

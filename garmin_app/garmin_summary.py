@@ -30,8 +30,8 @@ class GarminSummary(object):
         self.total_calories = 0
         self.total_distance = 0
         self.total_duration = 0
-        self.total_hr_dur = 0
-        self.total_hr_dis = 0
+        self.total_hr_dur = 0.
+        self.total_hr_dis = 0.
         self.number_of_items = 0
         self.md5sum = md5sum
         if not md5sum and self.fullfname:
