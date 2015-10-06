@@ -456,7 +456,7 @@ class TestGarminApp(unittest.TestCase):
 
         if HOSTNAME == 'dilepton-tower':
             with OpenPostgreSQLsshTunnel() as pport:
-                postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING, 
+                postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING,
                                                              pport)
                 gc_ = GarminCacheSQL(sql_string=postgre_str)
                 sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
