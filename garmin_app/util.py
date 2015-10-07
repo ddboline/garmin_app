@@ -208,6 +208,51 @@ class OpenSocketConnection(object):
             return True
 
 
+class OpenUnixSocketClient(object):
+    def __init__(self, host='localhost', portno=10888,
+                 socketfile='/tmp/.record_roku_socket'):
+        self.sock = None
+        self.socketfile = None
+        self.host = host
+        self.portno = portno
+        if socketfile:
+            self.socketfile = socketfile
+
+    def __enter__(self):
+        stm_type = socket.SOCK_STREAM
+        if self.socketfile:
+            net_type = socket.AF_UNIX
+            addr_obj = self.socketfile
+        else:
+            net_type = socket.AF_INET
+            addr_obj = (self.host, self.portno)
+        self.sock = socket.socket(net_type, stm_type)
+        try:
+            err = self.sock.connect(addr_obj)
+        except socket.error:
+            return None
+        if err:
+            print(err)
+        return self.sock
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.sock.close()
+        if exc_type or exc_value or traceback:
+            return False
+        else:
+            return True
+
+
+def send_command(ostr, host='localhost', portno=10888,
+                 socketfile='/tmp/.record_roku_socket'):
+    ''' send string to specified socket '''
+    with OpenUnixSocketClient(host, portno, socketfile) as sock:
+        if not sock:
+            return 'Failed to open socket'
+        sock.send(b'%s\n' % ostr)
+        return sock.recv(1024)
+
+
 def walk_wrapper(direc, callback, arg):
     """ wrapper around walk to allow consistent execution for py2/py3 """
     if hasattr(os.path, 'walk'):

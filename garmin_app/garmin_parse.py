@@ -118,6 +118,7 @@ class GarminParse(GarminFile):
                     cur_lap.lap_distance = (corrected_laps[lap_number][0]
                                             * METERS_PER_MILE)
                     cur_lap.lap_duration = corrected_laps[lap_number][1]
+
             cur_lap.lap_number = lap_number
             self.total_distance += cur_lap.lap_distance
             self.total_calories += cur_lap.lap_calories
