@@ -1,9 +1,9 @@
 package:
     name: garmin_app
-    version: {{ environ.get('GIT_DESCRIBE_TAG', '').replace('.dev', 'dev') }}
+    version: "0.0.4.1"
 
-build:
-    number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
+#build:
+    #number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
 
 source:
     git_url: ../
