@@ -41,15 +41,15 @@ class GarminServer(object):
         self.net.terminate()
 
 
-def test_garmin_server():
-    from .util import send_command
-    import time
-    from tempfile import NamedTemporaryFile
-
-    with NamedTemporaryFile() as tmpfile:
-        with GarminServer(socketfile=tmpfile.name) as gar:
-            time.sleep(2)
-            result = send_command('h', socketfile=tmpfile.name)
-
-            gar.kill_server()
-            assert result == 'done'
+#def test_garmin_server():
+#    from .util import send_command
+#    import time
+#    from tempfile import NamedTemporaryFile
+#
+#    with NamedTemporaryFile() as tmpfile:
+#        with GarminServer(socketfile=tmpfile.name) as gar:
+#            time.sleep(2)
+#            result = send_command('h', socketfile=tmpfile.name)
+#
+#            gar.kill_server()
+#            assert result == 'done'
