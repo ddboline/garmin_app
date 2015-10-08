@@ -32,7 +32,7 @@ test:
    - nose
 
   commands:
-   - nosetests ./tests/*.py garmin_app/*.py
+   - nosetests garmin_app
 
 #about
   #home: http://pandas.pydata.org
