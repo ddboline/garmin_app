@@ -7,7 +7,6 @@ import os.path
 import gzip
 import argparse
 import requests
-from cStringIO import StringIO
 
 from stravalib import Client, exc
 from sys import stderr, stdin
@@ -22,6 +21,12 @@ try:
     from ConfigParser import ConfigParser
 except ImportError:
     from configparser import ConfigParser
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 
 def strava_upload():
     """
