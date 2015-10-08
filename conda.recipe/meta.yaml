@@ -11,11 +11,10 @@ source:
 requirements:
   build:
     - python
-    - cython
     - numpy
     - libpython # [py2k and win]
     - setuptools
-    - pytz
+    - stravalib
     - python-dateutil
 
   run:
@@ -23,17 +22,18 @@ requirements:
     - numpy
     - python-dateutil
     - pytz
+    - stravalib
 
 test:
   imports:
-    - pandas
+    - garmin_app
 
-  #requires:
-  #  - nose
+  requires:
+   - nose
 
-  #commands:
-  #  - nosetests --exe -A "not slow and not network and not disabled" pandas
+  commands:
+   - nosetests ./tests/*.py garmin_app/*.py
 
-about:
-  home: http://pandas.pydata.org
-  license: BSD
+#about
+  #home: http://pandas.pydata.org
+  #license: BSD
