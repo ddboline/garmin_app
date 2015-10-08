@@ -4,7 +4,6 @@ from __future__ import (absolute_import, division, print_function,
 
 import webbrowser
 import os.path
-import ConfigParser
 import gzip
 import argparse
 import requests
@@ -19,6 +18,10 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 
 def strava_upload():
     """
@@ -70,7 +73,7 @@ def strava_upload():
 
     # Authorize Strava
     cid = 3163  # CLIENT_ID
-    cp_ = ConfigParser.ConfigParser()
+    cp_ = ConfigParser()
     cp_.read(os.path.expanduser('~/.stravacli'))
     cat = None
     if cp_.has_section('API'):
