@@ -16,6 +16,7 @@ from sqlalchemy.orm import sessionmaker
 from .util import OpenPostgreSQLsshTunnel, POSTGRESTRING
 
 Base = declarative_base()
+metadata = Base.metadata
 
 
 class GarminSummaryTable(Base):
@@ -61,11 +62,11 @@ class GarminCacheSQL(object):
 
     def create_table(self):
         """ create table """
-        Base.metadata.create_all(self.engine)
+        metadata.create_all(self.engine)
 
     def delete_table(self):
         """ drop table """
-        Base.metadata.drop_all(self.engine)
+        metadata.drop_all(self.engine)
 
     def read_sql_table(self):
         """ deserialize from database """

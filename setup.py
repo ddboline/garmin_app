@@ -17,8 +17,6 @@ setup(
     description='garmin_app',
     long_description='Garmin App',
     license='MIT',
-    tests_require=['nose'],
-    test_suite='tests',
     install_requires=['numpy'],
     packages=['garmin_app'],
     package_dir={'garmin_app': 'garmin_app'},
