@@ -457,7 +457,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertIn(mstr.hexdigest(), ['046172056a2358821f2effd0974d5160',
                       'a59c8ee120e789eda36e0cc8592ffce1'])
 
-        with OpenPostgreSQLsshTunnel() as pport:
+        with OpenPostgreSQLsshTunnel(port=5435) as pport:
             postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING,
                                                          pport)
             gc_ = GarminCacheSQL(sql_string=postgre_str)
@@ -471,7 +471,7 @@ class TestGarminApp(unittest.TestCase):
                           '046172056a2358821f2effd0974d5160',
                           'a59c8ee120e789eda36e0cc8592ffce1'])
 
-        with OpenPostgreSQLsshTunnel() as pport:
+        with OpenPostgreSQLsshTunnel(port=5436) as pport:
             postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING,
                                                          pport)
             gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
