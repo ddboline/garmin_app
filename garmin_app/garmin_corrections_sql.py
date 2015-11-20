@@ -82,13 +82,12 @@ class GarminCorrectionsSQL(object):
         """ deserialize from database """
         session = sessionmaker(bind=self.engine)
         session = session()
-
-        for row in session.query(GarminCorrectionsStarts).all():
-            gsum = GarminCorrectionsStarts()
-            for sl_ in DB_ENTRIES:
-                setattr(gsum, sl_, getattr(row, sl_))
-            self.summary_list[gsum.filename] = gsum
-        session.close()
+        with session.begin():
+            for row in session.query(GarminCorrectionsStarts).all():
+                gsum = GarminCorrectionsStarts()
+                for sl_ in DB_ENTRIES:
+                    setattr(gsum, sl_, getattr(row, sl_))
+                self.summary_list[gsum.filename] = gsum
         return self.summary_list
 
     def write_sql_table(self, summary_list):

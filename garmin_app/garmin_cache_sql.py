@@ -72,12 +72,13 @@ class GarminCacheSQL(object):
         """ deserialize from database """
         session = sessionmaker(bind=self.engine)
         session = session()
-        with session.begin():
-            for row in session.query(GarminSummaryTable).all():
-                gsum = GarminSummary()
-                for sl_ in DB_ENTRIES:
-                    setattr(gsum, sl_, getattr(row, sl_))
-                self.summary_list[gsum.filename] = gsum
+        for row in session.query(GarminSummaryTable).all():
+            gsum = GarminSummary()
+            for sl_ in DB_ENTRIES:
+                setattr(gsum, sl_, getattr(row, sl_))
+            self.summary_list[gsum.filename] = gsum
+        session.commit()
+        session.close()
         return self.summary_list
 
     def write_sql_table(self, summary_list):
@@ -91,23 +92,26 @@ class GarminCacheSQL(object):
 
         session = sessionmaker(bind=self.engine)
         session = session()
-        with session.begin():
-            for fn_, sl_ in summary_list.items():
-                if not isinstance(sl_, GarminSummary):
-                    print(type(sl_))
-                assert isinstance(sl_, GarminSummary)
-                fn_ = sl_.filename
-                if fn_ in self.summary_list:
-                    sl0 = self.summary_list[fn_]
-                    if not all(getattr(sl_, x) == getattr(sl0, x)
-                               for x in DB_ENTRIES):
-                        obj = session.query(GarminSummaryTable)\
-                                     .filter_by(filename=fn_).all()[0]
-                        session.delete(obj)
-                        slists.append(convert_to_sql(sl_))
-                else:
+        for fn_, sl_ in summary_list.items():
+            if not isinstance(sl_, GarminSummary):
+                print(type(sl_))
+            assert isinstance(sl_, GarminSummary)
+            fn_ = sl_.filename
+            if fn_ in self.summary_list:
+                sl0 = self.summary_list[fn_]
+                if not all(getattr(sl_, x) == getattr(sl0, x)
+                           for x in DB_ENTRIES):
+                    obj = session.query(GarminSummaryTable)\
+                                 .filter_by(filename=fn_).all()[0]
+                    session.delete(obj)
+                    session.commit()
                     slists.append(convert_to_sql(sl_))
-            session.add_all(slists)
+            else:
+                slists.append(convert_to_sql(sl_))
+    
+        session.add_all(slists)
+        session.commit()
+        session.close()
 
     def get_cache_summary_list(self, directory, options=None):
         """ redirect call """
