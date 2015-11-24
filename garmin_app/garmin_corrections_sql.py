@@ -12,7 +12,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
 from .util import OpenPostgreSQLsshTunnel, POSTGRESTRING
-from .garmin_corrections import list_of_corrected_laps, save_corrections
+from .garmin_corrections import (LIST_OF_MISLABELED_TIMES,
+                                 get_list_of_corrected_laps)
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -59,7 +60,7 @@ class GarminCorrectionsSQL(object):
         if garmin_corrections_ is not None:
             self.garmin_corrections_ = garmin_corrections_
         else:
-            self.garmin_corrections_ = list_of_corrected_laps()
+            self.garmin_corrections_ = get_list_of_corrected_laps()
         self.sql_string = sql_string
         self.summary_list = {}
         if isinstance(summary_list, dict):
@@ -125,7 +126,7 @@ class GarminCorrectionsSQL(object):
     def get_cache_summary_list(self, directory, options=None):
         """ redirect call """
         return self.garmin_corrections_.get_cache_summary_list(directory,
-                                                        options=options)
+                                                               options=options)
 
 
 def write_postgresql_table(summary_list, get_summary_list=False,

@@ -58,6 +58,10 @@ JSON_DIR = '%s/setup_files/build/garmin_app/garmin_app' % os.getenv('HOME')
 _LIST_OF_CORRECTED_LAPS = {}
 
 
+def get_list_of_corrected_laps():
+    _LIST_OF_CORRECTED_LAPS
+
+
 def list_of_corrected_laps(json_path=JSON_DIR,
                            json_file='garmin_corrections.json'):
     """ return list_of_corrected_laps """
