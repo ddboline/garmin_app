@@ -12,6 +12,8 @@ from .garmin_utils import METERS_PER_MILE
 
 FIVEK_DIST = 5000/METERS_PER_MILE
 
+DB_ENTRIES = ('id', 'start_time', 'lap_number', 'distance', 'duration')
+
 #LIST_OF_MISLABELED_FILES = {'biking':
 #                                ['20101120T135534.gmn', '20110507T144308.gmn',
 #                                '20110829T171218.gmn', '20111220T134356.gmn'],
