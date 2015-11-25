@@ -536,6 +536,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     else:
         return garmin_parse_arg_list(getattr(args, 'command'), options=options)
 
+
 def main():
     import garmin_app
     return garmin_arg_parse(script_path=garmin_app.__path__[0])

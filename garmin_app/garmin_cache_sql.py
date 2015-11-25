@@ -108,7 +108,7 @@ class GarminCacheSQL(object):
                     slists.append(convert_to_sql(sl_))
             else:
                 slists.append(convert_to_sql(sl_))
-    
+
         session.add_all(slists)
         session.commit()
         session.close()

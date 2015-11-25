@@ -150,7 +150,7 @@ def test_garmin_corrections_sql():
         gc_.create_table()
         gc_.write_sql_table(cor0)
         cor1 = gc_.read_sql_table()
-    
+
         for key, val in cor0.items():
             if key == 'DUMMY':
                 continue
