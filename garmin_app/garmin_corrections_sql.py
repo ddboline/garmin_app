@@ -84,11 +84,6 @@ class GarminCorrectionsSQL(object):
 
         slists = []
 
-        def convert_to_sql(sl_):
-            """ ... """
-            sld = {x: getattr(sl_, x) for x in DB_ENTRIES}
-            return GarminCorrectionsLaps(**sld)
-
         id_ = 0
         q = session.query(GarminCorrectionsLaps).order_by(
             GarminCorrectionsLaps.id.desc()).first()
@@ -146,16 +141,23 @@ def _read_postgresql_table(dbname='garmin_summary', port=5432):
 def test_garmin_corrections_sql():
     from .garmin_corrections import list_of_corrected_laps
     cor0 = list_of_corrected_laps()
-    write_postgresql_table(cor0, dbname='test_garmin_summary')
-    cor1 = read_postgresql_table(dbname='test_garmin_summary')
-
-    for key, val in cor0.items():
-        if key == 'DUMMY':
-            continue
-        for lap in val:
-            print(key, lap, cor0[key][lap], cor1[key][lap])
-            if isinstance(val[lap], list):
-                assert abs(cor0[key][lap][0] - cor1[key][lap][0]) < 1e-6
-                assert abs(cor0[key][lap][1] - cor1[key][lap][1]) < 1e-6
-            else:
-                assert abs(cor0[key][lap] - cor1[key][lap]) < 1e-6
+    with OpenPostgreSQLsshTunnel(port=5433) as pport:
+        postgre_str = '%s:%d/%s' % (POSTGRESTRING, pport,
+                                    'test_garmin_summary')
+        gc_ = GarminCorrectionsSQL(sql_string=postgre_str)
+        gc_.create_table()
+        gc_.delete_table()
+        gc_.create_table()
+        gc_.write_sql_table(cor0)
+        cor1 = gc_.read_sql_table()
+    
+        for key, val in cor0.items():
+            if key == 'DUMMY':
+                continue
+            for lap in val:
+                print(key, lap, cor0[key][lap], cor1[key][lap])
+                if isinstance(val[lap], list):
+                    assert abs(cor0[key][lap][0] - cor1[key][lap][0]) < 1e-6
+                    assert abs(cor0[key][lap][1] - cor1[key][lap][1]) < 1e-6
+                else:
+                    assert abs(cor0[key][lap] - cor1[key][lap]) < 1e-6
