@@ -112,13 +112,13 @@ class GarminCorrectionsSQL(object):
         session.close()
 
 
-def write_postgresql_table(corrections, dbname='garmin_summary'):
+def write_corrections_table(corrections, dbname='garmin_summary'):
     """ convenience function """
     with OpenPostgreSQLsshTunnel(port=5433) as pport:
-        return _write_postgresql_table(corrections, dbname=dbname, port=pport)
+        return _write_corrections_table(corrections, dbname=dbname, port=pport)
 
 
-def _write_postgresql_table(corrections, dbname='garmin_summary', port=5432):
+def _write_corrections_table(corrections, dbname='garmin_summary', port=5432):
     """ ... """
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
     gc_ = GarminCorrectionsSQL(sql_string=postgre_str)
@@ -127,12 +127,12 @@ def _write_postgresql_table(corrections, dbname='garmin_summary', port=5432):
     return sl_
 
 
-def read_postgresql_table(dbname='garmin_summary'):
+def read_corrections_table(dbname='garmin_summary'):
     with OpenPostgreSQLsshTunnel(port=5433) as pport:
-        return _read_postgresql_table(dbname=dbname, port=pport)
+        return _read_corrections_table(dbname=dbname, port=pport)
 
 
-def _read_postgresql_table(dbname='garmin_summary', port=5432):
+def _read_corrections_table(dbname='garmin_summary', port=5432):
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
     gc_ = GarminCorrectionsSQL(sql_string=postgre_str)
     return gc_.read_sql_table()
