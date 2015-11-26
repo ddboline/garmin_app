@@ -328,7 +328,10 @@ def add_correction(correction_str, json_path=None):
     """ add correction to json file """
     from dateutil.parser import parse
     from .garmin_corrections import (list_of_corrected_laps, save_corrections)
+    from .garmin_corrections_sql import (read_corrections_table,
+                                         write_corrections_table)
     l_corr = list_of_corrected_laps(json_path=json_path)
+    l_corr.update(read_corrections_table())
     ent = correction_str.split()
     timestr = ent[0]
     try:
@@ -363,6 +366,7 @@ def add_correction(correction_str, json_path=None):
     if os.path.exists('%s/public_html/garmin/files' % HOMEDIR):
         save_corrections(l_corr,
                          json_path='%s/public_html/garmin/files' % HOMEDIR)
+    write_corrections_table(l_corr)
     return l_corr
 
 
@@ -395,10 +399,13 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
 
             from .garmin_cache import GarminCache
             from .garmin_corrections import list_of_corrected_laps
+            from .garmin_corrections_sql import write_corrections_table
 
             pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
             cache_dir_ = '%s/run/cache' % cache_dir
             corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
+
+            write_corrections_table(corr_list_)
 
             cache_ = GarminCache(pickle_file=pickle_file_,
                                  cache_directory=cache_dir_,
@@ -419,7 +426,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             gdir.add('%s/run/%s' % (cache_dir, arg))
         elif arg == 'correction':
             add_correction(' '.join(args[1:]), json_path='%s/run' % cache_dir)
-            exit(0)
+            return
         elif arg in options:
             options[arg] = True
         elif 'do_%s' % arg in options:
