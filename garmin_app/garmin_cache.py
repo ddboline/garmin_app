@@ -154,23 +154,10 @@ class GarminCache(object):
                 self.cache_file_is_modified = True
                 self.input_work_queue.put((reduced_gmn_filename, gmn_filename,
                                            gmn_md5sum, self.corr_list))
-
-#                gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum,
-#                                     corr_list=self.corr_list)
-#                gfile = gsum.read_file()
-#                if gfile:
-#                    local_dict[reduced_gmn_filename] = gsum
-#                    self.cache_summary_md5_dict[gmn_md5sum] = gsum
-#                    self.write_cached_gfile(garminfile=gfile)
-#                else:
-#                    print('file %s not loaded for some reason'
-#                          % reduced_gmn_filename)
             else:
                 gsum = local_dict[reduced_gmn_filename]
                 self.output_work_queue.put((reduced_gmn_filename, gmn_filename,
                                             gmn_md5sum, gsum))
-#            summary_list[gsum.filename] = gsum
-
         for _ in range(mp.cpu_count()):
             self.pool.append(mp.Process(target=self.process_work_queue))
         for p in self.pool:
