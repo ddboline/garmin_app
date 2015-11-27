@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function,
 import os
 
 import gzip
+import time
 from functools import partial
 import multiprocessing as mp
 
@@ -23,6 +24,10 @@ except ImportError:
     import pickle
 
 _sentinel = 'EMPTY'
+_input_queue = mp.Queue()
+_output_queue = mp.Queue()
+#NCPU = mp.cpu_count()
+NCPU = 1
 
 
 def read_pickle_object_in_file(pickle_file):
@@ -43,6 +48,26 @@ def write_pickle_object_to_file(inpobj, pickle_file):
         pickle.dump(inpobj, pkl_file, pickle.HIGHEST_PROTOCOL)
     os.rename('%s.tmp' % pickle_file, pickle_file)
     return True
+
+
+def _write_cached_file(garminfile, cache_directory):
+    if not garminfile or not cache_directory:
+        return False
+    pkl_file = '%s/%s.pkl.gz' % (cache_directory, garminfile.filename)
+    return write_pickle_object_to_file(garminfile, pkl_file)
+
+
+def process_work_queue(inq, outq, cache_directory):
+    for reduced_gmn_filename, gmn_filename, gmn_md5sum, corr_list in iter(
+            inq.get, _sentinel):
+        gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum,
+                             corr_list=corr_list)
+        gfile = gsum.read_file()
+        if gfile:
+            _write_cached_file(gfile, cache_directory)
+        outq.put((reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum))
+    outq.put(_sentinel)
+    return
 
 
 class GarminCache(object):
@@ -71,13 +96,7 @@ class GarminCache(object):
         self.corr_list = []
         if corr_list:
             self.corr_list = corr_list
-        self.input_work_queue = mp.Queue()
-        self.output_work_queue = mp.Queue()
         self.pool = []
-
-    def __del__(self):
-        self.input_work_queue.close()
-        self.output_work_queue.close()
 
     def read_cached_gfile(self, gfbname):
         """ return cached file """
@@ -91,22 +110,7 @@ class GarminCache(object):
 
     def write_cached_gfile(self, garminfile=None):
         """ write cached file """
-        if not garminfile or not self.cache_directory:
-            return False
-        pkl_file = '%s/%s.pkl.gz' % (self.cache_directory, garminfile.filename)
-        return write_pickle_object_to_file(garminfile, pkl_file)
-
-    def process_work_queue(self):
-        for reduced_gmn_filename, gmn_filename, gmn_md5sum, corr_list in iter(
-                self.input_work_queue.get, _sentinel):
-            gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum,
-                                 corr_list=corr_list)
-            gfile = gsum.read_file()
-            if gfile:
-                self.write_cached_gfile(garminfile=gfile)
-            self.output_work_queue.put((reduced_gmn_filename, gmn_filename,
-                                        gmn_md5sum, gsum))
-        return
+        _write_cached_file(garminfile, self.cache_directory)
 
     def get_cache_summary_list(self, directory, options=None):
         """ return list of cached garmin_summary objects """
@@ -156,14 +160,18 @@ class GarminCache(object):
                      local_dict[reduced_gmn_filename].begin_datetime)
                         in self.corr_list)):
                 self.cache_file_is_modified = True
-                self.input_work_queue.put((reduced_gmn_filename, gmn_filename,
-                                           gmn_md5sum, self.corr_list))
+                _input_queue.put((reduced_gmn_filename, gmn_filename,
+                                  gmn_md5sum, self.corr_list))
             else:
                 gsum = local_dict[reduced_gmn_filename]
-                self.output_work_queue.put((reduced_gmn_filename, gmn_filename,
-                                            gmn_md5sum, gsum))
-        for _ in range(mp.cpu_count()):
-            self.pool.append(mp.Process(target=self.process_work_queue))
+                _output_queue.put((reduced_gmn_filename, gmn_filename,
+                                   gmn_md5sum, gsum))
+
+        for _ in range(NCPU):
+            self.pool.append(mp.Process(target=process_work_queue,
+                                        args=(_input_queue,
+                                              _output_queue,
+                                              self.cache_directory,)))
         for p in self.pool:
             p.start()
 
@@ -180,18 +188,21 @@ class GarminCache(object):
                 add_file(directory)
 
         for _ in self.pool:
-            self.input_work_queue.put(_sentinel)
+            _input_queue.put(_sentinel)
+
+        for _ in self.pool:
+            for reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum in iter(
+                    _output_queue.get, _sentinel):
+                self.cache_summary_file_dict[reduced_gmn_filename] = gsum
+                self.cache_summary_md5_dict[gmn_md5sum] = gsum
+                summary_list[gsum.filename] = gsum
+
+        while not _input_queue.empty():
+            time.sleep(10)
+            print('waiting')
         for p in self.pool:
-            p.join()
+            p.join(1)
         self.pool = []
-
-        self.output_work_queue.put(_sentinel)
-
-        for reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum in iter(
-                self.output_work_queue.get, _sentinel):
-            self.cache_summary_file_dict[reduced_gmn_filename] = gsum
-            self.cache_summary_md5_dict[gmn_md5sum] = gsum
-            summary_list[gsum.filename] = gsum
 
         self.cache_summary_list = list(self.cache_summary_file_dict.values())
 
