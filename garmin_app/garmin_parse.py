@@ -5,6 +5,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import os
 try:
     from itertools import izip
 except ImportError:
@@ -37,6 +38,12 @@ class GarminParse(GarminFile):
         self.corr_list = []
         if corr_list:
             self.corr_list = corr_list
+
+    def __del__(self):
+        if hasattr(self, 'filetype') and \
+                self.filetype in ('fit', 'gmn') \
+                and os.path.exists(self.orig_filename):
+            os.remove(self.orig_filename)
 
     def _determine_file_type(self):
         """ determine file type """
