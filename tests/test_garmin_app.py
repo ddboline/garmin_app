@@ -96,17 +96,20 @@ class TestGarminApp(unittest.TestCase):
         outfile = convert_gmn_to_gpx(GMNFILE)
         md5 = md5_command('tail -n186 %s | md5sum' % outfile)
         self.assertEqual(md5, '93e68a7fcc0e6b41037e16d3f3c59baa')
+        os.remove(outfile)
 
         outfile = convert_gmn_to_gpx(TCXFILE)
         if hasattr(md5, 'decode'):
             md5 = md5.decode()
         md5 = md5_command('tail -n740 %s | md5sum' % outfile)
         self.assertEqual(md5, '3e7ab7d5dc77a6e299596d615226ff0b')
+        os.remove(outfile)
 
         outfile = convert_gmn_to_gpx(FITFILE)
         md5 = md5_command('tail -n1246 %s | md5sum' % outfile)
         self.assertIn(md5, ['e06a6217293b218b8ca1e4dbf07174ce',
                             '47b9208c4ce3fed1c2da3da0ece615c1'])
+        os.remove(outfile)
 
         outfile = convert_gmn_to_gpx(TXTFILE)
         self.assertEqual(None, outfile)
@@ -119,6 +122,7 @@ class TestGarminApp(unittest.TestCase):
         md5 = md5_command('cat %s | md5sum' % outfile)
         self.assertIn(md5, ['1c304e508709540ccdf44fd70b3c5dcc',
                             'd96c38457f8bc1b6782bae9f9b02fe5a'])
+        os.remove(outfile)
 
     def test_gmn_to_xml(self):
         """ test gmn to xml conversion"""
@@ -130,6 +134,7 @@ class TestGarminApp(unittest.TestCase):
             outfile = convert_gmn_to_xml(GMNFILE)
             md5 = md5_command('cat %s | md5sum' % outfile)
             self.assertEqual(md5, 'c941a945ec3a2f75f72d426b57ff3b57')
+            os.remove(outfile)
 
     def test_read_txt(self):
         """ read text format """
