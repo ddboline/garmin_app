@@ -113,13 +113,13 @@ def convert_gmn_to_gpx(gmn_filename):
             tcx_filename = convert_fit_to_tcx(gmn_filename)
             run_command('gpsbabel -i gtrnctr -f %s -o gpx -F %s '
                         % (tcx_filename, fn_.name))
+            os.remove(tcx_filename)
         elif '.tcx' in gmn_filename.lower():
             run_command('gpsbabel -i gtrnctr -f %s -o gpx -F %s'
                         % (gmn_filename, fn_.name))
         else:
             run_command('garmin_gpx %s > %s' % (gmn_filename, fn_.name))
-        os.rename(fn_.name, '/tmp/temp.gpx')
-        return '/tmp/temp.gpx'
+        return fn_.name
 
 
 def convert_fit_to_tcx(fit_filename):
@@ -134,9 +134,9 @@ def convert_fit_to_tcx(fit_filename):
                 run_command('fit2tcx %s > %s' % (fit_filename, fn_.name))
             elif os.path.exists('./bin/fit2tcx'):
                 run_command('./bin/fit2tcx %s > %s' % (fit_filename, fn_.name))
-            os.rename(fn_.name, '/tmp/temp.tcx')
-            return '/tmp/temp.tcx'
+            return fn_.name
         else:
+            os.remove(fn_.name)
             return None
 
 
@@ -157,8 +157,7 @@ def convert_gmn_to_xml(gmn_filename):
                     line = line.decode()
                 xml_file.write(line)
         xml_file.write('</root>\n')
-        os.rename(xml_file.name, '/tmp/temp.xml')
-        return '/tmp/temp.xml'
+        return xml_file.name
 
 
 def get_md5_old(fname):
@@ -284,7 +283,7 @@ def read_garmin_file(fname, msg_q=None, options=None):
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.file_report_txt(_gfile))
     _report.file_report_html(_gfile, options=options)
-    convert_gmn_to_gpx(fname)
+    os.rename(convert_gmn_to_gpx(fname), '/tmp/temp.gpx')
     return True
 
 
