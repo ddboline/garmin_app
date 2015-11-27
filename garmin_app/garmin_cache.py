@@ -75,6 +75,10 @@ class GarminCache(object):
         self.output_work_queue = mp.Queue()
         self.pool = []
 
+    def __del__(self):
+        self.input_work_queue.close()
+        self.output_work_queue.close()
+
     def read_cached_gfile(self, gfbname):
         """ return cached file """
         if not self.cache_directory:
