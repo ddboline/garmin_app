@@ -94,19 +94,16 @@ class TestGarminApp(unittest.TestCase):
     def test_gmn_to_gpx(self):
         """ test gmn_to_gpx converter """
         outfile = convert_gmn_to_gpx(GMNFILE)
-        self.assertEqual('/tmp/temp.gpx', outfile)
         md5 = md5_command('tail -n186 %s | md5sum' % outfile)
         self.assertEqual(md5, '93e68a7fcc0e6b41037e16d3f3c59baa')
 
         outfile = convert_gmn_to_gpx(TCXFILE)
-        self.assertEqual('/tmp/temp.gpx', outfile)
         if hasattr(md5, 'decode'):
             md5 = md5.decode()
         md5 = md5_command('tail -n740 %s | md5sum' % outfile)
         self.assertEqual(md5, '3e7ab7d5dc77a6e299596d615226ff0b')
 
         outfile = convert_gmn_to_gpx(FITFILE)
-        self.assertEqual('/tmp/temp.gpx', outfile)
         md5 = md5_command('tail -n1246 %s | md5sum' % outfile)
         self.assertIn(md5, ['e06a6217293b218b8ca1e4dbf07174ce',
                             '47b9208c4ce3fed1c2da3da0ece615c1'])
@@ -119,7 +116,6 @@ class TestGarminApp(unittest.TestCase):
         self.assertFalse(convert_fit_to_tcx(GMNFILE))
         self.assertFalse(convert_fit_to_tcx(TCXFILE))
         outfile = convert_fit_to_tcx(FITFILE)
-        self.assertEqual('/tmp/temp.tcx', outfile)
         md5 = md5_command('cat %s | md5sum' % outfile)
         self.assertIn(md5, ['1c304e508709540ccdf44fd70b3c5dcc',
                             'd96c38457f8bc1b6782bae9f9b02fe5a'])
