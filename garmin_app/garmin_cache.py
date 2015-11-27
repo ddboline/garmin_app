@@ -26,8 +26,7 @@ except ImportError:
 _sentinel = 'EMPTY'
 _input_queue = mp.Queue()
 _output_queue = mp.Queue()
-#NCPU = mp.cpu_count()
-NCPU = 1
+NCPU = mp.cpu_count()
 
 
 def read_pickle_object_in_file(pickle_file):
