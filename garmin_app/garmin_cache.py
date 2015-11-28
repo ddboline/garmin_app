@@ -10,9 +10,9 @@ from __future__ import (absolute_import, division, print_function,
 import os
 
 import gzip
-import time
 from functools import partial
 import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor
 
 from .util import walk_wrapper
 from .garmin_summary import GarminSummary
@@ -23,10 +23,9 @@ try:
 except ImportError:
     import pickle
 
-_sentinel = 'EMPTY'
-_input_queue = mp.Queue()
-_output_queue = mp.Queue()
+_work_list = []
 NCPU = mp.cpu_count()
+_pool = ProcessPoolExecutor(max_workers=NCPU)
 
 
 def read_pickle_object_in_file(pickle_file):
@@ -56,17 +55,14 @@ def _write_cached_file(garminfile, cache_directory):
     return write_pickle_object_to_file(garminfile, pkl_file)
 
 
-def process_work_queue(inq, outq, cache_directory):
-    for reduced_gmn_filename, gmn_filename, gmn_md5sum, corr_list in iter(
-            inq.get, _sentinel):
-        gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum,
-                             corr_list=corr_list)
-        gfile = gsum.read_file()
-        if gfile:
-            _write_cached_file(gfile, cache_directory)
-        outq.put((reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum))
-    outq.put(_sentinel)
-    return
+def process_work_item(init, cache_directory):
+    reduced_gmn_filename, gmn_filename, gmn_md5sum, corr_list = init
+    gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)
+    gfile = gsum.read_file()
+    if gfile:
+        _write_cached_file(gfile, cache_directory)
+    outit = (reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum)
+    return outit
 
 
 class GarminCache(object):
@@ -159,20 +155,15 @@ class GarminCache(object):
                      local_dict[reduced_gmn_filename].begin_datetime)
                         in self.corr_list)):
                 self.cache_file_is_modified = True
-                _input_queue.put((reduced_gmn_filename, gmn_filename,
-                                  gmn_md5sum, self.corr_list))
+                _work_list.append(_pool.submit(process_work_item,
+                                               (reduced_gmn_filename,
+                                                gmn_filename, gmn_md5sum,
+                                                self.corr_list),
+                                               self.cache_directory))
             else:
                 gsum = local_dict[reduced_gmn_filename]
-                _output_queue.put((reduced_gmn_filename, gmn_filename,
+                _work_list.append((reduced_gmn_filename, gmn_filename,
                                    gmn_md5sum, gsum))
-
-        for _ in range(NCPU):
-            self.pool.append(mp.Process(target=process_work_queue,
-                                        args=(_input_queue,
-                                              _output_queue,
-                                              self.cache_directory,)))
-        for p in self.pool:
-            p.start()
 
         if type(directory) == list:
             for dr_ in directory:
@@ -186,22 +177,13 @@ class GarminCache(object):
             elif os.path.isfile(directory):
                 add_file(directory)
 
-        for _ in self.pool:
-            _input_queue.put(_sentinel)
-
-        for _ in self.pool:
-            for reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum in iter(
-                    _output_queue.get, _sentinel):
-                self.cache_summary_file_dict[reduced_gmn_filename] = gsum
-                self.cache_summary_md5_dict[gmn_md5sum] = gsum
-                summary_list[gsum.filename] = gsum
-
-        while not _input_queue.empty():
-            time.sleep(10)
-            print('waiting')
-        for p in self.pool:
-            p.join(1)
-        self.pool = []
+        for item in _work_list:
+            if hasattr(item, 'result'):
+                item = item.result()
+            reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum = item
+            self.cache_summary_file_dict[reduced_gmn_filename] = gsum
+            self.cache_summary_md5_dict[gmn_md5sum] = gsum
+            summary_list[gsum.filename] = gsum
 
         self.cache_summary_list = list(self.cache_summary_file_dict.values())
 
