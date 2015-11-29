@@ -283,6 +283,7 @@ def read_garmin_file(fname, msg_q=None, options=None):
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.file_report_txt(_gfile))
     _report.file_report_html(_gfile, options=options)
+    os.rename(convert_fit_to_tcx(fname), '/tmp/temp.tcx')
     os.rename(convert_gmn_to_gpx(fname), '/tmp/temp.gpx')
     return True
 
