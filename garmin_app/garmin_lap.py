@@ -98,4 +98,3 @@ class GarminLap(object):
                     self.lap_max_hr = int(ents[1].split('=')[1])
             elif 'Intensity' in ents[0]:
                 self.lap_intensity = ents[0].split('=')[1]
-        return None

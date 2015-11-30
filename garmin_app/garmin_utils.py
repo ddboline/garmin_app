@@ -249,7 +249,6 @@ def compare_with_remote(cache_dir):
         s3_file_chksum = save_to_s3(filelist=local_files_not_in_s3)
     if s3_files_not_in_local:
         print('missing files', s3_files_not_in_local)
-    return
 
 
 def read_garmin_file(fname, msg_q=None, options=None):
@@ -276,10 +275,9 @@ def read_garmin_file(fname, msg_q=None, options=None):
     else:
         _gfile = GarminParse(fname, corr_list=corr_list_)
         _gfile.read_file()
-    if _gfile:
-        cache_.write_cached_gfile(garminfile=_gfile)
-    else:
+    if not _gfile:
         return False
+    cache_.write_cached_gfile(garminfile=_gfile)
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.file_report_txt(_gfile))
     _report.file_report_html(_gfile, options=options)
@@ -316,7 +314,7 @@ def do_summary(directory_, msg_q=None, options=None):
     summary_list_ = cache_.get_cache_summary_list(directory=directory_,
                                                   options=options)
     if not summary_list_:
-        return None
+        return False
 
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.summary_report(summary_list_.values(), options=options))
@@ -337,7 +335,7 @@ def add_correction(correction_str, json_path=None):
     try:
         parse(timestr)
     except ValueError:
-        return
+        return {}
     lapdict = {}
     for idx, line in enumerate(ent[1:]):
         ent = line.split()
@@ -452,8 +450,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
 
     if len(gdir) == 1 and os.path.isfile(gdir[0]):
         return read_garmin_file(gdir[0], msg_q=msg_q, options=options)
-    else:
-        return do_summary(gdir, msg_q=msg_q, options=options)
+    return do_summary(gdir, msg_q=msg_q, options=options)
 
 
 def find_gps_tracks(arg, cache_dir):
@@ -522,7 +519,6 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                     ### Recreate cache file using list from database
                     write_(summary_list_, pickle_file_)
             return
-
         if arg == 'sync':
             compare_with_remote(cache_dir)
             return
@@ -538,10 +534,9 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     options['cache_dir'] = cache_dir
 
     if getattr(args, 'daemon'):
-        with GarminServer() as gar:
-            return gar
-    else:
-        return garmin_parse_arg_list(getattr(args, 'command'), options=options)
+        with GarminServer():
+            return None
+    return garmin_parse_arg_list(getattr(args, 'command'), options=options)
 
 
 def main():

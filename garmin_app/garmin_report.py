@@ -732,8 +732,7 @@ class GarminReport(object):
             run_command('mv %s/html %s/public_html/garmin'
                         % (cache_dir, HOMEDIR))
             return '%s/public_html/garmin/html' % HOMEDIR
-        else:
-            return '%s/html' % cache_dir
+        return '%s/html' % cache_dir
 
     @staticmethod
     def total_summary_report_txt(gsum, sport=None, number_days=0,

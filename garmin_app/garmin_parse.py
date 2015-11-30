@@ -164,7 +164,6 @@ class GarminParse(GarminFile):
                     for lap in self.laps:
                         lap.lap_calories = int(lap.lap_calories * (3390/26.43)
                                                / (1701/26.26))
-        return None
 
     def read_file_tcx(self):
         """ read tcx file """
@@ -236,8 +235,6 @@ class GarminParse(GarminFile):
 
             if cur_point.distance and cur_point.distance > 0:
                 self.points.append(cur_point)
-
-        return None
 
     def read_file_txt(self):
         """ read txt file, these just contain summary information """

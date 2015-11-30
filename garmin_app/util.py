@@ -38,8 +38,7 @@ class PopenWrapperClass(object):
             self.pop_.wait()
             if exc_type or exc_value or traceback:
                 return False
-            else:
-                return True
+            return True
 
 
 def run_command(command, do_popen=False, turn_on_commands=True,
@@ -52,10 +51,8 @@ def run_command(command, do_popen=False, turn_on_commands=True,
         if single_line:
             with PopenWrapperClass(command) as pop_:
                 return pop_.read()
-        else:
-            return PopenWrapperClass(command)
-    else:
-        return call(command, shell=True)
+        return PopenWrapperClass(command)
+    return call(command, shell=True)
 
 
 def test_run_command():
@@ -184,8 +181,7 @@ class OpenUnixSocketServer(object):
         self.sock.close()
         if exc_type or exc_value or traceback:
             return False
-        else:
-            return True
+        return True
 
 
 class OpenSocketConnection(object):
@@ -204,8 +200,7 @@ class OpenSocketConnection(object):
         self.conn.close()
         if exc_type or exc_value or traceback:
             return False
-        else:
-            return True
+        return True
 
 
 class OpenUnixSocketClient(object):
@@ -239,8 +234,7 @@ class OpenUnixSocketClient(object):
         self.sock.close()
         if exc_type or exc_value or traceback:
             return False
-        else:
-            return True
+        return True
 
 
 def send_command(ostr, host='localhost', portno=10888,
@@ -285,8 +279,7 @@ class OpenPostgreSQLsshTunnel(object):
             self.tunnel_process.kill()
         if exc_type or exc_value or traceback:
             return False
-        else:
-            return True
+        return True
 
 
 def test_datetimefromstring():

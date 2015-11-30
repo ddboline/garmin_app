@@ -17,7 +17,7 @@ class GarminDataFrame(object):
 
     def fill_dataframe(self, arr):
         """ fill dataframe """
-        import pandas as pd
+        from pandas import DataFrame
         inp_array = []
         for it_ in arr:
             columns = []
@@ -26,7 +26,7 @@ class GarminDataFrame(object):
                 columns.append(attr)
                 tmp_array.append(getattr(it_, attr))
             inp_array.append(tmp_array)
-        self.dataframe = pd.DataFrame(inp_array, columns=columns)
+        self.dataframe = DataFrame(inp_array, columns=columns)
 
     def fill_list(self):
         """ fill list """

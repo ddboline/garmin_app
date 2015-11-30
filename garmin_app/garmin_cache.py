@@ -100,8 +100,7 @@ class GarminCache(object):
         fname = '%s/%s.pkl.gz' % (self.cache_directory, gfbname)
         if not os.path.exists(fname):
             return False
-        else:
-            return read_pickle_object_in_file(fname)
+        return read_pickle_object_in_file(fname)
 
     def write_cached_gfile(self, garminfile=None):
         """ write cached file """
@@ -142,8 +141,8 @@ class GarminCache(object):
 
         def add_file(gmn_filename):
             """ generate garmin_summary """
-            if not any(a in gmn_filename.lower() for a in ['.gmn', '.tcx',
-                                                           '.fit', '.txt']):
+            _garmin_file_types = ('.gmn', '.tcx', '.fit', '.txt')
+            if not any(a in gmn_filename.lower() for a in _garmin_file_types):
                 return
             reduced_gmn_filename = os.path.basename(gmn_filename)
             gmn_md5sum = get_md5(gmn_filename)
