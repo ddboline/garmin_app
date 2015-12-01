@@ -7,7 +7,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import multiprocessing
-from .garmin_daemon import server_thread, GARMIN_SOCKET_FILE
+from garmin_app.garmin_daemon import server_thread, GARMIN_SOCKET_FILE
 
 
 class GarminServer(object):
@@ -42,7 +42,7 @@ class GarminServer(object):
 
 
 #def test_garmin_server():
-#    from .util import send_command
+#    from garmin_app.util import send_command
 #    import time
 #    from tempfile import NamedTemporaryFile
 #

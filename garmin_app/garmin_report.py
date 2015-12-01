@@ -14,12 +14,12 @@ try:
 except ImportError:
     from builtins import zip as izip
 
-from .util import HOMEDIR
-from .garmin_summary import GarminSummary
-from .garmin_utils import (print_date_string, print_h_m_s, run_command,
-                           days_in_month, days_in_year, METERS_PER_MILE,
-                           MARATHON_DISTANCE_MI, WEEKDAY_NAMES, MONTH_NAMES,
-                           SPORT_TYPES)
+from garmin_app.util import HOMEDIR
+from garmin_app.garmin_summary import GarminSummary
+from garmin_app.garmin_utils import (print_date_string, print_h_m_s,
+                                     run_command, days_in_month, days_in_year,
+                                     METERS_PER_MILE, MARATHON_DISTANCE_MI,
+                                     WEEKDAY_NAMES, MONTH_NAMES, SPORT_TYPES)
 
 
 def print_history_buttons(history_list):

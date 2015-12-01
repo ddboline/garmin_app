@@ -11,7 +11,7 @@ try:
 except ImportError:
     from builtins import zip as izip
 
-from .garmin_utils import METERS_PER_MILE
+from garmin_app.garmin_utils import METERS_PER_MILE
 
 
 class GarminFile(object):

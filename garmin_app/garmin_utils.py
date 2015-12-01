@@ -9,15 +9,17 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import os
+from dateutil.parser import parse
 import glob
 import hashlib
 import datetime
 import argparse
 from tempfile import NamedTemporaryFile
 
-from .garmin_server import GarminServer
-from .util import (run_command, openurl, dump_to_file, HOMEDIR, walk_wrapper,
-                   datetimefromstring)
+from garmin_app.garmin_server import GarminServer
+
+from garmin_app.util import (run_command, openurl, dump_to_file, HOMEDIR,
+                             walk_wrapper, datetimefromstring)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -185,7 +187,7 @@ def get_md5(fname):
 
 def compare_with_remote(cache_dir):
     """ sync files at script_path with files at BASEURL """
-    from .save_to_s3 import save_to_s3
+    from garmin_app.save_to_s3 import save_to_s3
     s3_file_chksum = save_to_s3()
     remote_file_chksum = {}
     remote_file_path = {}
@@ -253,10 +255,10 @@ def compare_with_remote(cache_dir):
 
 def read_garmin_file(fname, msg_q=None, options=None):
     """ read single garmin file """
-    from .garmin_cache import GarminCache
-    from .garmin_report import GarminReport
-    from .garmin_parse import GarminParse
-    from .garmin_corrections import list_of_corrected_laps
+    from garmin_app.garmin_cache import GarminCache
+    from garmin_app.garmin_parse import GarminParse
+    from garmin_app.garmin_report import GarminReport
+    from garmin_app.garmin_corrections import list_of_corrected_laps
     if options is None:
         options = {'cache_dir': CACHEDIR, 'do_update': False}
     cache_dir = options['cache_dir']
@@ -288,10 +290,10 @@ def read_garmin_file(fname, msg_q=None, options=None):
 
 def do_summary(directory_, msg_q=None, options=None):
     """ produce summary report """
-    from .garmin_cache import GarminCache
-    from .garmin_cache_sql import write_postgresql_table
-    from .garmin_report import GarminReport
-    from .garmin_corrections import list_of_corrected_laps
+    from garmin_app.garmin_cache import GarminCache
+    from garmin_app.garmin_cache_sql import write_postgresql_table
+    from garmin_app.garmin_corrections import list_of_corrected_laps
+    from garmin_app.garmin_report import GarminReport
     if options is None:
         options = {'cache_dir': CACHEDIR}
     cache_dir = options['cache_dir']
@@ -324,10 +326,10 @@ def do_summary(directory_, msg_q=None, options=None):
 
 def add_correction(correction_str, json_path=None):
     """ add correction to json file """
-    from dateutil.parser import parse
-    from .garmin_corrections import (list_of_corrected_laps, save_corrections)
-    from .garmin_corrections_sql import (read_corrections_table,
-                                         write_corrections_table)
+    from garmin_app.garmin_corrections import (list_of_corrected_laps,
+                                               save_corrections)
+    from garmin_app.garmin_corrections_sql import (read_corrections_table,
+                                                   write_corrections_table)
     l_corr = list_of_corrected_laps(json_path=json_path)
     l_corr.update(read_corrections_table())
     ent = correction_str.split()
@@ -370,6 +372,11 @@ def add_correction(correction_str, json_path=None):
 
 def garmin_parse_arg_list(args, options=None, msg_q=None):
     """ parse command line arguments """
+    from garmin_app.garmin_cache import GarminCache
+    from garmin_app.garmin_cache_sql import write_postgresql_table
+    from garmin_app.garmin_corrections import list_of_corrected_laps
+    from garmin_app.garmin_corrections_sql import write_corrections_table
+
     if options is None:
         options = {'cache_dir': CACHEDIR}
     cache_dir = options['cache_dir']
@@ -395,10 +402,6 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                 run_command('mv %s %s/public_html/garmin/tar'
                             % (fname, os.getenv('HOME')))
 
-            from .garmin_cache import GarminCache
-            from .garmin_corrections import list_of_corrected_laps
-            from .garmin_corrections_sql import write_corrections_table
-
             pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
             cache_dir_ = '%s/run/cache' % cache_dir
             corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
@@ -410,7 +413,6 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                                  corr_list=corr_list_)
             summary_list_ = cache_.cache_read_fn()
             ### backup garmin.pkl.gz info to postgresql database
-            from .garmin_cache_sql import write_postgresql_table
             write_postgresql_table(summary_list_)
 
             return
@@ -504,14 +506,15 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 run_command('tar zxf temp.tar.gz 2>&1 > /dev/null')
                 os.remove('temp.tar.gz')
 
-                from .garmin_cache import (read_pickle_object_in_file as read_,
-                                           write_pickle_object_to_file
-                                           as write_)
+                from garmin_app.garmin_cache import (
+                    read_pickle_object_in_file as read_,
+                    write_pickle_object_to_file as write_)
 
                 pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
                 summary_list_ = read_(pickle_file=pickle_file_)
                 if not summary_list_:
-                    from .garmin_cache_sql import write_postgresql_table
+                    from garmin_app.garmin_cache_sql import \
+                        write_postgresql_table
                     summary_list_ = write_postgresql_table(
                         [], get_summary_list=True)
                     print(len(summary_list_), pickle_file_)

@@ -6,14 +6,14 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .garmin_cache import GarminCache
-from .garmin_summary import GarminSummary, DB_ENTRIES
+from garmin_app.garmin_cache import GarminCache
+from garmin_app.garmin_summary import GarminSummary, DB_ENTRIES
 from sqlalchemy import (create_engine, Column, Integer, Float, String,
                         DateTime)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from .util import OpenPostgreSQLsshTunnel, POSTGRESTRING
+from garmin_app.util import OpenPostgreSQLsshTunnel, POSTGRESTRING
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -131,7 +131,7 @@ def write_postgresql_table(summary_list, get_summary_list=False,
 def _write_postgresql_table(summary_list, get_summary_list=False,
                             dbname='garmin_summary', port=5432):
     """ ... """
-    from .garmin_cache_sql import GarminCacheSQL
+    from garmin_app.garmin_cache_sql import GarminCacheSQL
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
     gc_ = GarminCacheSQL(sql_string=postgre_str)
     sl_ = gc_.read_sql_table()

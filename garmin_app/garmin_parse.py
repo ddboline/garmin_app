@@ -12,15 +12,15 @@ except ImportError:
     from builtins import zip as izip
 import datetime
 
-from .garmin_file import GarminFile
-from .garmin_lap import GarminLap
-from .garmin_point import GarminPoint
-from .garmin_utils import (METERS_PER_MILE, convert_time_string,
-                           print_date_string, convert_fit_to_tcx,
-                           convert_gmn_to_xml, expected_calories)
-from .garmin_corrections import LIST_OF_MISLABELED_TIMES
+from garmin_app.garmin_file import GarminFile
+from garmin_app.garmin_lap import GarminLap
+from garmin_app.garmin_point import GarminPoint
+from garmin_app.garmin_utils import (METERS_PER_MILE, convert_time_string,
+                                     print_date_string, convert_fit_to_tcx,
+                                     convert_gmn_to_xml, expected_calories)
+from garmin_app.garmin_corrections import LIST_OF_MISLABELED_TIMES
 
-from .util import run_command
+from garmin_app.util import run_command
 
 
 class GarminParse(GarminFile):

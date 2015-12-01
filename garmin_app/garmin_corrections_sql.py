@@ -10,9 +10,9 @@ from sqlalchemy import (create_engine, Column, Integer, Float, DateTime)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from .util import OpenPostgreSQLsshTunnel, POSTGRESTRING
-from .garmin_corrections import DB_ENTRIES
-from .garmin_utils import print_date_string
+from garmin_app.util import OpenPostgreSQLsshTunnel, POSTGRESTRING
+from garmin_app.garmin_corrections import DB_ENTRIES, list_of_corrected_laps
+from garmin_app.garmin_utils import print_date_string
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -139,7 +139,6 @@ def _read_corrections_table(dbname='garmin_summary', port=5432):
 
 
 def test_garmin_corrections_sql():
-    from .garmin_corrections import list_of_corrected_laps
     cor0 = list_of_corrected_laps()
     with OpenPostgreSQLsshTunnel(port=5433) as pport:
         postgre_str = '%s:%d/%s' % (POSTGRESTRING, pport,

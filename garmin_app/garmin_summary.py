@@ -7,7 +7,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import os
-from .garmin_utils import (get_md5, expected_calories, SPORT_TYPES,
+from garmin_app.garmin_parse import GarminParse
+from garmin_app.garmin_utils import (get_md5, expected_calories, SPORT_TYPES,
                            METERS_PER_MILE)
 
 DB_ENTRIES = ('filename', 'begin_datetime', 'sport', 'total_calories',
@@ -47,7 +48,6 @@ class GarminSummary(object):
 
     def read_file(self):
         """  read the file, calculate some stuff """
-        from .garmin_parse import GarminParse
         temp_gfile = GarminParse(self.fullfname, corr_list=self.corr_list)
         temp_gfile.read_file()
         self.begin_datetime = temp_gfile.begin_datetime

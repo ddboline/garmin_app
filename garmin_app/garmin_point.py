@@ -5,7 +5,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .garmin_utils import convert_date_string, METERS_PER_MILE
+from garmin_app.garmin_utils import convert_date_string, METERS_PER_MILE
 
 
 class GarminPoint(object):

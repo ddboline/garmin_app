@@ -6,7 +6,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .util import OpenUnixSocketServer, OpenSocketConnection
+from garmin_app.util import OpenUnixSocketServer, OpenSocketConnection
 
 GARMIN_SOCKET_FILE = '/tmp/.garmin_test_socket'
 
@@ -15,7 +15,7 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
     """
         server_thread, listens for commands, sends back responses.
     """
-    from .garmin_utils import garmin_parse_arg_list, BASEDIR, CACHEDIR
+    from garmin_app.garmin_utils import garmin_parse_arg_list, BASEDIR, CACHEDIR
 
     script_path = '%s/garmin_app' % BASEDIR
     cache_dir = CACHEDIR
