@@ -6,7 +6,7 @@ sudo bash -c "echo deb ssh://ddboline@ddbolineathome.mooo.com/var/www/html/deb/t
 sudo apt-get update
 sudo apt-get install -y --force-yes gpsbabel garmin-forerunner-tools xml2 fit2tcx libtinyxml2.6.2
 sudo /opt/conda/bin/conda install -c https://conda.anaconda.org/ddboline --yes requests pandas \
-        dateutil matplotlib boto psycopg2 sqlalchemy nose stravalib pyusb
+        python-dateutil matplotlib boto psycopg2 sqlalchemy nose stravalib pyusb
 
 if [ -z $1 ] ; then
     true
