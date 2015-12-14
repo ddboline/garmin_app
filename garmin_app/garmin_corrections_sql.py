@@ -6,7 +6,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from sqlalchemy import (create_engine, Column, Integer, Float, DateTime)
+from sqlalchemy import (create_engine, Column, Integer, Float, DateTime, String)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -27,6 +27,7 @@ class GarminCorrectionsLaps(Base):
     lap_number = Column(Integer)
     distance = Column(Float)
     duration = Column(Float)
+    unique_key = Column(String, unique=True)
 
     def __repr__(self):
         return 'GarminCorrectionsLaps<%s>' % ', '.join(
@@ -101,10 +102,9 @@ class GarminCorrectionsSQL(object):
 
                 if st_ == 'DUMMY':
                     continue
-                slists.append(GarminCorrectionsLaps(id=id_, start_time=st_,
-                                                    lap_number=key,
-                                                    distance=dis,
-                                                    duration=dur))
+                slists.append(GarminCorrectionsLaps(
+                    id=id_, start_time=st_, lap_number=key, distance=dis,
+                    duration=dur, unique_key='%s_%s' % (st_, key)))
                 id_ += 1
 
         session.add_all(slists)
