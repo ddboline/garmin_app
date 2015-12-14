@@ -57,7 +57,7 @@ def _write_cached_file(garminfile, cache_directory):
 
 def process_work_item(init, cache_directory):
     reduced_gmn_filename, gmn_filename, gmn_md5sum, corr_list = init
-    gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum)
+    gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum, corr_list=corr_list)
     gfile = gsum.read_file()
     if gfile:
         _write_cached_file(gfile, cache_directory)
@@ -69,7 +69,7 @@ class GarminCache(object):
     """ class to manage caching objects """
     def __init__(self, pickle_file='', cache_directory='', corr_list=None,
                  cache_read_fn=read_pickle_object_in_file,
-                 cache_write_fn=write_pickle_object_to_file):
+                 cache_write_fn=write_pickle_object_to_file, use_sql=True):
         self.pickle_file = pickle_file
         self.cache_directory = cache_directory
         self.cache_summary_list = []
@@ -77,7 +77,12 @@ class GarminCache(object):
         self.cache_summary_file_dict = {}
         self.cache_file_is_modified = False
         self.do_update = False
-        if pickle_file:
+        if use_sql:
+            from garmin_app.garmin_cache_sql import (read_postgresql_table,
+                                                     write_postgresql_table)
+            self.cache_read_fn = read_postgresql_table
+            self.cache_write_fn = write_postgresql_table
+        elif pickle_file:
             self.cache_read_fn = partial(cache_read_fn,
                                          pickle_file=self.pickle_file)
             self.cache_write_fn = partial(cache_write_fn,
