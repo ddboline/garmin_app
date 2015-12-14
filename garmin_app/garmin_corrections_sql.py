@@ -123,6 +123,9 @@ def _write_corrections_table(corrections, dbname='garmin_summary', port=5432):
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
     gc_ = GarminCorrectionsSQL(sql_string=postgre_str)
     sl_ = gc_.read_sql_table()
+    gc_.delete_table()
+    gc_.create_table()
+    sl_.update(corrections)
     gc_.write_sql_table(corrections)
     return sl_
 

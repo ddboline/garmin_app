@@ -313,7 +313,7 @@ def do_summary(directory_, msg_q=None, options=None):
                                                       % cache_dir,
                                                       options=options)
         cache_ = GarminCache(pickle_file=pickle_file_, cache_directory=cache_dir_,
-                            corr_list=corr_list_)
+                            corr_list=corr_list_,  use_sql=False)
         cache_.cache_write_fn(cache_.cache_summary_file_dict)
         write_corrections_table(corr_list_)
         return summary_list_
