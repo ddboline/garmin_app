@@ -293,6 +293,8 @@ def do_summary(directory_, msg_q=None, options=None):
     from garmin_app.garmin_cache import GarminCache
     from garmin_app.garmin_cache_sql import write_postgresql_table
     from garmin_app.garmin_corrections import list_of_corrected_laps
+    from garmin_app.garmin_corrections_sql import (read_corrections_table,
+                                                   write_corrections_table)
     from garmin_app.garmin_report import GarminReport
     if options is None:
         options = {'cache_dir': CACHEDIR}
@@ -302,15 +304,18 @@ def do_summary(directory_, msg_q=None, options=None):
 
     pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
     cache_dir_ = '%s/run/cache' % cache_dir
-    cache_ = GarminCache(pickle_file=pickle_file_, cache_directory=cache_dir_,
-                         corr_list=corr_list_)
+    #cache_ = GarminCache(pickle_file=pickle_file_, cache_directory=cache_dir_,
+                         #corr_list=corr_list_)
+    cache_ = GarminCache(cache_directory=cache_dir_, corr_list=corr_list_,
+                         use_sql=True)
     if 'build' in options and options['build']:
         summary_list_ = cache_.get_cache_summary_list(directory='%s/run'
                                                       % cache_dir,
                                                       options=options)
-        ### backup garmin.pkl.gz info to postgresql database
-        write_postgresql_table(summary_list_)
-
+        cache_ = GarminCache(pickle_file=pickle_file_, cache_directory=cache_dir_,
+                            corr_list=corr_list_)
+        cache_.cache_write_fn(cache_.cache_summary_file_dict)
+        write_corrections_table(corr_list_)
         return summary_list_
 
     summary_list_ = cache_.get_cache_summary_list(directory=directory_,
@@ -320,6 +325,7 @@ def do_summary(directory_, msg_q=None, options=None):
 
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.summary_report(summary_list_.values(), options=options))
+    
 
     return True
 
