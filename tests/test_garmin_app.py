@@ -494,7 +494,8 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output.encode())
             self.assertIn(mstr.hexdigest(), [
                           '046172056a2358821f2effd0974d5160',
-                          'a59c8ee120e789eda36e0cc8592ffce1'])
+                          'a59c8ee120e789eda36e0cc8592ffce1',
+                          'd41d8cd98f00b204e9800998ecf8427e'])
 
         gc_ = GarminCache(
             pickle_file='%s/temp.pkl.gz' % CURDIR,
