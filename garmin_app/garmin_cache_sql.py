@@ -138,3 +138,16 @@ def _write_postgresql_table(summary_list, get_summary_list=False,
     if not get_summary_list:
         gc_.write_sql_table(summary_list)
     return sl_
+
+
+def read_postgresql_table(dbname='garmin_summary'):
+    with OpenPostgreSQLsshTunnel(port=5433) as pport:
+        return _read_postgresql_table(dbname=dbname, port=pport)
+
+
+def _read_postgresql_table(dbname='garmin_summary', port=5432):
+    from garmin_app.garmin_cache_sql import GarminCacheSQL
+    postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
+    gc_ = GarminCacheSQL(sql_string=postgre_str)
+    sl_ = gc_.read_sql_table()
+    return sl_
