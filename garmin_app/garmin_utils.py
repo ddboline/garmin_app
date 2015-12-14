@@ -524,8 +524,6 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                     summary_list_ = write_postgresql_table(
                         [], get_summary_list=True)
                     print(len(summary_list_), pickle_file_)
-                    if summary_list_:
-                        print(summary_list_[0])
                     ### Recreate cache file using list from database
                     write_(summary_list_, pickle_file_)
             return
