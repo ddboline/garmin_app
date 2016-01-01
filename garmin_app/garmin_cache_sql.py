@@ -49,7 +49,7 @@ class GarminCacheSQL(object):
             self.garmin_cache = GarminCache(
                 pickle_file=pickle_file, cache_directory=cache_directory,
                 corr_list=corr_list, cache_read_fn=self.read_sql_table,
-                cache_write_fn=self.write_sql_table)
+                cache_write_fn=self.write_sql_table, use_sql=False)
         self.sql_string = sql_string
         self.summary_list = {}
         if isinstance(summary_list, dict):

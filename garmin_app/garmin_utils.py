@@ -283,7 +283,8 @@ def read_garmin_file(fname, msg_q=None, options=None):
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.file_report_txt(_gfile))
     _report.file_report_html(_gfile, options=options)
-    for fn0, fn1 in ((convert_fit_to_tcx(fname), '/tmp/temp.tcx'), (convert_gmn_to_gpx(fname), '/tmp/temp.gpx')):
+    for fn0, fn1 in ((convert_fit_to_tcx(fname), '/tmp/temp.tcx'),
+                     (convert_gmn_to_gpx(fname), '/tmp/temp.gpx')):
         if fn0 and os.path.exists(fn0):
             os.rename(fn0, fn1)
     return True
@@ -292,10 +293,8 @@ def read_garmin_file(fname, msg_q=None, options=None):
 def do_summary(directory_, msg_q=None, options=None):
     """ produce summary report """
     from garmin_app.garmin_cache import GarminCache
-    from garmin_app.garmin_cache_sql import write_postgresql_table
     from garmin_app.garmin_corrections import list_of_corrected_laps
-    from garmin_app.garmin_corrections_sql import (read_corrections_table,
-                                                   write_corrections_table)
+    from garmin_app.garmin_corrections_sql import write_corrections_table
     from garmin_app.garmin_report import GarminReport
     if options is None:
         options = {'cache_dir': CACHEDIR}
@@ -313,8 +312,9 @@ def do_summary(directory_, msg_q=None, options=None):
         summary_list_ = cache_.get_cache_summary_list(directory='%s/run'
                                                       % cache_dir,
                                                       options=options)
-        cache_ = GarminCache(pickle_file=pickle_file_, cache_directory=cache_dir_,
-                            corr_list=corr_list_,  use_sql=False)
+        cache_ = GarminCache(pickle_file=pickle_file_,
+                             cache_directory=cache_dir_, corr_list=corr_list_,
+                             use_sql=False)
         cache_.cache_write_fn(cache_.cache_summary_file_dict)
         write_corrections_table(corr_list_)
         return summary_list_
@@ -326,7 +326,6 @@ def do_summary(directory_, msg_q=None, options=None):
 
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.summary_report(summary_list_.values(), options=options))
-    
 
     return True
 

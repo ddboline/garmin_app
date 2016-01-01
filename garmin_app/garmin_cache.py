@@ -159,15 +159,15 @@ class GarminCache(object):
                      local_dict[reduced_gmn_filename].begin_datetime)
                         in self.corr_list)):
                 self.cache_file_is_modified = True
-                _work_list.append(_pool.submit(process_work_item,
+                _work_list.append((gmn_filename, _pool.submit(process_work_item,
                                                (reduced_gmn_filename,
                                                 gmn_filename, gmn_md5sum,
                                                 self.corr_list),
-                                               self.cache_directory))
+                                               self.cache_directory)))
             else:
                 gsum = local_dict[reduced_gmn_filename]
-                _work_list.append((reduced_gmn_filename, gmn_filename,
-                                   gmn_md5sum, gsum))
+                _work_list.append((gmn_filename, (reduced_gmn_filename, gmn_filename,
+                                   gmn_md5sum, gsum)))
 
         if type(directory) == list:
             for dr_ in directory:
@@ -181,9 +181,13 @@ class GarminCache(object):
             elif os.path.isfile(directory):
                 add_file(directory)
 
-        for item in _work_list:
+        for fn_, item in _work_list:
             if hasattr(item, 'result'):
-                item = item.result()
+                try:
+                    item = item.result()
+                except AttributeError:
+                    print(fn_)
+                    raise
             reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum = item
             self.cache_summary_file_dict[reduced_gmn_filename] = gsum
             self.cache_summary_md5_dict[gmn_md5sum] = gsum

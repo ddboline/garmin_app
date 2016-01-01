@@ -276,7 +276,8 @@ class TestGarminApp(unittest.TestCase):
         gfile = GarminParse(FITFILE)
         gfile.read_file()
         gcache = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
-                             cache_directory='%s/run/cache' % CURDIR)
+                             cache_directory='%s/run/cache' % CURDIR,
+                             use_sql=False)
         write_pickle_object_to_file(gfile, gcache.pickle_file)
         del gfile
 
@@ -428,7 +429,8 @@ class TestGarminApp(unittest.TestCase):
     def test_garmin_cache(self):
         """ test GarminCache.get_cache_summary_list """
         gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
-                          cache_directory='%s/run/cache' % CURDIR)
+                          cache_directory='%s/run/cache' % CURDIR,
+                          use_sql=False)
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
         output = '\n'.join('%s' % s for s in sorted(sl_.values(),
                                                     key=lambda x: x.filename))
@@ -448,7 +450,8 @@ class TestGarminApp(unittest.TestCase):
                       'a59c8ee120e789eda36e0cc8592ffce1'])
 
         gc0 = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
-                          cache_directory='%s/run/cache' % CURDIR)
+                          cache_directory='%s/run/cache' % CURDIR,
+                          use_sql=False)
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
         sqlite_str = 'sqlite:///%s/run/cache/test.db' % CURDIR
         gc1 = GarminCacheSQL(sql_string=sqlite_str, garmin_cache=gc0,
@@ -478,7 +481,8 @@ class TestGarminApp(unittest.TestCase):
             postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING,
                                                          pport)
             gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
-                              cache_directory='%s/run/cache' % CURDIR)
+                              cache_directory='%s/run/cache' % CURDIR,
+                              use_sql=False)
             sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
             sl_ = _write_postgresql_table(sl_, get_summary_list=True,
                                           dbname='test_garmin_summary',
@@ -497,9 +501,9 @@ class TestGarminApp(unittest.TestCase):
                           'a59c8ee120e789eda36e0cc8592ffce1',
                           'd41d8cd98f00b204e9800998ecf8427e'])
 
-        gc_ = GarminCache(
-            pickle_file='%s/temp.pkl.gz' % CURDIR,
-            cache_directory='%s/run/cache' % CURDIR)
+        gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
+                          cache_directory='%s/run/cache' % CURDIR,
+                          use_sql=False)
         gsum = GarminSummary(FITFILE)
         gfile = gsum.read_file()
         test1 = '%s' % gfile
@@ -508,13 +512,13 @@ class TestGarminApp(unittest.TestCase):
         test2 = '%s' % gfile_new
         self.assertEqual(test1, test2)
 
-        gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR)
+        gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR, use_sql=False)
         gfile_new = gc_.read_cached_gfile(gfbname=gfile.filename)
         self.assertEqual(gfile_new, False)
 
-        gc_ = GarminCache(
-            pickle_file='%s/temp.pkl.gz' % CURDIR,
-            cache_directory='%s/run/cache' % CURDIR)
+        gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
+                          cache_directory='%s/run/cache' % CURDIR,
+                          use_sql=False)
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
         rp_ = GarminReport(cache_obj=gc_)
         options = {'do_plot': False, 'do_year': False, 'do_month': False,
@@ -531,9 +535,9 @@ class TestGarminApp(unittest.TestCase):
 
     def test_summary_report_file(self):
         """ test GarminCache.summary_report """
-        gc_ = GarminCache(
-            pickle_file='%s/temp.pkl.gz' % CURDIR,
-            cache_directory='%s/run/cache' % CURDIR)
+        gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
+                          cache_directory='%s/run/cache' % CURDIR,
+                          use_sql=False)
         sl_ = gc_.get_cache_summary_list(directory='%s/tests' % CURDIR)
         rp_ = GarminReport(cache_obj=gc_)
         options = {'do_plot': False, 'do_year': True, 'do_month': True,
