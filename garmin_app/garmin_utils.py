@@ -37,6 +37,9 @@ MARATHON_DISTANCE_MI = MARATHON_DISTANCE_M / METERS_PER_MILE  # meters
 SPORT_TYPES = ('running', 'biking', 'walking', 'ultimate', 'elliptical',
                'stairs', 'lifting', 'swimming', 'other', 'snowshoeing',
                'skiing')
+SPORT_MAP = {k: k for k in SPORT_TYPES}
+for o, n in ('running', 'run'), ('biking', 'bike'):
+    SPORT_MAP[o] = n
 MONTH_NAMES = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
                'Oct', 'Nov', 'Dec')
 WEEKDAY_NAMES = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')

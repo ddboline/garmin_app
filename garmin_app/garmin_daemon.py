@@ -34,12 +34,8 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
                     isprev = True
                     args.pop(0)
 
-                if msg_q is not None:
-                    print(msg_q)
-
                 if msg_q is not None and isprev:
                     tmp_ = ' '.join(args)
-                    print(tmp_, msg_q)
                     if tmp_ in msg_q:
                         idx = msg_q.index(tmp_)
                         print('msg_q', msg_q, idx)
@@ -65,9 +61,6 @@ def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
                 if msg_q is not None and not isprev:
                     if recv_.strip() != 'prev year':
                         msg_q.append(recv_.strip())
-
-                if msg_q is not None:
-                    print(msg_q)
 
                 conn.send('done')
     return 0
