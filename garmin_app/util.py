@@ -139,7 +139,7 @@ def test_openurl():
     test_httperror()
 
 
-def dump_to_file(url_, outfile_):
+def dump_to_file(url, outfile_):
     """ dump url to file """
     from contextlib import closing
     import requests
@@ -148,9 +148,9 @@ def dump_to_file(url_, outfile_):
         requests.packages.urllib3.disable_warnings()
     except AttributeError:
         pass
-    with closing(requests.get(url_, stream=True, verify=False)) as url_:
+    with closing(requests.get(url, stream=True, verify=False)) as url_:
         if url_.status_code != 200:
-            print('something bad happened %d' % url_.status_code)
+            print('something bad happened %d, %s' % (url_.status_code, url))
             raise HTTPError
         for chunk in url_.iter_content(4096):
             outfile_.write(chunk)
