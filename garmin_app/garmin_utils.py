@@ -349,19 +349,19 @@ def add_correction(correction_str, json_path=None):
         return {}
     lapdict = {}
     for idx, line in enumerate(ent[1:]):
-        ent = line.split()
+        arg = line.split(',')
         tmp_ = []
-        if len(ent) == 0:
+        if len(arg) == 0:
             continue
-        if len(ent) > 0:
+        if len(arg) > 0:
             try:
-                lapdist = float(ent[0])
+                lapdist = float(arg[0])
             except ValueError:
                 continue
             tmp_.append(lapdist)
-        if len(ent) > 1:
+        if len(arg) > 1:
             try:
-                laptime = float(ent[1])
+                laptime = float(arg[1])
             except ValueError:
                 laptime = None
             tmp_.append(laptime)
