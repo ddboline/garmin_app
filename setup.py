@@ -11,7 +11,7 @@ from setuptools import setup
 
 setup(
     name='garmin_app',
-    version='0.0.5.3',
+    version='0.0.5.4',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='garmin_app',
