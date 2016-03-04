@@ -45,7 +45,8 @@ MONTH_NAMES = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
 WEEKDAY_NAMES = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
 
 COMMANDS = ('get', 'build', 'sync', 'backup', 'year', '(file)', '(directory)',
-            '(year(-month(-day)))', '(sport)', 'occur', 'update', 'correction')
+            '(year(-month(-day)))', '(sport)', 'occur', 'update', 'correction',
+            'check')
 
 
 def days_in_year(year=datetime.date.today().year):
@@ -258,12 +259,15 @@ def compare_with_remote(cache_dir):
 
 def read_garmin_file(fname, msg_q=None, options=None):
     """ read single garmin file """
+    from garmin_app.garmin_cache import pool
     from garmin_app.garmin_cache import GarminCache
     from garmin_app.garmin_parse import GarminParse
     from garmin_app.garmin_report import GarminReport
     from garmin_app.garmin_corrections import list_of_corrected_laps
     if options is None:
         options = {'cache_dir': CACHEDIR, 'do_update': False}
+    tcx_job = pool.submit(convert_fit_to_tcx, fname)
+    gpx_job = pool.submit(convert_gmn_to_gpx, fname)
     cache_dir = options['cache_dir']
 
     corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
@@ -283,11 +287,11 @@ def read_garmin_file(fname, msg_q=None, options=None):
     if not _gfile:
         return False
     cache_.write_cached_gfile(garminfile=_gfile)
-    _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
-    print(_report.file_report_txt(_gfile))
-    _report.file_report_html(_gfile, options=options)
-    for fn0, fn1 in ((convert_fit_to_tcx(fname), '/tmp/temp.tcx'),
-                     (convert_gmn_to_gpx(fname), '/tmp/temp.gpx')):
+    _report = GarminReport(cache_obj=cache_, msg_q=msg_q, gfile=_gfile)
+    print(_report.file_report_txt())
+    _report.file_report_html(options=options)
+    for fn0, fn1 in ((tcx_job.result(), '/tmp/temp.tcx'),
+                     (gpx_job.result(), '/tmp/temp.gpx')):
         if fn0 and os.path.exists(fn0):
             os.rename(fn0, fn1)
     return True
@@ -302,34 +306,28 @@ def do_summary(directory_, msg_q=None, options=None):
     if options is None:
         options = {'cache_dir': CACHEDIR}
     cache_dir = options['cache_dir']
-
     corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
-
     pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
     cache_dir_ = '%s/run/cache' % cache_dir
-    #cache_ = GarminCache(pickle_file=pickle_file_, cache_directory=cache_dir_,
-                         #corr_list=corr_list_)
     cache_ = GarminCache(cache_directory=cache_dir_, corr_list=corr_list_,
-                         use_sql=True)
+                         use_sql=True,
+                         check_md5=options.get('do_check', False))
     if 'build' in options and options['build']:
         summary_list_ = cache_.get_cache_summary_list(directory='%s/run'
                                                       % cache_dir,
                                                       options=options)
         cache_ = GarminCache(pickle_file=pickle_file_,
                              cache_directory=cache_dir_, corr_list=corr_list_,
-                             use_sql=False)
+                             use_sql=False, check_md5=True)
         cache_.cache_write_fn(cache_.cache_summary_file_dict)
         write_corrections_table(corr_list_)
         return summary_list_
-
     summary_list_ = cache_.get_cache_summary_list(directory=directory_,
                                                   options=options)
     if not summary_list_:
         return False
-
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q)
     print(_report.summary_report(summary_list_.values(), options=options))
-
     return True
 
 
@@ -419,7 +417,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
 
             cache_ = GarminCache(pickle_file=pickle_file_,
                                  cache_directory=cache_dir_,
-                                 corr_list=corr_list_)
+                                 corr_list=corr_list_, check_md5=True)
             summary_list_ = cache_.cache_read_fn()
             ### backup garmin.pkl.gz info to postgresql database
             write_postgresql_table(summary_list_)
@@ -540,7 +538,8 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
 
     options = {'do_plot': False, 'do_year': False, 'do_month': False,
                'do_week': False, 'do_day': False, 'do_file': False,
-               'do_sport': None, 'do_update': False, 'do_average': False}
+               'do_sport': None, 'do_update': False, 'do_average': False,
+               'do_check': False}
     options['script_path'] = script_path
     options['cache_dir'] = cache_dir
 
