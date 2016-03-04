@@ -55,7 +55,7 @@ def _write_cached_file(garminfile, cache_directory):
     return write_pickle_object_to_file(garminfile, pkl_file)
 
 
-def process_work_item(init, cache_directory):
+def _read_file_in_par(init, cache_directory):
     reduced_gmn_filename, gmn_filename, gmn_md5sum, corr_list = init
     gsum = GarminSummary(gmn_filename, md5sum=gmn_md5sum, corr_list=corr_list)
     gfile = gsum.read_file()
@@ -163,16 +163,15 @@ class GarminCache(object):
                      local_dict[reduced_gmn_filename].begin_datetime)
                         in self.corr_list)):
                 self.cache_file_is_modified = True
-                _job = pool.submit(process_work_item,
+                _job = pool.submit(_read_file_in_par,
                                    (reduced_gmn_filename, gmn_filename,
                                     gmn_md5sum, self.corr_list),
                                    self.cache_directory)
                 _work_list.append((gmn_filename, _job))
             else:
                 gsum = local_dict[reduced_gmn_filename]
-                _work_list.append((gmn_filename, (reduced_gmn_filename,
-                                                  gmn_filename,
-                                   gmn_md5sum, gsum)))
+                _res = (reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum)
+                _work_list.append((gmn_filename, _res))
 
         if type(directory) == list:
             for dr_ in directory:
