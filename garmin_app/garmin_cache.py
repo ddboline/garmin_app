@@ -25,7 +25,7 @@ except ImportError:
 
 _work_list = []
 NCPU = mp.cpu_count()
-_pool = ProcessPoolExecutor(max_workers=NCPU)
+pool = ProcessPoolExecutor(max_workers=NCPU)
 
 
 def read_pickle_object_in_file(pickle_file):
@@ -69,7 +69,8 @@ class GarminCache(object):
     """ class to manage caching objects """
     def __init__(self, pickle_file='', cache_directory='', corr_list=None,
                  cache_read_fn=read_pickle_object_in_file,
-                 cache_write_fn=write_pickle_object_to_file, use_sql=True):
+                 cache_write_fn=write_pickle_object_to_file, use_sql=True,
+                 check_md5=False):
         self.pickle_file = pickle_file
         self.cache_directory = cache_directory
         self.cache_summary_list = []
@@ -77,6 +78,7 @@ class GarminCache(object):
         self.cache_summary_file_dict = {}
         self.cache_file_is_modified = False
         self.do_update = False
+        self.check_md5 = check_md5
         if use_sql:
             from garmin_app.garmin_cache_sql import (read_postgresql_table,
                                                      write_postgresql_table)
@@ -96,7 +98,6 @@ class GarminCache(object):
         self.corr_list = []
         if corr_list:
             self.corr_list = corr_list
-        self.pool = []
 
     def read_cached_gfile(self, gfbname):
         """ return cached file """
@@ -150,8 +151,11 @@ class GarminCache(object):
             if not any(a in gmn_filename.lower() for a in _garmin_file_types):
                 return
             reduced_gmn_filename = os.path.basename(gmn_filename)
-            gmn_md5sum = get_md5(gmn_filename)
             local_dict = self.cache_summary_file_dict
+            if self.check_md5:
+                gmn_md5sum = get_md5(gmn_filename)
+            else:
+                gmn_md5sum = local_dict[reduced_gmn_filename].md5sum
             if ((reduced_gmn_filename not in local_dict) or
                     (hasattr(local_dict, 'md5sum') and
                      local_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
@@ -159,12 +163,11 @@ class GarminCache(object):
                      local_dict[reduced_gmn_filename].begin_datetime)
                         in self.corr_list)):
                 self.cache_file_is_modified = True
-                _work_list.append((gmn_filename,
-                                   _pool.submit(process_work_item,
-                                                (reduced_gmn_filename,
-                                                 gmn_filename, gmn_md5sum,
-                                                 self.corr_list),
-                                                self.cache_directory)))
+                _job = pool.submit(process_work_item,
+                                   (reduced_gmn_filename, gmn_filename,
+                                    gmn_md5sum, self.corr_list),
+                                   self.cache_directory)
+                _work_list.append((gmn_filename, _job))
             else:
                 gsum = local_dict[reduced_gmn_filename]
                 _work_list.append((gmn_filename, (reduced_gmn_filename,
