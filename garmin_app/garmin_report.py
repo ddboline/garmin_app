@@ -43,9 +43,10 @@ class GarminReport(object):
             individual files
             summaries of files, days, weeks, months and years
     """
-    def __init__(self, cache_obj=None, msg_q=None):
+    def __init__(self, cache_obj=None, msg_q=None, gfile=None):
         self.cache_obj = cache_obj
         self.msg_q = msg_q
+        self.gfile = gfile
 
     def summary_report(self, summary_list, options, copy_to_public_html=True):
         """ get summary of files in directory """
@@ -449,9 +450,10 @@ class GarminReport(object):
                                                       HOMEDIR))
         return outstr
 
-    @staticmethod
-    def file_report_txt(gfile):
+    def file_report_txt(self):
         """ nice output string for a file """
+        assert self.gfile is not None
+        gfile = self.gfile
         retval = ['Start time %s' % print_date_string(gfile.begin_datetime)]
 
         for lap in gfile.laps:
@@ -520,9 +522,11 @@ class GarminReport(object):
 
         return '\n'.join(retval)
 
-    def file_report_html(self, gfile, options=None, use_time=False,
+    def file_report_html(self, options=None, use_time=False,
                          copy_to_public_html=True):
         """ create pretty plots """
+        assert self.gfile is not None
+        gfile = self.gfile
         avg_hr, sum_time, max_hr = 0, 0, 0
         hr_vals, hr_values, alt_vals, alt_values = [], [], [], []
         if not options:
