@@ -152,7 +152,7 @@ class GarminCache(object):
                 return
             reduced_gmn_filename = os.path.basename(gmn_filename)
             local_dict = self.cache_summary_file_dict
-            if self.check_md5:
+            if self.check_md5 or reduced_gmn_filename not in local_dict:
                 gmn_md5sum = get_md5(gmn_filename)
             else:
                 gmn_md5sum = local_dict[reduced_gmn_filename].md5sum
