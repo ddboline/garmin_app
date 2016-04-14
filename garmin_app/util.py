@@ -259,13 +259,13 @@ def walk_wrapper(direc, callback, arg):
 
 class OpenPostgreSQLsshTunnel(object):
     """ Class to let us open an ssh tunnel, then close it when done """
-    def __init__(self, port=5432):
+    def __init__(self, port=5432, do_tunnel=False):
         self.tunnel_process = 0
         self.postgre_port = 5432
         self.remote_port = port
 
     def __enter__(self):
-        if HOSTNAME != 'dilepton-tower':
+        if HOSTNAME != 'dilepton-tower' and do_tunnel:
             self.postgre_port = self.remote_port
             _cmd = 'ssh -N -L localhost:%d' % self.remote_port + \
                    ':localhost:5432 ddboline@ddbolineathome.mooo.com'
