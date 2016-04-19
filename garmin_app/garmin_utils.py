@@ -400,7 +400,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             fname = '%s/garmin_data_%s.tar.gz'\
                     % (cache_dir, datetime.date.today().strftime('%Y%m%d'))
             run_command('cd %s/run/ ; ' % cache_dir +
-                        'tar zcvf %s gps_tracks/ garmin.pkl* ' % fname +
+                        'tar zcvf %s gps_tracks/ ' % fname +
                         'garmin_corrections.json')
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
                 run_command('cp %s %s/public_html/backup/garmin_data.tar.gz'
