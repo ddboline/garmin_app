@@ -303,8 +303,8 @@ class TestGarminApp(unittest.TestCase):
         """ test GarminReport.file_report_txt """
         gfile = GarminParse(FITFILE)
         gfile.read_file()
-        gr_ = GarminReport()
-        output = gr_.file_report_txt(gfile)
+        gr_ = GarminReport(gfile=gfile)
+        output = gr_.file_report_txt()
 
         mstr = hashlib.md5()
         mstr.update(output.encode())
@@ -314,11 +314,11 @@ class TestGarminApp(unittest.TestCase):
         """ test GarminReport.file_report_html """
         gfile = GarminParse(FITFILE)
         gfile.read_file()
-        gr_ = GarminReport()
+        gr_ = GarminReport(gfile=gfile)
         script_path = CURDIR
         options = {'script_path': '%s/garmin_app' % script_path,
                    'cache_dir': script_path}
-        html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
+        html_path = gr_.file_report_html(copy_to_public_html=False,
                                          options=options)
         file_md5 = [['index.html', ['1c1abe181f36a85949974a222cc874df',
                                     '548581a142811d412dbf955d2e5372aa']]]
