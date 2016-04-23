@@ -143,7 +143,7 @@ def _read_corrections_table(dbname='garmin_summary', port=5432):
 
 def test_garmin_corrections_sql():
     cor0 = list_of_corrected_laps()
-    with OpenPostgreSQLsshTunnel(port=5433) as pport:
+    with OpenPostgreSQLsshTunnel(port=5433, do_tunnel=True) as pport:
         postgre_str = '%s:%d/%s' % (POSTGRESTRING, pport,
                                     'test_garmin_summary')
         gc_ = GarminCorrectionsSQL(sql_string=postgre_str)
