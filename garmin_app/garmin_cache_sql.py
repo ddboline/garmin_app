@@ -120,9 +120,9 @@ class GarminCacheSQL(object):
 
 
 def write_postgresql_table(summary_list, get_summary_list=False,
-                           dbname='garmin_summary'):
+                           dbname='garmin_summary', do_tunnel=False):
     """ convenience function """
-    with OpenPostgreSQLsshTunnel(port=5433) as pport:
+    with OpenPostgreSQLsshTunnel(port=5433, do_tunnel=do_tunnel) as pport:
         return _write_postgresql_table(summary_list,
                                        get_summary_list=get_summary_list,
                                        dbname=dbname, port=pport)
@@ -140,12 +140,13 @@ def _write_postgresql_table(summary_list, get_summary_list=False,
     return sl_
 
 
-def read_postgresql_table(dbname='garmin_summary'):
-    with OpenPostgreSQLsshTunnel(port=5433) as pport:
+def read_postgresql_table(dbname='garmin_summary', do_tunnel=False):
+    with OpenPostgreSQLsshTunnel(port=5433, do_tunnel=do_tunnel) as pport:
         return _read_postgresql_table(dbname=dbname, port=pport)
 
 
-def _read_postgresql_table(dbname='garmin_summary', port=5432):
+def _read_postgresql_table(dbname='garmin_summary', port=5432,
+                           do_tunnel=False):
     from garmin_app.garmin_cache_sql import GarminCacheSQL
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
     gc_ = GarminCacheSQL(sql_string=postgre_str)

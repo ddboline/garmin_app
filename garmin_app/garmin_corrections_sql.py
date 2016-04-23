@@ -112,9 +112,10 @@ class GarminCorrectionsSQL(object):
         session.close()
 
 
-def write_corrections_table(corrections, dbname='garmin_summary'):
+def write_corrections_table(corrections, dbname='garmin_summary',
+                            do_tunnel=False):
     """ convenience function """
-    with OpenPostgreSQLsshTunnel(port=5433) as pport:
+    with OpenPostgreSQLsshTunnel(port=5433, do_tunnel=do_tunnel) as pport:
         return _write_corrections_table(corrections, dbname=dbname, port=pport)
 
 
@@ -130,8 +131,8 @@ def _write_corrections_table(corrections, dbname='garmin_summary', port=5432):
     return sl_
 
 
-def read_corrections_table(dbname='garmin_summary'):
-    with OpenPostgreSQLsshTunnel(port=5433) as pport:
+def read_corrections_table(dbname='garmin_summary', do_tunnel=False):
+    with OpenPostgreSQLsshTunnel(port=5433, do_tunnel=do_tunnel) as pport:
         return _read_corrections_table(dbname=dbname, port=pport)
 
 

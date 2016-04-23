@@ -70,7 +70,7 @@ class GarminCache(object):
     def __init__(self, pickle_file='', cache_directory='', corr_list=None,
                  cache_read_fn=read_pickle_object_in_file,
                  cache_write_fn=write_pickle_object_to_file, use_sql=True,
-                 check_md5=False):
+                 check_md5=False, do_tunnel=False):
         self.pickle_file = pickle_file
         self.cache_directory = cache_directory
         self.cache_summary_list = []
@@ -78,12 +78,15 @@ class GarminCache(object):
         self.cache_summary_file_dict = {}
         self.cache_file_is_modified = False
         self.do_update = False
+        self.do_tunnel = do_tunnel
         self.check_md5 = check_md5
         if use_sql:
             from garmin_app.garmin_cache_sql import (read_postgresql_table,
                                                      write_postgresql_table)
-            self.cache_read_fn = read_postgresql_table
-            self.cache_write_fn = write_postgresql_table
+            self.cache_read_fn = partial(read_postgresql_table,
+                                         do_tunnel=self.do_tunnel)
+            self.cache_write_fn = partial(write_postgresql_table,
+                                          do_tunnel=self.do_tunnel)
         elif pickle_file:
             self.cache_read_fn = partial(cache_read_fn,
                                          pickle_file=self.pickle_file)
