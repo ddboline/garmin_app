@@ -496,7 +496,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     parser.add_argument('command', nargs='*', help=help_text)
     parser.add_argument('--daemon', '-d', action='store_true',
                         help='run as daemon')
-    parser.add_argument('--tunnel', '-t', action='tunnel_postgres',
+    parser.add_argument('--tunnel', '-t', action='store_true',
                         help='tunnel to postgresql server')
     args = parser.parse_args()
 
