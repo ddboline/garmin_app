@@ -1,11 +1,5 @@
 #!/bin/bash
 
-if [ -d "/home/${USER}/.garmin_cache/run/gps_tracks" ]; then
-    true
-else
-    ./garmin.py get
-fi
-
 nosetests --with-coverage --cover-package=garmin_app ./tests/*.py garmin_app/*.py
 
 # pyreverse garmin_app
