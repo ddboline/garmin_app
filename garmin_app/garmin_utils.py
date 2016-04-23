@@ -310,7 +310,7 @@ def do_summary(directory_, msg_q=None, options=None):
     pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
     cache_dir_ = '%s/run/cache' % cache_dir
     cache_ = GarminCache(cache_directory=cache_dir_, corr_list=corr_list_,
-                         use_sql=True,
+                         use_sql=True, do_tunnel=options['do_tunnel'],
                          check_md5=options.get('do_check', False))
     if 'build' in options and options['build']:
         summary_list_ = cache_.get_cache_summary_list(directory='%s/run'
