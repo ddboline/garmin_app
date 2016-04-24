@@ -10,7 +10,7 @@ from sqlalchemy import (create_engine, Column, Integer, Float, DateTime, String)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from garmin_app.util import OpenPostgreSQLsshTunnel, POSTGRESTRING
+from garmin_app.util import OpenPostgreSQLsshTunnel, POSTGRESTRING, USER
 from garmin_app.garmin_corrections import DB_ENTRIES, list_of_corrected_laps
 from garmin_app.garmin_utils import print_date_string
 
@@ -119,9 +119,12 @@ def write_corrections_table(corrections, dbname='garmin_summary',
         return _write_corrections_table(corrections, dbname=dbname, port=pport)
 
 
-def _write_corrections_table(corrections, dbname='garmin_summary', port=5432):
+def _write_corrections_table(corrections, dbname='garmin_summary', port=5432,
+                             do_tunnel=False):
     """ ... """
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
+    if do_tunnel:
+        postgre_str = postgre_str.replace(USER, 'ddboline')
     gc_ = GarminCorrectionsSQL(sql_string=postgre_str)
     sl_ = gc_.read_sql_table()
     gc_.delete_table()
@@ -133,11 +136,15 @@ def _write_corrections_table(corrections, dbname='garmin_summary', port=5432):
 
 def read_corrections_table(dbname='garmin_summary', do_tunnel=False):
     with OpenPostgreSQLsshTunnel(port=5433, do_tunnel=do_tunnel) as pport:
-        return _read_corrections_table(dbname=dbname, port=pport)
+        return _read_corrections_table(dbname=dbname, port=pport,
+                                       do_tunnel=do_tunnel)
 
 
-def _read_corrections_table(dbname='garmin_summary', port=5432):
+def _read_corrections_table(dbname='garmin_summary', port=5432,
+                            do_tunnel=False):
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
+    if do_tunnel:
+        postgre_str = postgre_str.replace(USER, 'ddboline')
     gc_ = GarminCorrectionsSQL(sql_string=postgre_str)
     return gc_.read_sql_table()
 
