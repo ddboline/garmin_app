@@ -9,7 +9,8 @@ sudo apt-get install -y --force-yes gpsbabel garmin-forerunner-tools xml2 python
                                     python3-pandas python3-dateutil python3-usb fit2tcx \
                                     python3-psycopg2 python3-sqlalchemy python3-matplotlib \
                                     python3-nose python3-coverage python3-numpy=1.\* \
-                                    python3-boto python3-stravalib python3-setuptools
+                                    python3-boto python3-stravalib python3-setuptools \
+                                    libtinyxml2.6.2
 
 if [ -z $1 ] ; then
     true

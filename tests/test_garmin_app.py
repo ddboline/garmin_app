@@ -303,8 +303,8 @@ class TestGarminApp(unittest.TestCase):
         """ test GarminReport.file_report_txt """
         gfile = GarminParse(FITFILE)
         gfile.read_file()
-        gr_ = GarminReport()
-        output = gr_.file_report_txt(gfile)
+        gr_ = GarminReport(gfile=gfile)
+        output = gr_.file_report_txt()
 
         mstr = hashlib.md5()
         mstr.update(output.encode())
@@ -314,11 +314,11 @@ class TestGarminApp(unittest.TestCase):
         """ test GarminReport.file_report_html """
         gfile = GarminParse(FITFILE)
         gfile.read_file()
-        gr_ = GarminReport()
+        gr_ = GarminReport(gfile=gfile)
         script_path = CURDIR
         options = {'script_path': '%s/garmin_app' % script_path,
                    'cache_dir': script_path}
-        html_path = gr_.file_report_html(gfile, copy_to_public_html=False,
+        html_path = gr_.file_report_html(copy_to_public_html=False,
                                          options=options)
         file_md5 = [['index.html', ['1c1abe181f36a85949974a222cc874df',
                                     '548581a142811d412dbf955d2e5372aa']]]
@@ -463,7 +463,7 @@ class TestGarminApp(unittest.TestCase):
         self.assertIn(mstr.hexdigest(), ['046172056a2358821f2effd0974d5160',
                       'a59c8ee120e789eda36e0cc8592ffce1'])
 
-        with OpenPostgreSQLsshTunnel(port=5435) as pport:
+        with OpenPostgreSQLsshTunnel(port=5435, do_tunnel=True) as pport:
             postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING,
                                                          pport)
             gc_ = GarminCacheSQL(sql_string=postgre_str)
@@ -477,7 +477,7 @@ class TestGarminApp(unittest.TestCase):
                           '046172056a2358821f2effd0974d5160',
                           'a59c8ee120e789eda36e0cc8592ffce1'])
 
-        with OpenPostgreSQLsshTunnel(port=5436) as pport:
+        with OpenPostgreSQLsshTunnel(port=5436, do_tunnel=True) as pport:
             postgre_str = '%s:%d/test_garmin_summary' % (POSTGRESTRING,
                                                          pport)
             gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,

@@ -310,7 +310,7 @@ def do_summary(directory_, msg_q=None, options=None):
     pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
     cache_dir_ = '%s/run/cache' % cache_dir
     cache_ = GarminCache(cache_directory=cache_dir_, corr_list=corr_list_,
-                         use_sql=True,
+                         use_sql=True, do_tunnel=options['do_tunnel'],
                          check_md5=options.get('do_check', False))
     if 'build' in options and options['build']:
         summary_list_ = cache_.get_cache_summary_list(directory='%s/run'
@@ -318,9 +318,10 @@ def do_summary(directory_, msg_q=None, options=None):
                                                       options=options)
         cache_ = GarminCache(pickle_file=pickle_file_,
                              cache_directory=cache_dir_, corr_list=corr_list_,
-                             use_sql=False, check_md5=True)
+                             use_sql=False, check_md5=True,
+                             do_tunnel=options['do_tunnel'])
         cache_.cache_write_fn(cache_.cache_summary_file_dict)
-        write_corrections_table(corr_list_)
+        write_corrections_table(corr_list_, options['do_tunnel'])
         return summary_list_
     summary_list_ = cache_.get_cache_summary_list(directory=directory_,
                                                   options=options)
@@ -331,14 +332,14 @@ def do_summary(directory_, msg_q=None, options=None):
     return True
 
 
-def add_correction(correction_str, json_path=None):
+def add_correction(correction_str, json_path=None, options=None):
     """ add correction to json file """
     from garmin_app.garmin_corrections import (list_of_corrected_laps,
                                                save_corrections)
     from garmin_app.garmin_corrections_sql import (read_corrections_table,
                                                    write_corrections_table)
     l_corr = list_of_corrected_laps(json_path=json_path)
-    l_corr.update(read_corrections_table())
+    l_corr.update(read_corrections_table(do_tunnel=options['do_tunnel']))
     ent = correction_str.split()
     timestr = ent[0]
     try:
@@ -373,7 +374,7 @@ def add_correction(correction_str, json_path=None):
     if os.path.exists('%s/public_html/garmin/files' % HOMEDIR):
         save_corrections(l_corr,
                          json_path='%s/public_html/garmin/files' % HOMEDIR)
-    write_corrections_table(l_corr)
+    write_corrections_table(l_corr, do_tunnel=options['do_tunnel'])
     return l_corr
 
 
@@ -413,14 +414,15 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             cache_dir_ = '%s/run/cache' % cache_dir
             corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
 
-            write_corrections_table(corr_list_)
+            write_corrections_table(corr_list_, do_tunnel=options['do_tunnel'])
 
             cache_ = GarminCache(pickle_file=pickle_file_,
                                  cache_directory=cache_dir_,
                                  corr_list=corr_list_, check_md5=True)
             summary_list_ = cache_.cache_read_fn()
             ### backup garmin.pkl.gz info to postgresql database
-            write_postgresql_table(summary_list_)
+            write_postgresql_table(summary_list_,
+                                   do_tunnel=options['do_tunnel'])
 
             return
         elif arg == 'occur':
@@ -432,7 +434,8 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
         elif arg != 'run' and os.path.isdir('%s/run/%s' % (cache_dir, arg)):
             gdir.add('%s/run/%s' % (cache_dir, arg))
         elif arg == 'correction':
-            add_correction(' '.join(args[1:]), json_path='%s/run' % cache_dir)
+            add_correction(' '.join(args[1:]), json_path='%s/run' % cache_dir,
+                           options=options)
             return
         elif arg in options:
             options[arg] = True
@@ -494,7 +497,13 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     parser.add_argument('command', nargs='*', help=help_text)
     parser.add_argument('--daemon', '-d', action='store_true',
                         help='run as daemon')
+    parser.add_argument('--tunnel', '-t', action='store_true',
+                        help='tunnel to postgresql server')
     args = parser.parse_args()
+
+    do_tunnel = False
+    if getattr(args, 'tunnel'):
+        do_tunnel = True
 
     for arg in getattr(args, 'command'):
         if any(arg == x for x in ['h', 'help', '-h', '--help']):
@@ -523,7 +532,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                     from garmin_app.garmin_cache_sql import \
                         write_postgresql_table
                     summary_list_ = write_postgresql_table(
-                        [], get_summary_list=True)
+                        [], get_summary_list=True, do_tunnel=do_tunnel)
                     print(len(summary_list_), pickle_file_)
                     ### Recreate cache file using list from database
                     write_(summary_list_, pickle_file_)
@@ -539,9 +548,10 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     options = {'do_plot': False, 'do_year': False, 'do_month': False,
                'do_week': False, 'do_day': False, 'do_file': False,
                'do_sport': None, 'do_update': False, 'do_average': False,
-               'do_check': False}
+               'do_check': False, 'do_tunnel': False}
     options['script_path'] = script_path
     options['cache_dir'] = cache_dir
+    options['do_tunnel'] = do_tunnel
 
     if getattr(args, 'daemon'):
         with GarminServer():
