@@ -13,7 +13,7 @@ from sqlalchemy import (create_engine, Column, Integer, Float, String,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from garmin_app.util import OpenPostgreSQLsshTunnel, POSTGRESTRING
+from garmin_app.util import OpenPostgreSQLsshTunnel, POSTGRESTRING, USER
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -126,14 +126,18 @@ def write_postgresql_table(summary_list, get_summary_list=False,
     with OpenPostgreSQLsshTunnel(port=port, do_tunnel=do_tunnel) as pport:
         return _write_postgresql_table(summary_list,
                                        get_summary_list=get_summary_list,
-                                       dbname=dbname, port=pport)
+                                       dbname=dbname, port=pport,
+                                       do_tunnel=do_tunnel)
 
 
 def _write_postgresql_table(summary_list, get_summary_list=False,
-                            dbname='garmin_summary', port=5432):
+                            dbname='garmin_summary', port=5432,
+                            do_tunnel=False):
     """ ... """
     from garmin_app.garmin_cache_sql import GarminCacheSQL
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
+    if do_tunnel:
+        postgre_str = postgre_str.replace(USER, 'ddboline')
     gc_ = GarminCacheSQL(sql_string=postgre_str)
     sl_ = gc_.read_sql_table()
     if not get_summary_list:
@@ -144,13 +148,16 @@ def _write_postgresql_table(summary_list, get_summary_list=False,
 def read_postgresql_table(dbname='garmin_summary', do_tunnel=False,
                           port=5433):
     with OpenPostgreSQLsshTunnel(port=port, do_tunnel=do_tunnel) as pport:
-        return _read_postgresql_table(dbname=dbname, port=pport)
+        return _read_postgresql_table(dbname=dbname, port=pport,
+                                      do_tunnel=do_tunnel)
 
 
 def _read_postgresql_table(dbname='garmin_summary', port=5432,
                            do_tunnel=False):
     from garmin_app.garmin_cache_sql import GarminCacheSQL
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
+    if do_tunnel:
+        postgre_str = postgre_str.replace(USER, 'ddboline')
     gc_ = GarminCacheSQL(sql_string=postgre_str)
     sl_ = gc_.read_sql_table()
     return sl_
