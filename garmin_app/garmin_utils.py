@@ -19,7 +19,7 @@ from tempfile import NamedTemporaryFile
 from garmin_app.garmin_server import GarminServer
 
 from garmin_app.util import (run_command, openurl, dump_to_file, HOMEDIR,
-                             walk_wrapper, datetimefromstring)
+                             walk_wrapper, datetimefromstring, HOSTNAME)
 
 BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
@@ -187,6 +187,45 @@ def get_md5(fname):
     output = run_command('md5sum "%s"' % fname, do_popen=True,
                          single_line=True).split()[0]
     return output.decode()
+
+
+def sync_db(to_local=True, to_remote=False):
+    from garmin_app.garmin_cache_sql import (read_postgresql_table,
+                                             write_postgresql_table)
+    from garmin_app.garmin_corrections_sql import (read_corrections_table,
+                                                   write_corrections_table)
+
+    if HOSTNAME == 'dilepton-tower':
+        return
+    cache_local = read_postgresql_table(do_tunnel=False)
+    cache_remote = read_postgresql_table(do_tunnel=True)
+
+    if to_local:
+        summary_list = {}
+        summary_list.update(cache_local)
+        summary_list.update(cache_remote)
+        write_postgresql_table(summary_list, do_tunnel=False)
+
+    if to_remote:
+        summary_list = {}
+        summary_list.update(cache_remote)
+        summary_list.update(cache_local)
+        write_postgresql_table(summary_list, do_tunnel=True)
+
+    corrections_local = read_corrections_table(do_tunnel=False)
+    corrections_remote = read_corrections_table(do_tunnel=True)
+
+    if to_local:
+        corrections = {}
+        corrections.update(corrections_local)
+        corrections.update(corrections_remote)
+        write_corrections_table(corrections, do_tunnel=False)
+
+    if to_remote:
+        corrections = {}
+        corrections.update(corrections_remote)
+        corrections.update(corrections_local)
+        write_corrections_table(corrections, do_tunnel=True)
 
 
 def compare_with_remote(cache_dir):
