@@ -281,7 +281,8 @@ def compare_with_remote(cache_dir):
                 dump_to_file(urlout, outfile)
 
     local_files_not_in_s3 = ['%s/run/%s/%s' % (cache_dir,
-                                               remote_file_path[fn_], fn_)
+                                               remote_file_path.get(fn_, ''),
+                                               fn_)
                              for fn_ in local_file_chksum
                              if fn_ not in s3_file_chksum
                              or local_file_chksum[fn_] != s3_file_chksum[fn_]]
