@@ -52,6 +52,8 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
     if not filelist:
         filelist = []
     for fn_ in filelist:
+        if not os.path.exists(fn_):
+            continue
         kn_ = fn_.split('/')[-1]
         with open(fn_, 'rb') as infile:
             if kn_ in list_of_keys:
