@@ -350,7 +350,8 @@ def do_summary(directory_, msg_q=None, options=None):
     pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
     cache_dir_ = '%s/run/cache' % cache_dir
     cache_ = GarminCache(cache_directory=cache_dir_, corr_list=corr_list_,
-                         use_sql=True, do_tunnel=options['do_tunnel'],
+                         use_sql=True,
+                         do_tunnel=options.get('do_tunnel', False),
                          check_md5=options.get('do_check', False))
     if 'build' in options and options['build']:
         summary_list_ = cache_.get_cache_summary_list(directory='%s/run'
@@ -359,9 +360,10 @@ def do_summary(directory_, msg_q=None, options=None):
         cache_ = GarminCache(pickle_file=pickle_file_,
                              cache_directory=cache_dir_, corr_list=corr_list_,
                              use_sql=False, check_md5=True,
-                             do_tunnel=options['do_tunnel'])
+                             do_tunnel=options.get('do_tunnel', False))
         cache_.cache_write_fn(cache_.cache_summary_file_dict)
-        write_corrections_table(corr_list_, options['do_tunnel'])
+        write_corrections_table(corr_list_,
+                                do_tunnel=options.get('do_tunnel', False))
         return summary_list_
     summary_list_ = cache_.get_cache_summary_list(directory=directory_,
                                                   options=options)
@@ -379,7 +381,8 @@ def add_correction(correction_str, json_path=None, options=None):
     from garmin_app.garmin_corrections_sql import (read_corrections_table,
                                                    write_corrections_table)
     l_corr = list_of_corrected_laps(json_path=json_path)
-    l_corr.update(read_corrections_table(do_tunnel=options['do_tunnel']))
+    l_corr.update(
+        read_corrections_table(do_tunnel=options.get('do_tunnel', False)))
     ent = correction_str.split()
     timestr = ent[0]
     try:
@@ -414,7 +417,7 @@ def add_correction(correction_str, json_path=None, options=None):
     if os.path.exists('%s/public_html/garmin/files' % HOMEDIR):
         save_corrections(l_corr,
                          json_path='%s/public_html/garmin/files' % HOMEDIR)
-    write_corrections_table(l_corr, do_tunnel=options['do_tunnel'])
+    write_corrections_table(l_corr, do_tunnel=options.get('do_tunnel', False))
     return l_corr
 
 
@@ -454,7 +457,8 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             cache_dir_ = '%s/run/cache' % cache_dir
             corr_list_ = list_of_corrected_laps(json_path='%s/run' % cache_dir)
 
-            write_corrections_table(corr_list_, do_tunnel=options['do_tunnel'])
+            write_corrections_table(
+                corr_list_, do_tunnel=options.get('do_tunnel', False))
 
             cache_ = GarminCache(pickle_file=pickle_file_,
                                  cache_directory=cache_dir_,
@@ -462,7 +466,7 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             summary_list_ = cache_.cache_read_fn()
             ### backup garmin.pkl.gz info to postgresql database
             write_postgresql_table(summary_list_,
-                                   do_tunnel=options['do_tunnel'])
+                                   do_tunnel=options.get('do_tunnel', False))
 
             return
         elif arg == 'occur':
