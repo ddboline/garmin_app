@@ -7,6 +7,7 @@ import os
 import time
 import shlex
 import socket
+import numpy as np
 from subprocess import call, Popen, PIPE
 
 HOSTNAME = os.uname()[1]
@@ -256,6 +257,17 @@ def walk_wrapper(direc, callback, arg):
         for dirpath, dirnames, filenames in os.walk(direc):
             callback(arg, dirpath, dirnames + filenames)
     return
+
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    r_earth = 6371.
+    dlat = np.abs(lat1-lat2)*np.pi/180.
+    dlon = np.abs(lon1-lon2)*np.pi/180.
+    lat1 *= np.pi/180.
+    lat2 *= np.pi/180.
+    dist = (2. * r_earth * np.arcsin(np.sqrt(np.sin(dlat/2.)**2 +
+            np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2.)**2)))
+    return dist
 
 
 class OpenPostgreSQLsshTunnel(object):
