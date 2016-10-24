@@ -635,7 +635,7 @@ class GarminReport(object):
                                      opts=options))
 
         with open('%s/html/index.html' % cache_dir, 'wt') as htmlfile:
-            if len(lat_vals) > 0 and len(lon_vals) > 0\
+            if len(lat_vals) > 0 and len(lon_vals) > 0 \
                     and len(lat_vals) == len(lon_vals):
                 minlat, maxlat = min(lat_vals), max(lat_vals)
                 minlon, maxlon = min(lon_vals), max(lon_vals)
@@ -1140,6 +1140,8 @@ def get_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi',
     for point in gfile.points:
         cur_point_me = point.distance
         cur_point_time = point.duration_from_begin
+        if cur_point_me is None or last_point_me is None:
+            continue
         if (cur_point_me - last_point_me) <= 0:
             continue
         if point.heart_rate:
