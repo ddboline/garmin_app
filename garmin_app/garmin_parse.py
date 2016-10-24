@@ -20,7 +20,7 @@ from garmin_app.garmin_utils import (METERS_PER_MILE, convert_time_string,
                                      convert_gmn_to_xml, expected_calories)
 from garmin_app.garmin_corrections import LIST_OF_MISLABELED_TIMES
 
-from garmin_app.util import run_command
+from garmin_app.util import (run_command, haversine_distance)
 
 
 class GarminParse(GarminFile):
@@ -57,8 +57,8 @@ class GarminParse(GarminFile):
         elif '.gmn' in self.orig_filename.lower():
             self.filetype = 'gmn'
             self.orig_filename = convert_gmn_to_xml(self.orig_filename)
-#        elif '.gpx' in self.orig_filename.lower():
-#            self.filetype = 'gpx'
+        elif '.gpx' in self.orig_filename.lower():
+            self.filetype = 'gpx'
 
     def read_file(self):
         """ read file, use is_tcx/is_txt to decide which function to call """
@@ -68,7 +68,12 @@ class GarminParse(GarminFile):
             self.read_file_txt()
         elif self.filetype == 'gmn':
             self.read_file_xml()
-        self.begin_datetime = self.laps[0].lap_start
+        elif self.filetype == 'gpx':
+            self.read_file_gpx()
+        if len(self.laps) > 0:
+            self.begin_datetime = self.laps[0].lap_start
+        else:
+            self.begin_datetime = datetime.datetime.now()
         printed_datetime = print_date_string(self.begin_datetime)
         for sport in LIST_OF_MISLABELED_TIMES:
             if printed_datetime in LIST_OF_MISLABELED_TIMES[sport]:
@@ -164,6 +169,33 @@ class GarminParse(GarminFile):
                     for lap in self.laps:
                         lap.lap_calories = int(lap.lap_calories * (3390/26.43)
                                                / (1701/26.26))
+
+    def read_file_gpx(self):
+        lats = []
+        lons = []
+        with run_command('xml2 < %s' % self.orig_filename,
+                         do_popen=True) as pop_:
+            for idx, line in enumerate(pop_):
+                if hasattr(line, 'decode'):
+                    line = line.decode()
+                ent = line.strip().split('/')
+                if len(ent) == 6 and 'lat' in ent[5]:
+                    lats.append(float(ent[5].split('=')[-1]))
+                if len(ent) == 6 and 'lon' in ent[5]:
+                    lons.append(float(ent[5].split('=')[-1]))
+        assert len(lats) == len(lons)
+        last = None
+        distance = 0
+        for lat, lon in zip(lats, lons):
+            cur_point = GarminPoint()
+            cur_point.latitude = lat
+            cur_point.longitude = lon
+            if last is not None:
+                distance += haversine_distance(lat, lon, last[0], last[1])
+            cur_point.distance = distance
+            last = (lat, lon)
+            self.points.append(cur_point)
+        self.sport = 'running'
 
     def read_file_tcx(self):
         """ read tcx file """
