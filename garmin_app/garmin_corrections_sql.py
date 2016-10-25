@@ -171,3 +171,4 @@ def test_garmin_corrections_sql():
                     assert abs(cor0[key][lap][1] - cor1[key][lap][1]) < 1e-6
                 else:
                     assert abs(cor0[key][lap] - cor1[key][lap]) < 1e-6
+        gc_.delete_table()
