@@ -5,6 +5,8 @@
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+from pytz import timezone
+from time import gmtime, strftime
 
 from garmin_app.garmin_cache import GarminCache
 from garmin_app.garmin_summary import GarminSummary, DB_ENTRIES
@@ -14,6 +16,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from garmin_app.util import OpenPostgreSQLsshTunnel, POSTGRESTRING, USER
+
+utc = timezone('UTC')
+est = timezone(strftime("%Z", gmtime()))
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -75,7 +80,12 @@ class GarminCacheSQL(object):
         for row in session.query(GarminSummaryTable).all():
             gsum = GarminSummary()
             for sl_ in DB_ENTRIES:
-                setattr(gsum, sl_, getattr(row, sl_))
+                if sl_ == 'begin_datetime':
+                    tmp = getattr(row, sl_).replace(tzinfo=utc)
+                    tmp = tmp.astimezone(est)
+                    setattr(gsum, sl_, tmp)
+                else:
+                    setattr(gsum, sl_, getattr(row, sl_))
             self.summary_list[gsum.filename] = gsum
         session.commit()
         session.close()
