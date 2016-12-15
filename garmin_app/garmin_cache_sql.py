@@ -5,9 +5,6 @@
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-from pytz import timezone
-from time import gmtime, strftime
-
 from garmin_app.garmin_cache import GarminCache
 from garmin_app.garmin_summary import GarminSummary, DB_ENTRIES
 from sqlalchemy import (create_engine, Column, Integer, Float, String,
@@ -15,10 +12,8 @@ from sqlalchemy import (create_engine, Column, Integer, Float, String,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from garmin_app.util import OpenPostgreSQLsshTunnel, POSTGRESTRING, USER
-
-utc = timezone('UTC')
-est = timezone(strftime("%Z", gmtime()))
+from garmin_app.util import (OpenPostgreSQLsshTunnel, POSTGRESTRING, USER,
+                             utc, est)
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -86,6 +81,7 @@ class GarminCacheSQL(object):
                     setattr(gsum, sl_, tmp)
                 else:
                     setattr(gsum, sl_, getattr(row, sl_))
+                ##setattr(gsum, sl_, getattr(row, sl_))
             self.summary_list[gsum.filename] = gsum
         session.commit()
         session.close()
@@ -98,6 +94,8 @@ class GarminCacheSQL(object):
         def convert_to_sql(sl_):
             """ ... """
             sld = {x: getattr(sl_, x) for x in DB_ENTRIES}
+            sld['begin_datetime'] = sld['begin_datetime'].astimezone(utc)
+            sld['begin_datetime'] = sld['begin_datetime'].replace(tzinfo=None)
             return GarminSummaryTable(**sld)
 
         session = sessionmaker(bind=self.engine)

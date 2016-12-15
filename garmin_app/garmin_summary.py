@@ -7,6 +7,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import os
+from garmin_app.util import utc, est
 from garmin_app.garmin_parse import GarminParse
 from garmin_app.garmin_utils import (get_md5, expected_calories, SPORT_TYPES,
                            METERS_PER_MILE)
@@ -51,6 +52,8 @@ class GarminSummary(object):
         temp_gfile = GarminParse(self.fullfname, corr_list=self.corr_list)
         temp_gfile.read_file()
         self.begin_datetime = temp_gfile.begin_datetime
+        self.begin_datetime = self.begin_datetime.replace(tzinfo=utc)
+        self.begin_datetime = self.begin_datetime.astimezone(est)
         self.sport = temp_gfile.sport
         self.total_calories = temp_gfile.total_calories
         self.total_distance = temp_gfile.total_distance
