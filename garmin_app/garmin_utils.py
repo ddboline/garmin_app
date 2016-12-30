@@ -21,7 +21,8 @@ from garmin_app.garmin_server import GarminServer
 from garmin_app.util import (run_command, openurl, dump_to_file, HOMEDIR,
                              walk_wrapper, datetimefromstring, HOSTNAME)
 
-BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
+#BASEURL = 'https://ddbolineathome.mooo.com/~ddboline'
+BASEURL = 'http://ddbolineinthecloud.mooo.com/~ubuntu'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
 CACHEDIR = '%s/.garmin_cache' % HOMEDIR
 
@@ -195,7 +196,7 @@ def sync_db(to_local=True, to_remote=False):
     from garmin_app.garmin_corrections_sql import (read_corrections_table,
                                                    write_corrections_table)
 
-    if HOSTNAME == 'dilepton-tower':
+    if HOSTNAME in ('dilepton-tower', 'dilepton-chromebook'):
         return
     cache_local = read_postgresql_table(do_tunnel=False)
     cache_remote = read_postgresql_table(do_tunnel=True)

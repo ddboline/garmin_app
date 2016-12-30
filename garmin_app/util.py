@@ -19,7 +19,7 @@ USER = os.getenv('USER')
 POSTGRESTRING = 'postgresql://%s:BQGIvkKFZPejrKvX@localhost' % USER
 
 utc = timezone('UTC')
-est = timezone(strftime("%Z", gmtime()))
+est = timezone(strftime("%Z", gmtime()).replace('CST', 'CST6CDT'))
 
 
 class PopenWrapperClass(object):
@@ -284,7 +284,8 @@ class OpenPostgreSQLsshTunnel(object):
         self.do_tunnel = do_tunnel
 
     def __enter__(self):
-        if HOSTNAME != 'dilepton-tower' and self.do_tunnel:
+        if HOSTNAME not in ('dilepton-tower', 'dilepton-chromebook') and \
+                self.do_tunnel:
             self.postgre_port = self.remote_port
             _cmd = 'ssh -N -L localhost:%d' % self.remote_port + \
                    ':localhost:5432 ddboline@ddbolineathome.mooo.com'

@@ -54,7 +54,8 @@ LIST_OF_MISLABELED_TIMES = {'biking':
                             ['2013-12-25T19:34:06Z'],
                             'skiing':
                             ['2010-12-24T14:04:58Z',
-                             '2013-12-26T21:24:38Z']}
+                             '2013-12-26T21:24:38Z',
+                             '2016-12-30T17:34:03Z']}
 
 JSON_DIR = '%s/setup_files/build/garmin_app/garmin_app' % os.getenv('HOME')
 
