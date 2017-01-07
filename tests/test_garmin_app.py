@@ -20,7 +20,8 @@ TXTFILE = 'tests/test.txt'
 GPXFILE = 'tests/test.gpx'
 
 GARMINSUMMARYSTR = 'GarminSummary<filename=test.fit, ' + \
-                   'begin_datetime=2014-01-12 16:00:05, sport=running, ' + \
+                   'begin_datetime=2014-01-12 11:00:05-05:00, ' + \
+                   'sport=running, ' + \
                    'total_calories=351, total_distance=5081.34, ' + \
                    'total_duration=1451.55, total_hr_dur=220635.6, ' + \
                    'total_hr_dis=1451.55, number_of_items=1, ' + \
@@ -102,13 +103,12 @@ class TestGarminApp(unittest.TestCase):
         if hasattr(md5, 'decode'):
             md5 = md5.decode()
         md5 = md5_command('tail -n740 %s | md5sum' % outfile)
-        self.assertEqual(md5, '3e7ab7d5dc77a6e299596d615226ff0b')
+        self.assertEqual(md5, 'e4c286408f261a648bb8815521bc0095')
         os.remove(outfile)
 
         outfile = convert_gmn_to_gpx(FITFILE)
         md5 = md5_command('tail -n1246 %s | md5sum' % outfile)
-        self.assertIn(md5, ['e06a6217293b218b8ca1e4dbf07174ce',
-                            '47b9208c4ce3fed1c2da3da0ece615c1'])
+        self.assertIn(md5, ['d29f88090e92d4a16b27a609ff3a0d9b'])
         os.remove(outfile)
 
         outfile = convert_gmn_to_gpx(TXTFILE)
@@ -211,7 +211,7 @@ class TestGarminApp(unittest.TestCase):
                                   garmin_list=[gsum]).dataframe
             gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
             md5 = md5_command('cat temp.fit.sum.csv | md5sum')
-            self.assertIn(md5, ['b83e146680aa2583f9f1650c5a709b6a',
+            self.assertIn(md5, ['4d58abbb5cd604582782595c99f83757',
                                 '4aed7300dae1ebc400642cbf87dceac8'])
 
     def test_cache_dataframe_tcx(self):
@@ -232,7 +232,7 @@ class TestGarminApp(unittest.TestCase):
                               garmin_list=[gsum]).dataframe
         gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.sum.csv | md5sum')
-        self.assertEqual(md5, 'aff4a61c7568d6ecbc4db36f79cb1e74')
+        self.assertEqual(md5, 'ac5e35fea996f62757b6c25d21f543f4')
 #        cleanup_pickle()
 
     def test_cache_dataframe_fit(self):
@@ -253,7 +253,7 @@ class TestGarminApp(unittest.TestCase):
                               garmin_list=[gsum]).dataframe
         gdf.to_csv('temp.fit.sum.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.sum.csv | md5sum')
-        self.assertEqual(md5, 'c65b0b55423651f06c43f3e408ff5aeb')
+        self.assertEqual(md5, '2cbb419260abb688a930065f7d192186')
 #        cleanup_pickle()
 
     def test_cache_dataframe_fit_fill_list(self):
@@ -294,6 +294,8 @@ class TestGarminApp(unittest.TestCase):
         gsum = GarminSummary(FITFILE)
         gsum.read_file()
         output = '%s' % gsum
+        print(output)
+        print(GARMINSUMMARYSTR)
         self.assertEqual(output, GARMINSUMMARYSTR)
         mstr = hashlib.md5()
         mstr.update(output.encode())
@@ -446,7 +448,7 @@ class TestGarminApp(unittest.TestCase):
                                                     key=lambda x: x.filename))
         mstr = hashlib.md5()
         mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['046172056a2358821f2effd0974d5160',
+        self.assertIn(mstr.hexdigest(), ['c06f13236f9abed0723e4af7537ca3d4',
                       'a59c8ee120e789eda36e0cc8592ffce1'])
 
         gc0 = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
@@ -460,7 +462,7 @@ class TestGarminApp(unittest.TestCase):
                                                     key=lambda x: x.filename))
         mstr = hashlib.md5()
         mstr.update(output.encode())
-        self.assertIn(mstr.hexdigest(), ['046172056a2358821f2effd0974d5160',
+        self.assertIn(mstr.hexdigest(), ['06465ba08d19d59c963e542bc19f12b7',
                       'a59c8ee120e789eda36e0cc8592ffce1'])
 
         with OpenPostgreSQLsshTunnel(port=5435, do_tunnel=True) as pport:
@@ -474,7 +476,7 @@ class TestGarminApp(unittest.TestCase):
             mstr = hashlib.md5()
             mstr.update(output.encode())
             self.assertIn(mstr.hexdigest(), [
-                          '046172056a2358821f2effd0974d5160',
+                          'c06f13236f9abed0723e4af7537ca3d4',
                           'a59c8ee120e789eda36e0cc8592ffce1'])
 
         with OpenPostgreSQLsshTunnel(port=5436, do_tunnel=True) as pport:
@@ -497,9 +499,7 @@ class TestGarminApp(unittest.TestCase):
             mstr = hashlib.md5()
             mstr.update(output.encode())
             self.assertIn(mstr.hexdigest(), [
-                          '046172056a2358821f2effd0974d5160',
-                          'a59c8ee120e789eda36e0cc8592ffce1',
-                          'd41d8cd98f00b204e9800998ecf8427e'])
+                          '06465ba08d19d59c963e542bc19f12b7'])
 
         gc_ = GarminCache(pickle_file='%s/temp.pkl.gz' % CURDIR,
                           cache_directory='%s/run/cache' % CURDIR,
@@ -671,11 +671,11 @@ class TestGarminApp(unittest.TestCase):
             corr_list={'2011-05-07T15:43:08Z': {0: [1.1, 300]}})
         gsum.read_file()
         tmp = '%s' % gsum
-        test0 = 'GarminSummary<filename=test.gmn, begin_datetime=' + \
-                '2011-05-07 15:43:08, sport=biking, total_calories=61, ' + \
-                'total_distance=1770.2784, total_duration=300, ' + \
-                'total_hr_dur=0, total_hr_dis=0, number_of_items=1, ' + \
-                'md5sum=af6f79ef18f4ec5526d3f987b6f00f9b>'
+        test0 = 'GarminSummary<filename=test.gmn, begin_datetime=' \
+                '2011-05-07 10:43:08-05:00, sport=biking, ' \
+                'total_calories=61, total_distance=1770.2784, ' \
+                'total_duration=300, total_hr_dur=0, total_hr_dis=0, ' \
+                'number_of_items=1, md5sum=af6f79ef18f4ec5526d3f987b6f00f9b>'
         test1 = test0.replace('total_distance=1770.2784',
                               'total_distance=1770.2784000000001')
         self.assertIn(tmp, [test0, test1])
@@ -701,10 +701,12 @@ class TestGarminApp(unittest.TestCase):
         gsum.read_file()
         tmp = '%s' % gsum
         test = 'GarminSummary<filename=test.tcx, begin_datetime=' + \
-               '2012-11-05 11:52:21, sport=biking, total_calories=285, ' + \
+               '2012-11-05 06:52:21-05:00, sport=biking, total_calories=285, ' + \
                'total_distance=6437.376, total_duration=1050, ' + \
                'total_hr_dur=0, total_hr_dis=0, number_of_items=1, ' + \
                'md5sum=eaa1e1a2bc26b1145a046c39f31b4024>'
+        print(tmp)
+        print(test)
         self.assertEqual(tmp, test)
 
     def test_print_history_buttons(self):
