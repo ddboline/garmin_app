@@ -6,8 +6,8 @@ sudo bash -c "echo deb ssh://ddboline@ddbolineathome.mooo.com/var/www/html/deb/x
 sudo apt-get update
 sudo apt-get install -y --force-yes gpsbabel garmin-forerunner-tools xml2 python-requests \
                                     python-pandas python-dateutil python-usb fit2tcx \
-                                    python-psycopg2 python-sqlalchemy python-nose \
-                                    python-coverage python-numpy=1.\* libtinyxml2.6.2v5 \
+                                    python-psycopg2 python-sqlalchemy python-pytest \
+                                    python-pytest-cov python-numpy=1.\* libtinyxml2.6.2v5 \
                                     python-boto python-lxml python-matplotlib \
                                     python-stravalib python-setuptools python-dev \
                                     python-futures
