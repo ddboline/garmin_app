@@ -52,7 +52,7 @@ from garmin_app.garmin_corrections import (list_of_corrected_laps,
                                            save_corrections)
 from garmin_app.garmin_file import GarminFile
 from garmin_app.util import (run_command, OpenPostgreSQLsshTunnel,
-                             POSTGRESTRING)
+                             convert_date, POSTGRESTRING, print_h_m_s, openurl)
 
 
 def md5_command(command):
@@ -222,7 +222,7 @@ class TestGarminApp(unittest.TestCase):
                               garmin_list=gfile.points).dataframe
         gdf.to_csv('temp.tcx.point.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.tcx.point.csv | md5sum')
-        self.assertEqual(md5, 'd9b1d2e8dd99a32e1fc9c58e87e75f27')
+        self.assertEqual(md5, '5ebd5307817c251ae58e48862a633d47')
         gdf = GarminDataFrame(garmin_class=GarminLap,
                               garmin_list=gfile.laps).dataframe
         gdf.to_csv('temp.tcx.lap.csv', index=False, float_format='%.4f')
@@ -745,6 +745,50 @@ class TestGarminApp(unittest.TestCase):
 
         with self.assertRaises(IOError):
             read_garmin_file('NULL', options=options)
+
+
+def test_run_command():
+    """ test run_command """
+    cmd = 'echo "HELLO"'
+    out = run_command(cmd, do_popen=True, single_line=True).strip()
+    assert out == b'HELLO'
+
+    out = run_command(cmd, turn_on_commands=False)
+    assert out == cmd
+
+
+def test_convert_date():
+    """ test convert_date """
+    import datetime
+    assert convert_date('080515') == datetime.date(year=2015, month=8, day=5)
+
+
+def test_print_h_m_s():
+    """ test print_h_m_s """
+    assert print_h_m_s(12345) == '03:25:45'
+
+
+def test_openurl():
+    """ test openurl """
+    import hashlib
+    output = ''.join(openurl('https://httpbin.org/html'))
+    output = output.encode(errors='replace')
+    mstr = hashlib.md5()
+    mstr.update(output)
+    output = mstr.hexdigest()
+    assert output in ('fefa33a57febcf8a413cc252966670fb',
+                      '348369d8bd0d9ae6c4cdfc9e2cfa7e99')
+
+    from requests import HTTPError
+    from nose.tools import raises
+
+    @raises(HTTPError)
+    def test_httperror():
+        """ ... """
+        openurl('https://httpbin.org/aspdoifqwpof')
+
+    test_httperror()
+
 
 if __name__ == '__main__':
     unittest.main()
