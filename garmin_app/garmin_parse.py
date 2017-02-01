@@ -173,6 +173,7 @@ class GarminParse(GarminFile):
     def read_file_gpx(self):
         lats = []
         lons = []
+        eles = []
         with run_command('xml2 < %s' % self.orig_filename,
                          do_popen=True) as pop_:
             for idx, line in enumerate(pop_):
@@ -183,13 +184,18 @@ class GarminParse(GarminFile):
                     lats.append(float(ent[5].split('=')[-1]))
                 if len(ent) == 6 and 'lon' in ent[5]:
                     lons.append(float(ent[5].split('=')[-1]))
+                if len(ent) == 6 and 'ele' in ent[5]:
+                    eles.append(float(ent[5].split('=')[-1]))
         assert len(lats) == len(lons)
+        if not eles:
+            eles = [0 for _ in range(len(lats))]
         last = None
         distance = 0
-        for lat, lon in zip(lats, lons):
+        for lat, lon, ele in zip(lats, lons, eles):
             cur_point = GarminPoint()
             cur_point.latitude = lat
             cur_point.longitude = lon
+            cur_point.altitude = ele
             if last is not None:
                 distance += haversine_distance(lat, lon, last[0], last[1])
             cur_point.distance = distance
@@ -265,8 +271,7 @@ class GarminParse(GarminFile):
             time_from_begin += cur_point.duration_from_last
             cur_point.duration_from_begin = time_from_begin
 
-            if cur_point.distance and cur_point.distance > 0:
-                self.points.append(cur_point)
+            self.points.append(cur_point)
 
     def read_file_txt(self):
         """ read txt file, these just contain summary information """
