@@ -1,6 +1,6 @@
 #!/bin/bash
 
-py.test3 --with-coverage --cover-package=garmin_app ./tests/*.py garmin_app/*.py
+py.test3 --cov=garmin_app ./tests/*.py garmin_app/*.py
 
 # rm -rf ${HOME}/.garmin_cache/
 # python3 ./garmin.py get
