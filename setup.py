@@ -21,7 +21,9 @@ setup(
     packages=['garmin_app'],
     package_dir={'garmin_app': 'garmin_app'},
     package_data={'garmin_app': ['templates/*.html']},
-    entry_points={'console_scripts':
-                  ['garmin-app = garmin_app.garmin_utils:main',
-                   'strava-upload = garmin_app.strava_upload:strava_upload']}
-)
+    entry_points={
+        'console_scripts': [
+            'garmin-app = garmin_app.garmin_utils:main',
+            'strava-upload = garmin_app.strava_upload:strava_upload'
+        ]
+    })

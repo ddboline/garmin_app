@@ -2,8 +2,7 @@
 """
     GarminLap Class
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from garmin_app.garmin_utils import (convert_date_string, convert_time_string)
 
@@ -14,10 +13,11 @@ class GarminLap(object):
             functions:
                 read_lap_xml(node), read_lap_tcx(node), print_lap_string(node)
     """
-    _db_entries = ['lap_type', 'lap_index', 'lap_start', 'lap_duration',
-                   'lap_distance', 'lap_trigger', 'lap_max_speed',
-                   'lap_calories', 'lap_avg_hr', 'lap_max_hr', 'lap_intensity',
-                   'lap_number', 'lap_start_string']
+    _db_entries = [
+        'lap_type', 'lap_index', 'lap_start', 'lap_duration', 'lap_distance', 'lap_trigger',
+        'lap_max_speed', 'lap_calories', 'lap_avg_hr', 'lap_max_hr', 'lap_intensity', 'lap_number',
+        'lap_start_string'
+    ]
     __slots__ = _db_entries
 
     def __init__(self, **options):
@@ -43,8 +43,8 @@ class GarminLap(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminLap<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
+        return 'GarminLap<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
+                                           for x in self._db_entries)
 
     def read_lap_xml(self, ents):
         """ read lap from xml file """

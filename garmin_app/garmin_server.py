@@ -3,8 +3,7 @@
 """
     Garmin Server Class
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import multiprocessing
 from garmin_app.garmin_daemon import server_thread, GARMIN_SOCKET_FILE
@@ -12,6 +11,7 @@ from garmin_app.garmin_daemon import server_thread, GARMIN_SOCKET_FILE
 
 class GarminServer(object):
     """ Garmin Server Class """
+
     def __init__(self, socketfile=GARMIN_SOCKET_FILE):
         """ Init Method """
         self.msg_q = None
@@ -29,9 +29,8 @@ class GarminServer(object):
         """ start server, manager based communication """
         manager = multiprocessing.Manager()
         self.msg_q = manager.list()
-        self.net = multiprocessing.Process(target=server_thread,
-                                           args=(self.socket_file,
-                                                 self.msg_q))
+        self.net = multiprocessing.Process(
+            target=server_thread, args=(self.socket_file, self.msg_q))
         self.net.start()
 
     def join_server(self):
@@ -39,17 +38,3 @@ class GarminServer(object):
 
     def kill_server(self):
         self.net.terminate()
-
-
-#def test_garmin_server():
-#    from garmin_app.util import send_command
-#    import time
-#    from tempfile import NamedTemporaryFile
-#
-#    with NamedTemporaryFile() as tmpfile:
-#        with GarminServer(socketfile=tmpfile.name) as gar:
-#            time.sleep(2)
-#            result = send_command('h', socketfile=tmpfile.name)
-#
-#            gar.kill_server()
-#            assert result == 'done'

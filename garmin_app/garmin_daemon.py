@@ -3,8 +3,7 @@
 """
     Daemon for garmin_app
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from garmin_app.util import OpenUnixSocketServer, OpenSocketConnection
 
@@ -12,8 +11,7 @@ GARMIN_SOCKET_FILE = '/tmp/.garmin_test_socket'
 
 
 def handle_connection(conn, msg_q):
-    from garmin_app.garmin_utils import (garmin_parse_arg_list, BASEDIR,
-                                         CACHEDIR)
+    from garmin_app.garmin_utils import (garmin_parse_arg_list, BASEDIR, CACHEDIR)
     recv_ = conn.recv(1024)
 
     script_path = '%s/garmin_app' % BASEDIR
@@ -42,11 +40,17 @@ def handle_connection(conn, msg_q):
             while len(msg_q) > 0:
                 msg_q.pop(-1)
 
-    options = {'do_plot': False, 'do_year': False,
-               'do_month': False, 'do_week': False,
-               'do_day': False, 'do_file': False,
-               'do_sport': None, 'do_update': False,
-               'do_average': False}
+    options = {
+        'do_plot': False,
+        'do_year': False,
+        'do_month': False,
+        'do_week': False,
+        'do_day': False,
+        'do_file': False,
+        'do_sport': None,
+        'do_update': False,
+        'do_average': False
+    }
     options['script_path'] = script_path
     options['cache_dir'] = cache_dir
 

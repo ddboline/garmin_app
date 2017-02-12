@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
-
 """
     module holds GarminSummary class
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
 from garmin_app.util import utc, est
 from garmin_app.garmin_parse import GarminParse
-from garmin_app.garmin_utils import (get_md5, expected_calories, SPORT_TYPES,
-                           METERS_PER_MILE)
+from garmin_app.garmin_utils import (get_md5, expected_calories, SPORT_TYPES, METERS_PER_MILE)
 
-DB_ENTRIES = ('filename', 'begin_datetime', 'sport', 'total_calories',
-              'total_distance', 'total_duration', 'total_hr_dur',
-              'total_hr_dis', 'number_of_items', 'md5sum')
+DB_ENTRIES = ('filename', 'begin_datetime', 'sport', 'total_calories', 'total_distance',
+              'total_duration', 'total_hr_dur', 'total_hr_dis', 'number_of_items', 'md5sum')
 
 
 class GarminSummary(object):
@@ -44,8 +40,8 @@ class GarminSummary(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminSummary<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
+        return 'GarminSummary<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
+                                               for x in self._db_entries)
 
     def read_file(self):
         """  read the file, calculate some stuff """
@@ -64,12 +60,11 @@ class GarminSummary(object):
 
         if self.total_calories == 0 and self.sport == 'running'\
                 and self.total_distance > 0.0:
-            _ppermile = (self.total_duration / 60.) / (self.total_distance
-                                                       / METERS_PER_MILE)
-            _cal = expected_calories(weight=175,
-                                     pace_min_per_mile=_ppermile,
-                                     distance=(self.total_distance
-                                               / METERS_PER_MILE))
+            _ppermile = (self.total_duration / 60.) / (self.total_distance / METERS_PER_MILE)
+            _cal = expected_calories(
+                weight=175,
+                pace_min_per_mile=_ppermile,
+                distance=(self.total_distance / METERS_PER_MILE))
             self.total_calories = int(_cal)
         elif self.total_calories == 0 and self.sport == 'stairs'\
                 and self.total_duration > 0:

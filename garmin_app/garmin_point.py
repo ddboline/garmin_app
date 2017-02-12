@@ -2,8 +2,7 @@
 """
     GarminPoint Class
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from garmin_app.garmin_utils import convert_date_string, METERS_PER_MILE
 
@@ -12,10 +11,11 @@ class GarminPoint(object):
     """
         point representing each gps point
     """
-    _db_entries = ['time', 'latitude', 'longitude', 'altitude', 'distance',
-                   'heart_rate', 'duration_from_last', 'duration_from_begin',
-                   'speed_mps', 'speed_permi', 'speed_mph',
-                   'avg_speed_value_permi', 'avg_speed_value_mph']
+    _db_entries = [
+        'time', 'latitude', 'longitude', 'altitude', 'distance', 'heart_rate', 'duration_from_last',
+        'duration_from_begin', 'speed_mps', 'speed_permi', 'speed_mph', 'avg_speed_value_permi',
+        'avg_speed_value_mph'
+    ]
     __slots__ = _db_entries
 
     def __init__(self, **options):
@@ -35,8 +35,8 @@ class GarminPoint(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminPoint<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self.__slots__)
+        return 'GarminPoint<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
+                                             for x in self.__slots__)
 
     def read_point_xml(self, ents):
         """ read xml point """
@@ -75,8 +75,6 @@ class GarminPoint(object):
                 if len(ents) > 2:
                     if 'Speed' in ents[2]:
                         self.speed_mps = float(ents[2].split('=')[1])
-                        self.speed_mph = (self.speed_mps * 3600.
-                                          / METERS_PER_MILE)
+                        self.speed_mph = (self.speed_mps * 3600. / METERS_PER_MILE)
                         if self.speed_mps > 0.:
-                            self.speed_permi = (METERS_PER_MILE
-                                                / self.speed_mps / 60.)
+                            self.speed_permi = (METERS_PER_MILE / self.speed_mps / 60.)

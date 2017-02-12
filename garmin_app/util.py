@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Utility functions """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
 import time
@@ -24,6 +23,7 @@ est = timezone(strftime("%Z", gmtime()).replace('CST', 'CST6CDT'))
 
 class PopenWrapperClass(object):
     """ context wrapper around subprocess.Popen """
+
     def __init__(self, command):
         """ init fn """
         self.command = command
@@ -48,8 +48,7 @@ class PopenWrapperClass(object):
             return True
 
 
-def run_command(command, do_popen=False, turn_on_commands=True,
-                single_line=False):
+def run_command(command, do_popen=False, turn_on_commands=True, single_line=False):
     """ wrapper around os.system """
     if not turn_on_commands:
         print(command)
@@ -123,6 +122,7 @@ def dump_to_file(url, outfile_):
 
 class OpenUnixSocketServer(object):
     """ context wrapper around unix socket """
+
     def __init__(self, socketfile):
         """ init fn """
         self.sock = None
@@ -150,6 +150,7 @@ class OpenUnixSocketServer(object):
 
 class OpenSocketConnection(object):
     """ context wrapper around socket connection """
+
     def __init__(self, sock):
         """ init fn """
         self.sock = sock
@@ -168,8 +169,8 @@ class OpenSocketConnection(object):
 
 
 class OpenUnixSocketClient(object):
-    def __init__(self, host='localhost', portno=10888,
-                 socketfile='/tmp/.record_roku_socket'):
+
+    def __init__(self, host='localhost', portno=10888, socketfile='/tmp/.record_roku_socket'):
         self.sock = None
         self.socketfile = None
         self.host = host
@@ -201,8 +202,7 @@ class OpenUnixSocketClient(object):
         return True
 
 
-def send_command(ostr, host='localhost', portno=10888,
-                 socketfile='/tmp/.record_roku_socket'):
+def send_command(ostr, host='localhost', portno=10888, socketfile='/tmp/.record_roku_socket'):
     ''' send string to specified socket '''
     with OpenUnixSocketClient(host, portno, socketfile) as sock:
         if not sock:
@@ -223,17 +223,18 @@ def walk_wrapper(direc, callback, arg):
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     r_earth = 6371.
-    dlat = np.abs(lat1-lat2)*np.pi/180.
-    dlon = np.abs(lon1-lon2)*np.pi/180.
-    lat1 *= np.pi/180.
-    lat2 *= np.pi/180.
-    dist = (2. * r_earth * np.arcsin(np.sqrt(np.sin(dlat/2.)**2 +
-            np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2.)**2)))
+    dlat = np.abs(lat1 - lat2) * np.pi / 180.
+    dlon = np.abs(lon1 - lon2) * np.pi / 180.
+    lat1 *= np.pi / 180.
+    lat2 *= np.pi / 180.
+    dist = (2. * r_earth * np.arcsin(
+        np.sqrt(np.sin(dlat / 2.)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2.)**2)))
     return dist
 
 
 class OpenPostgreSQLsshTunnel(object):
     """ Class to let us open an ssh tunnel, then close it when done """
+
     def __init__(self, port=5432, do_tunnel=False):
         self.tunnel_process = 0
         self.postgre_port = 5432
@@ -264,6 +265,5 @@ def test_datetimefromstring():
     import datetime
     from pytz import UTC
     dt0 = '1980-11-17T05:12:13Z'
-    dt1 = datetime.datetime(year=1980, month=11, day=17, hour=5, minute=12,
-                            second=13, tzinfo=UTC)
+    dt1 = datetime.datetime(year=1980, month=11, day=17, hour=5, minute=12, second=13, tzinfo=UTC)
     assert datetimefromstring(dt0) == dt1

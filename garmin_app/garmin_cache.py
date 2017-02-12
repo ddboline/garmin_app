@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-
 """
     functions to read and write
     GarminFile, GarminSummary objects to and from pickle cache
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
 
@@ -67,10 +65,16 @@ def _read_file_in_par(init, cache_directory):
 
 class GarminCache(object):
     """ class to manage caching objects """
-    def __init__(self, pickle_file='', cache_directory='', corr_list=None,
+
+    def __init__(self,
+                 pickle_file='',
+                 cache_directory='',
+                 corr_list=None,
                  cache_read_fn=read_pickle_object_in_file,
-                 cache_write_fn=write_pickle_object_to_file, use_sql=True,
-                 check_md5=False, do_tunnel=False):
+                 cache_write_fn=write_pickle_object_to_file,
+                 use_sql=True,
+                 check_md5=False,
+                 do_tunnel=False):
         self.pickle_file = pickle_file
         self.cache_directory = cache_directory
         self.cache_summary_list = []
@@ -81,17 +85,12 @@ class GarminCache(object):
         self.do_tunnel = do_tunnel
         self.check_md5 = check_md5
         if use_sql:
-            from garmin_app.garmin_cache_sql import (read_postgresql_table,
-                                                     write_postgresql_table)
-            self.cache_read_fn = partial(read_postgresql_table,
-                                         do_tunnel=self.do_tunnel)
-            self.cache_write_fn = partial(write_postgresql_table,
-                                          do_tunnel=self.do_tunnel)
+            from garmin_app.garmin_cache_sql import (read_postgresql_table, write_postgresql_table)
+            self.cache_read_fn = partial(read_postgresql_table, do_tunnel=self.do_tunnel)
+            self.cache_write_fn = partial(write_postgresql_table, do_tunnel=self.do_tunnel)
         elif pickle_file:
-            self.cache_read_fn = partial(cache_read_fn,
-                                         pickle_file=self.pickle_file)
-            self.cache_write_fn = partial(cache_write_fn,
-                                          pickle_file=self.pickle_file)
+            self.cache_read_fn = partial(cache_read_fn, pickle_file=self.pickle_file)
+            self.cache_write_fn = partial(cache_write_fn, pickle_file=self.pickle_file)
         else:
             self.cache_read_fn = cache_read_fn
             self.cache_write_fn = cache_write_fn
@@ -132,11 +131,14 @@ class GarminCache(object):
             elif not isinstance(temp_list, list):
                 temp_list = [temp_list]
             self.cache_summary_list = temp_list
-        self.cache_summary_file_dict = {os.path.basename(x.filename):
-                                        x for x in self.cache_summary_list}
-        self.cache_summary_md5_dict = {x.md5sum:
-                                       x for x in self.cache_summary_list
-                                       if hasattr(x, 'md5sum')}
+        self.cache_summary_file_dict = {
+            os.path.basename(x.filename): x
+            for x in self.cache_summary_list
+        }
+        self.cache_summary_md5_dict = {
+            x.md5sum: x
+            for x in self.cache_summary_list if hasattr(x, 'md5sum')
+        }
 
         def process_files(_, dirname, names):
             """ callback function for os.walk """
@@ -160,15 +162,13 @@ class GarminCache(object):
             else:
                 gmn_md5sum = local_dict[reduced_gmn_filename].md5sum
             if ((reduced_gmn_filename not in local_dict) or
-                    (hasattr(local_dict, 'md5sum') and
-                     local_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
-                    (self.do_update and print_date_string(
-                     local_dict[reduced_gmn_filename].begin_datetime)
-                        in self.corr_list)):
+                (hasattr(local_dict, 'md5sum') and
+                 local_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or (
+                     self.do_update and print_date_string(
+                         local_dict[reduced_gmn_filename].begin_datetime) in self.corr_list)):
                 self.cache_file_is_modified = True
-                _job = pool.submit(_read_file_in_par,
-                                   (reduced_gmn_filename, gmn_filename,
-                                    gmn_md5sum, self.corr_list),
+                _job = pool.submit(_read_file_in_par, (reduced_gmn_filename, gmn_filename,
+                                                       gmn_md5sum, self.corr_list),
                                    self.cache_directory)
                 _work_list.append((gmn_filename, _job))
             else:

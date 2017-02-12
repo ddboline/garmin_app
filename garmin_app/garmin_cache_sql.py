@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
-
 """
     write cache objects to sql database
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 from garmin_app.garmin_cache import GarminCache
 from garmin_app.garmin_summary import GarminSummary, DB_ENTRIES
-from sqlalchemy import (create_engine, Column, Integer, Float, String,
-                        DateTime)
+from sqlalchemy import (create_engine, Column, Integer, Float, String, DateTime)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from garmin_app.util import (OpenPostgreSQLsshTunnel, POSTGRESTRING, USER,
-                             utc, est)
+from garmin_app.util import (OpenPostgreSQLsshTunnel, POSTGRESTRING, USER, utc, est)
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -35,21 +31,30 @@ class GarminSummaryTable(Base):
     md5sum = Column(String(32))
 
     def __repr__(self):
-        return 'GarminSummaryTable<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in DB_ENTRIES)
+        return 'GarminSummaryTable<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
+                                                    for x in DB_ENTRIES)
 
 
 class GarminCacheSQL(object):
     """ cache in SQL database using sqlalchemy """
-    def __init__(self, sql_string='', pickle_file='', cache_directory='',
-                 corr_list=None, garmin_cache=None, summary_list=None):
+
+    def __init__(self,
+                 sql_string='',
+                 pickle_file='',
+                 cache_directory='',
+                 corr_list=None,
+                 garmin_cache=None,
+                 summary_list=None):
         if garmin_cache is not None:
             self.garmin_cache = garmin_cache
         else:
             self.garmin_cache = GarminCache(
-                pickle_file=pickle_file, cache_directory=cache_directory,
-                corr_list=corr_list, cache_read_fn=self.read_sql_table,
-                cache_write_fn=self.write_sql_table, use_sql=False)
+                pickle_file=pickle_file,
+                cache_directory=cache_directory,
+                corr_list=corr_list,
+                cache_read_fn=self.read_sql_table,
+                cache_write_fn=self.write_sql_table,
+                use_sql=False)
         self.sql_string = sql_string
         self.summary_list = {}
         if isinstance(summary_list, dict):
@@ -81,7 +86,6 @@ class GarminCacheSQL(object):
                     setattr(gsum, sl_, tmp)
                 else:
                     setattr(gsum, sl_, getattr(row, sl_))
-                ##setattr(gsum, sl_, getattr(row, sl_))
             self.summary_list[gsum.filename] = gsum
         session.commit()
         session.close()
@@ -107,8 +111,7 @@ class GarminCacheSQL(object):
             fn_ = sl_.filename
             if fn_ in self.summary_list:
                 sl0 = self.summary_list[fn_]
-                if not all(getattr(sl_, x) == getattr(sl0, x)
-                           for x in DB_ENTRIES):
+                if not all(getattr(sl_, x) == getattr(sl0, x) for x in DB_ENTRIES):
                     obj = session.query(GarminSummaryTable)\
                                  .filter_by(filename=fn_).all()[0]
                     session.delete(obj)
@@ -123,23 +126,28 @@ class GarminCacheSQL(object):
 
     def get_cache_summary_list(self, directory, options=None):
         """ redirect call """
-        return self.garmin_cache.get_cache_summary_list(directory,
-                                                        options=options)
+        return self.garmin_cache.get_cache_summary_list(directory, options=options)
 
 
-def write_postgresql_table(summary_list, get_summary_list=False,
-                           dbname='garmin_summary', do_tunnel=False,
+def write_postgresql_table(summary_list,
+                           get_summary_list=False,
+                           dbname='garmin_summary',
+                           do_tunnel=False,
                            port=5433):
     """ convenience function """
     with OpenPostgreSQLsshTunnel(port=port, do_tunnel=do_tunnel) as pport:
-        return _write_postgresql_table(summary_list,
-                                       get_summary_list=get_summary_list,
-                                       dbname=dbname, port=pport,
-                                       do_tunnel=do_tunnel)
+        return _write_postgresql_table(
+            summary_list,
+            get_summary_list=get_summary_list,
+            dbname=dbname,
+            port=pport,
+            do_tunnel=do_tunnel)
 
 
-def _write_postgresql_table(summary_list, get_summary_list=False,
-                            dbname='garmin_summary', port=5432,
+def _write_postgresql_table(summary_list,
+                            get_summary_list=False,
+                            dbname='garmin_summary',
+                            port=5432,
                             do_tunnel=False):
     """ ... """
     from garmin_app.garmin_cache_sql import GarminCacheSQL
@@ -153,15 +161,12 @@ def _write_postgresql_table(summary_list, get_summary_list=False,
     return sl_
 
 
-def read_postgresql_table(dbname='garmin_summary', do_tunnel=False,
-                          port=5433):
+def read_postgresql_table(dbname='garmin_summary', do_tunnel=False, port=5433):
     with OpenPostgreSQLsshTunnel(port=port, do_tunnel=do_tunnel) as pport:
-        return _read_postgresql_table(dbname=dbname, port=pport,
-                                      do_tunnel=do_tunnel)
+        return _read_postgresql_table(dbname=dbname, port=pport, do_tunnel=do_tunnel)
 
 
-def _read_postgresql_table(dbname='garmin_summary', port=5432,
-                           do_tunnel=False):
+def _read_postgresql_table(dbname='garmin_summary', port=5432, do_tunnel=False):
     from garmin_app.garmin_cache_sql import GarminCacheSQL
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
     if do_tunnel:

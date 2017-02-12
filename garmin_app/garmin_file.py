@@ -2,8 +2,7 @@
 """
     module holds GarminFile class
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
 try:
@@ -21,9 +20,10 @@ class GarminFile(object):
                 read_file(), read_file_tcx(), read_file_xml(),
                 print_file_string(), calculate_speed(), print_splits()
     """
-    _db_entries = ['filename', 'filetype', 'begin_datetime', 'sport',
-                   'total_calories', 'total_distance', 'total_duration',
-                   'total_hr_dur', 'total_hr_dis']
+    _db_entries = [
+        'filename', 'filetype', 'begin_datetime', 'sport', 'total_calories', 'total_distance',
+        'total_duration', 'total_hr_dur', 'total_hr_dis'
+    ]
     __slots__ = _db_entries + ['orig_filename', 'laps', 'points']
     garmin_file_types = ('txt', 'tcx', 'fit', 'gpx', 'gmn')
 
@@ -48,8 +48,8 @@ class GarminFile(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminFile<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
+        return 'GarminFile<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
+                                            for x in self._db_entries)
 
     def calculate_speed(self):
         """
@@ -68,16 +68,14 @@ class GarminFile(object):
             totdur = (t1_ - t0_).total_seconds()  # seconds
             totdis = d1_ - d0_  # meters
             if totdis > 0 and not point0.speed_permi:
-                point0.speed_permi = (totdur/60.) / (totdis/METERS_PER_MILE)
+                point0.speed_permi = (totdur / 60.) / (totdis / METERS_PER_MILE)
             if totdur > 0 and not point0.speed_mph:
-                point0.speed_mph = (totdis/METERS_PER_MILE) / (totdur / 3600.)
+                point0.speed_mph = (totdis / METERS_PER_MILE) / (totdur / 3600.)
             if totdur > 0 and not point0.speed_mps:
                 point0.speed_mps = totdis / totdur
             if d1_ > 0:
-                point0.avg_speed_value_permi = (
-                    ((t1_ - self.points[0].time).total_seconds()/60.)
-                    / (d1_ / METERS_PER_MILE))
+                point0.avg_speed_value_permi = ((
+                    (t1_ - self.points[0].time).total_seconds() / 60.) / (d1_ / METERS_PER_MILE))
             if (t1_ - self.points[0].time).total_seconds() > 0:
-                point0.avg_speed_value_mph = (
-                    (point0.distance / METERS_PER_MILE)
-                    / ((t1_ - self.points[0].time).total_seconds() / 3600.))
+                point0.avg_speed_value_mph = ((point0.distance / METERS_PER_MILE) / (
+                    (t1_ - self.points[0].time).total_seconds() / 3600.))

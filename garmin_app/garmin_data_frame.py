@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-
 """
     GarminDataFrame class
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 
 class GarminDataFrame(object):
     """ dump list of garmin_points to pandas.DataFrame """
+
     def __init__(self, garmin_class=None, garmin_list=None):
         self.dataframe = None
         self.garminclass = garmin_class

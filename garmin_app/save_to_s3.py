@@ -17,8 +17,7 @@
 """
     Save to AWS S3
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 # Import the SDK
 import boto
@@ -37,6 +36,7 @@ def read_keys():
                 aws_secret_access_key = line.split('=')[-1].strip()
     return aws_access_key_id, aws_secret_access_key
 
+
 AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY = read_keys()
 
 
@@ -45,8 +45,8 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
         function to save to s3, bname is bucket name
         filelist is list of files to add or overwrite
     """
-    s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
-                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    s3_ = boto.connect_s3(
+        aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     bucket = s3_.create_bucket(bucket_name=bname)
     list_of_keys = get_list_of_keys()
     if not filelist:
@@ -73,8 +73,8 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
 
 def get_list_of_keys(bname='garmin_scripts_gps_files_ddboline'):
     """ get list of keys """
-    s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
-                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    s3_ = boto.connect_s3(
+        aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     bucket = s3_.get_bucket(bucket_name=bname)
     list_of_keys = {}
     for key in bucket.list():
@@ -82,11 +82,10 @@ def get_list_of_keys(bname='garmin_scripts_gps_files_ddboline'):
     return list_of_keys
 
 
-def download_from_s3(bucket_name='garmin_scripts_gps_files_ddboline',
-                     key_name='', fname=''):
+def download_from_s3(bucket_name='garmin_scripts_gps_files_ddboline', key_name='', fname=''):
     """ download file """
-    s3_ = boto.connect_s3(aws_access_key_id=AWS_ACCESS_KEY_ID,
-                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    s3_ = boto.connect_s3(
+        aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     if not key_name or not fname:
         return False
     dname = os.path.dirname(fname)

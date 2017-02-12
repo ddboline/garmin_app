@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-
 """
     write cache objects to sql database
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from sqlalchemy import (create_engine, Column, Integer, Float, DateTime, String)
 from sqlalchemy.ext.declarative import declarative_base
@@ -31,14 +29,20 @@ class GarminCorrectionsLaps(Base):
 
     def __repr__(self):
         return 'GarminCorrectionsLaps<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in (
-                'start_time', 'lap_number', 'distance', 'duration'))
+            '%s=%s' % (x, getattr(self, x))
+            for x in ('start_time', 'lap_number', 'distance', 'duration'))
 
 
 class GarminCorrectionsSQL(object):
     """ cache in SQL database using sqlalchemy """
-    def __init__(self, sql_string='', pickle_file='', cache_directory='',
-                 corr_list=None, garmin_corrections_=None, summary_list=None):
+
+    def __init__(self,
+                 sql_string='',
+                 pickle_file='',
+                 cache_directory='',
+                 corr_list=None,
+                 garmin_corrections_=None,
+                 summary_list=None):
         if garmin_corrections_ is not None:
             self.garmin_corrections_ = garmin_corrections_
         else:
@@ -86,8 +90,7 @@ class GarminCorrectionsSQL(object):
         slists = []
 
         id_ = 0
-        q = session.query(GarminCorrectionsLaps).order_by(
-            GarminCorrectionsLaps.id.desc()).first()
+        q = session.query(GarminCorrectionsLaps).order_by(GarminCorrectionsLaps.id.desc()).first()
         if q:
             id_ += q.id + 1
 
@@ -102,9 +105,14 @@ class GarminCorrectionsSQL(object):
 
                 if st_ == 'DUMMY':
                     continue
-                slists.append(GarminCorrectionsLaps(
-                    id=id_, start_time=st_, lap_number=key, distance=dis,
-                    duration=dur, unique_key='%s_%s' % (st_, key)))
+                slists.append(
+                    GarminCorrectionsLaps(
+                        id=id_,
+                        start_time=st_,
+                        lap_number=key,
+                        distance=dis,
+                        duration=dur,
+                        unique_key='%s_%s' % (st_, key)))
                 id_ += 1
 
         session.add_all(slists)
@@ -112,15 +120,13 @@ class GarminCorrectionsSQL(object):
         session.close()
 
 
-def write_corrections_table(corrections, dbname='garmin_summary',
-                            do_tunnel=False):
+def write_corrections_table(corrections, dbname='garmin_summary', do_tunnel=False):
     """ convenience function """
     with OpenPostgreSQLsshTunnel(port=5433, do_tunnel=do_tunnel) as pport:
         return _write_corrections_table(corrections, dbname=dbname, port=pport)
 
 
-def _write_corrections_table(corrections, dbname='garmin_summary', port=5432,
-                             do_tunnel=False):
+def _write_corrections_table(corrections, dbname='garmin_summary', port=5432, do_tunnel=False):
     """ ... """
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
     if do_tunnel:
@@ -136,12 +142,10 @@ def _write_corrections_table(corrections, dbname='garmin_summary', port=5432,
 
 def read_corrections_table(dbname='garmin_summary', do_tunnel=False):
     with OpenPostgreSQLsshTunnel(port=5433, do_tunnel=do_tunnel) as pport:
-        return _read_corrections_table(dbname=dbname, port=pport,
-                                       do_tunnel=do_tunnel)
+        return _read_corrections_table(dbname=dbname, port=pport, do_tunnel=do_tunnel)
 
 
-def _read_corrections_table(dbname='garmin_summary', port=5432,
-                            do_tunnel=False):
+def _read_corrections_table(dbname='garmin_summary', port=5432, do_tunnel=False):
     postgre_str = '%s:%d/%s' % (POSTGRESTRING, port, dbname)
     if do_tunnel:
         postgre_str = postgre_str.replace(USER, 'ddboline')
@@ -152,8 +156,7 @@ def _read_corrections_table(dbname='garmin_summary', port=5432,
 def test_garmin_corrections_sql():
     cor0 = list_of_corrected_laps()
     with OpenPostgreSQLsshTunnel(port=5433, do_tunnel=True) as pport:
-        postgre_str = '%s:%d/%s' % (POSTGRESTRING, pport,
-                                    'test_garmin_summary')
+        postgre_str = '%s:%d/%s' % (POSTGRESTRING, pport, 'test_garmin_summary')
         gc_ = GarminCorrectionsSQL(sql_string=postgre_str)
         gc_.create_table()
         gc_.delete_table()
