@@ -278,8 +278,8 @@ class TestGarminApp(unittest.TestCase):
         gsum = GarminSummary(FITFILE)
         gsum.read_file()
         output = '%s' % gsum
-        output = output.replace('begin_datetime=2014-01-12 16:00:05+00:00',
-                                'begin_datetime=2014-01-12 11:00:05-05:00')
+        #output = output.replace('begin_datetime=2014-01-12 16:00:05+00:00',
+                                #'begin_datetime=2014-01-12 11:00:05-05:00')
         print(output)
         print(GARMINSUMMARYSTR)
         self.assertEqual(output, GARMINSUMMARYSTR)
@@ -425,16 +425,16 @@ class TestGarminApp(unittest.TestCase):
         output = '\n'.join('%s' % s for s in sorted(sl_.values(), key=lambda x: x.filename))
         test_output = open('tests/test_cache_summary.out', 'rt').read().strip()
 
-        hack = (('begin_datetime=2014-01-12 16:00:05+00:00',
-                 'begin_datetime=2014-01-12 11:00:05-05:00'),
-                ('begin_datetime=2011-05-07 15:43:08+00:00',
-                 'begin_datetime=2011-05-07 10:43:08-05:00'),
-                ('begin_datetime=2012-11-05 11:52:21+00:00',
-                 'begin_datetime=2012-11-05 06:52:21-05:00'), (
-                     'begin_datetime=2013-01-16 13:30:00+00:00',
-                     'begin_datetime=2013-01-16 08:30:00-05:00'))
-        for a, b in hack:
-            output = output.replace(a, b)
+        #hack = (('begin_datetime=2014-01-12 16:00:05+00:00',
+                 #'begin_datetime=2014-01-12 11:00:05-05:00'),
+                #('begin_datetime=2011-05-07 15:43:08+00:00',
+                 #'begin_datetime=2011-05-07 10:43:08-05:00'),
+                #('begin_datetime=2012-11-05 11:52:21+00:00',
+                 #'begin_datetime=2012-11-05 06:52:21-05:00'), (
+                     #'begin_datetime=2013-01-16 13:30:00+00:00',
+                     #'begin_datetime=2013-01-16 08:30:00-05:00'))
+        #for a, b in hack:
+            #output = output.replace(a, b)
 
         mstr = hashlib.md5()
         mstr.update(output.encode())
@@ -698,8 +698,6 @@ class TestGarminApp(unittest.TestCase):
                 'total_duration=300, total_hr_dur=0, total_hr_dis=0, ' \
                 'number_of_items=1, md5sum=af6f79ef18f4ec5526d3f987b6f00f9b>'
         test1 = test0.replace('total_distance=1770.2784', 'total_distance=1770.2784000000001')
-        test1 = test1.replace('begin_datetime=2011-05-07 10:43:08-05:00',
-                              'begin_datetime=2011-05-07 15:43:08+00:00')
         self.assertIn(tmp, [test0, test1])
 
     def test_read_tcx_correction(self):
@@ -722,8 +720,8 @@ class TestGarminApp(unittest.TestCase):
                'total_distance=6437.376, total_duration=1050, ' + \
                'total_hr_dur=0, total_hr_dis=0, number_of_items=1, ' + \
                'md5sum=eaa1e1a2bc26b1145a046c39f31b4024>'
-        tmp = tmp.replace('begin_datetime=2012-11-05 11:52:21+00:00',
-                          'begin_datetime=2012-11-05 06:52:21-05:00')
+        #tmp = tmp.replace('begin_datetime=2012-11-05 11:52:21+00:00',
+                          #'begin_datetime=2012-11-05 06:52:21-05:00')
         print(tmp)
         print(test)
         self.assertEqual(tmp, test)
