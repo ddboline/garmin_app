@@ -108,7 +108,10 @@ class GarminCache(object):
         fname = '%s/%s.pkl.gz' % (self.cache_directory, gfbname)
         if not os.path.exists(fname):
             return False
-        return read_pickle_object_in_file(fname)
+        try:
+            return read_pickle_object_in_file(fname)
+        except ValueError:
+            return False
 
     def write_cached_gfile(self, garminfile=None):
         """ write cached file """
