@@ -809,10 +809,14 @@ class GarminReport(object):
                            (gsum.total_distance / METERS_PER_MILE), '%i cal' % gsum.total_calories))
 
         if sport == 'running' or sport == 'walking':
-            retval.append(' %10s \t' % ('%s / mi' % print_h_m_s(
-                gsum.total_duration / (gsum.total_distance / METERS_PER_MILE), False)))
-            retval.append(' %10s \t' % ('%s / km' % print_h_m_s(
-                gsum.total_duration / (gsum.total_distance / 1000.), False)))
+            if gsum.total_distance > 0:
+                retval.append(' %10s \t' % ('%s / mi' % print_h_m_s(
+                    gsum.total_duration / (gsum.total_distance / METERS_PER_MILE), False)))
+                retval.append(' %10s \t' % ('%s / km' % print_h_m_s(
+                    gsum.total_duration / (gsum.total_distance / 1000.), False)))
+            else:
+                retval.append(' %10s \t' % (''))
+                retval.append(' %10s \t' % (''))
         elif sport == 'biking':
             retval.append(' %10s \t' % ('%.2f mph' % (
                 (gsum.total_distance / METERS_PER_MILE) / (gsum.total_duration / 60. / 60.))))
