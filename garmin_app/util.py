@@ -18,7 +18,7 @@ USER = os.getenv('USER')
 POSTGRESTRING = 'postgresql://%s:BQGIvkKFZPejrKvX@localhost' % USER
 
 utc = timezone('UTC')
-est = timezone(strftime("%Z").replace('CST', 'CST6CDT'))
+est = timezone(strftime("%Z").replace('CST', 'CST6CDT').replace('EDT', 'EST5EDT'))
 
 
 class PopenWrapperClass(object):
