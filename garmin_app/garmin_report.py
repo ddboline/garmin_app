@@ -481,9 +481,10 @@ class GarminReport(object):
         hr_vals, hr_values, alt_vals, alt_values = [], [], [], []
         if not options:
             options = {'cache_dir': None, 'script_path': None}
-        speed_values = get_splits(gfile, 400., do_heart_rate=False)
+        speed_values = get_splits(gfile, 400., do_heart_rate=True)
+        heart_rate_speed = [(h, 4 * t / 60.) for d, t, h in speed_values]
         if speed_values:
-            speed_values = [(d / 4., 4 * t / 60.) for d, t in speed_values if t < 20]
+            speed_values = [(d / 4., 4 * t / 60.) for d, t, h in speed_values]
         mph_speed_values = []
         avg_speed_values = []
         avg_mph_speed_values = []
@@ -508,8 +509,6 @@ class GarminReport(object):
             if point.altitude > 0:
                 alt_vals.append(point.altitude)
                 alt_values.append([xval, point.altitude])
-            # if point.speed_permi > 0 and point.speed_permi < 20:
-            # speed_values.append([xval, point.speed_permi])
             if point.speed_mph > 0 and point.speed_mph < 20:
                 mph_speed_values.append([xval, point.speed_mph])
             if point.avg_speed_value_permi > 0\
@@ -569,7 +568,15 @@ class GarminReport(object):
             graphs.append(
                 plot_graph(
                     name='speed_mph', title='Speed mph', data=mph_speed_values, opts=options))
-
+        if len(heart_rate_speed) > 0:
+            options = {'xlabel': 'hrt', 'ylabel': 'min/mi', 'cache_dir': cache_dir}
+            graphs.append(
+                plot_graph(
+                    name='heartrate_vs_speed',
+                    title='Speed min/mi every 1/4 mi',
+                    data=heart_rate_speed,
+                    do_scatter=True,
+                    opts=options))
         if len(avg_speed_values) > 0:
             avg_speed_value_min = int(avg_speed_values[-1][1])
             avg_speed_value_sec = int((avg_speed_values[-1][1] - avg_speed_value_min) * 60.)
@@ -1059,7 +1066,7 @@ def print_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi'):
     return '\n'.join(retval)
 
 
-def plot_graph(name=None, title=None, data=None, opts={}):
+def plot_graph(name=None, title=None, data=None, do_scatter=False, opts={}):
     """ graphics plotting function """
     import numpy as np
     import matplotlib
@@ -1073,7 +1080,10 @@ def plot_graph(name=None, title=None, data=None, opts={}):
     pl.clf()
     xar, yar = zip(*data)
     xar, yar = [np.array(x) for x in (xar, yar)]
-    pl.plot(xar, yar, **popts)
+    if do_scatter:
+        pl.scatter(xar, yar, **popts)
+    else:
+        pl.plot(xar, yar, **popts)
     xmin, xmax, ymin, ymax = pl.axis()
     xmin, ymin = [z - 0.1 * abs(z) for z in (xmin, ymin)]
     xmax, ymax = [z + 0.1 * abs(z) for z in (xmax, ymax)]

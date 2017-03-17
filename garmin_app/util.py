@@ -9,7 +9,7 @@ import socket
 import numpy as np
 from subprocess import call, Popen, PIPE
 from pytz import timezone
-from time import gmtime, strftime
+from time import strftime
 
 HOSTNAME = os.uname()[1]
 HOMEDIR = os.getenv('HOME')
