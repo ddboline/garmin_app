@@ -1081,13 +1081,14 @@ def plot_graph(name=None, title=None, data=None, do_scatter=False, opts={}):
     xar, yar = zip(*data)
     xar, yar = [np.array(x) for x in (xar, yar)]
     if do_scatter:
-        pl.scatter(xar, yar, **popts)
+        pl.hist2d(xar, yar, bins=10, **popts)
+        #pl.hexbin(xar, yar, gridsize=30, **popts)
     else:
         pl.plot(xar, yar, **popts)
-    xmin, xmax, ymin, ymax = pl.axis()
-    xmin, ymin = [z - 0.1 * abs(z) for z in (xmin, ymin)]
-    xmax, ymax = [z + 0.1 * abs(z) for z in (xmax, ymax)]
-    pl.axis([xmin, xmax, ymin, ymax])
+        xmin, xmax, ymin, ymax = pl.axis()
+        xmin, ymin = [z - 0.1 * abs(z) for z in (xmin, ymin)]
+        xmax, ymax = [z + 0.1 * abs(z) for z in (xmax, ymax)]
+        pl.axis([xmin, xmax, ymin, ymax])
     if 'xlabel' in opts:
         pl.xlabel(opts['xlabel'], horizontalalignment='right')
     if 'ylabel' in opts:
