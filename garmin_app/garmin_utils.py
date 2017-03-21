@@ -15,7 +15,7 @@ import datetime
 import argparse
 from tempfile import NamedTemporaryFile
 
-from garmin_app.garmin_server import GarminServer
+from garmin_app.garmin_server import garmin_server
 
 from garmin_app.util import (run_command, openurl, dump_to_file, HOMEDIR, walk_wrapper,
                              datetimefromstring, HOSTNAME)
@@ -578,7 +578,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
     options['do_tunnel'] = do_tunnel
 
     if getattr(args, 'daemon'):
-        with GarminServer():
+        with garmin_server():
             return None
     return garmin_parse_arg_list(getattr(args, 'command'), options=options)
 
