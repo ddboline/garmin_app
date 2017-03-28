@@ -9,15 +9,15 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 from setuptools import setup
 
-console_scripts = [
-    'garmin-app = garmin_app.garmin_utils:main',
-    'strava-upload = garmin_app.strava_upload:strava_upload']
-if sys.version_info.major != 2:
-    v = sys.version_info.major
-    console_scripts = [
-        'garmin-app%s = garmin_app.garmin_utils:main' % v,
-        'strava-upload%s = garmin_app.strava_upload:strava_upload' % v]
+console_scripts = (
+    ('garmin-app', 'garmin_app.garmin_utils:main'),
+    ('strava-upload', 'garmin_app.strava_upload:strava_upload'))
 
+if sys.version_info.major == 2:
+    console_scripts = ['%s = %s' % (x, y) for x, y in console_scripts]
+else:
+    v = sys.version_info.major
+    console_scripts = ['%s%s = %s' % (x, v, y) for x, y in console_scripts]
 
 setup(
     name='garmin_app',
