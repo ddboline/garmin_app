@@ -1,6 +1,7 @@
 #!/bin/bash
 
-py.test --cov=garmin_app ./tests/*.py garmin_app/*.py
+mkdir -p coverage
+py.test --cov=garmin_app --cov-report html:coverage/ ./tests/*.py garmin_app/*.py
 
 # pyreverse garmin_app
 # for N in classes packages; do dot -Tps ${N}*.dot > ${N}.ps ; ps2pdf ${N}.ps ; done
