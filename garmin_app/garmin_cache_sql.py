@@ -106,7 +106,7 @@ class GarminCacheSQL(object):
         session = session()
         for fn_, sl_ in summary_list.items():
             if not isinstance(sl_, GarminSummary):
-                print(type(sl_))
+                raise Exception('Bad type %s' % type(sl_))
             assert isinstance(sl_, GarminSummary)
             fn_ = sl_.filename
             if fn_ in self.summary_list:

@@ -15,7 +15,8 @@ from garmin_app.garmin_file import GarminFile
 from garmin_app.garmin_lap import GarminLap
 from garmin_app.garmin_point import GarminPoint
 from garmin_app.garmin_utils import (METERS_PER_MILE, convert_time_string, print_date_string,
-                                     convert_fit_to_tcx, convert_gmn_to_xml, expected_calories)
+                                     convert_fit_to_tcx, convert_gmn_to_xml, expected_calories,
+                                     convert_date_string)
 from garmin_app.garmin_corrections import LIST_OF_MISLABELED_TIMES
 
 from garmin_app.util import (run_command, haversine_distance)
@@ -71,6 +72,8 @@ class GarminParse(GarminFile):
             self.read_file_gpx()
         if len(self.laps) > 0:
             self.begin_datetime = self.laps[0].lap_start
+        elif len(self.points) > 0:
+            self.begin_datetime = self.points[0].time
         else:
             self.begin_datetime = datetime.datetime.now()
         printed_datetime = print_date_string(self.begin_datetime)
@@ -165,6 +168,7 @@ class GarminParse(GarminFile):
         lats = []
         lons = []
         eles = []
+        times = []
         with run_command('xml2 < %s' % self.orig_filename, do_popen=True) as pop_:
             for idx, line in enumerate(pop_):
                 if hasattr(line, 'decode'):
@@ -176,16 +180,19 @@ class GarminParse(GarminFile):
                     lons.append(float(ent[5].split('=')[-1]))
                 if len(ent) == 6 and 'ele' in ent[5]:
                     eles.append(float(ent[5].split('=')[-1]))
+                if len(ent) == 6 and 'time' in ent[5]:
+                    times.append(convert_date_string(ent[5].split('=')[-1]))
         assert len(lats) == len(lons)
         if not eles:
             eles = [0 for _ in range(len(lats))]
         last = None
         distance = 0
-        for lat, lon, ele in zip(lats, lons, eles):
+        for lat, lon, ele, time in zip(lats, lons, eles, times):
             cur_point = GarminPoint()
             cur_point.latitude = lat
             cur_point.longitude = lon
             cur_point.altitude = ele
+            cur_point.time = time
             if last is not None:
                 distance += haversine_distance(lat, lon, last[0], last[1])
             cur_point.distance = distance

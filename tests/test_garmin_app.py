@@ -9,6 +9,7 @@ import datetime
 import dateutil.tz
 import glob
 import hashlib
+import mock
 
 from garmin_app.garmin_utils import (convert_gmn_to_gpx, convert_fit_to_tcx, convert_gmn_to_xml,
                                      get_md5, get_md5_old, days_in_month, expected_calories,
@@ -27,6 +28,7 @@ from garmin_app.garmin_corrections import (list_of_corrected_laps, save_correcti
 from garmin_app.garmin_file import GarminFile
 from garmin_app.util import (run_command, OpenPostgreSQLsshTunnel, convert_date, POSTGRESTRING,
                              print_h_m_s, openurl)
+from garmin_app import garmin_daemon
 
 GMNFILE = 'tests/test.gmn'
 TCXFILE = 'tests/test.tcx'
@@ -157,6 +159,13 @@ class TestGarminApp(unittest.TestCase):
         gfile = GarminParse(filename=FITFILE)
         self.assertTrue(gfile.filetype == 'fit')
         gfile.read_file()
+        self.assertEqual(gfile.begin_datetime.date(), datetime.date(year=2014, month=1, day=12))
+
+    def test_read_gpx(self):
+        gfile = GarminParse(filename=GPXFILE)
+        self.assertTrue(gfile.filetype == 'gpx')
+        gfile.read_file()
+        print(gfile)
         self.assertEqual(gfile.begin_datetime.date(), datetime.date(year=2014, month=1, day=12))
 
     def test_calculate_speed(self):
@@ -813,6 +822,29 @@ def test_openurl():
         openurl('https://httpbin.org/aspdoifqwpof')
 
     test_httperror()
+
+
+def test_garmin_daemon():
+    conn = mock.MagicMock()
+    msgq = ['year run', '2017 month run', '2017-03 day run', '2017 year run']
+
+    conn.recv.return_value = 'prev 2017 year run'
+
+    garmin_daemon.handle_connection(conn, msgq)
+
+    conn.send.assert_called_once_with('done')
+
+    conn.recv.return_value = ''
+
+    garmin_daemon.handle_connection(conn, msgq)
+
+    conn.recv.return_value = 'prev year'
+
+    garmin_daemon.handle_connection(conn, msgq)
+
+    conn.recv.return_value = 'prev year run'
+
+    garmin_daemon.handle_connection(conn, msgq)
 
 
 if __name__ == '__main__':
