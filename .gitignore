@@ -62,3 +62,4 @@ run/
 *.gz
 *.dot
 *.ps
+coverage/
