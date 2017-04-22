@@ -38,7 +38,7 @@ _LIST_OF_CORRECTED_LAPS = {}
 
 
 def get_list_of_corrected_laps():
-    _LIST_OF_CORRECTED_LAPS
+    return _LIST_OF_CORRECTED_LAPS
 
 
 def list_of_corrected_laps(json_path=JSON_DIR, json_file='garmin_corrections.json'):

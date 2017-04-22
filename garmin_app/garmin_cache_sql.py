@@ -58,9 +58,7 @@ class GarminCacheSQL(object):
         self.sql_string = sql_string
         self.summary_list = {}
         if isinstance(summary_list, dict):
-            self.summary_list = summary_list
-        elif isinstance(summary_list, list):
-            self.summary_list = {v.filename: v for v in summary_list}
+            self.summary_list.update(summary_list)
 
         self.engine = create_engine(self.sql_string, echo=False)
         self.create_table()
