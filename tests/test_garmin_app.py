@@ -10,6 +10,7 @@ import dateutil.tz
 import glob
 import hashlib
 import mock
+import pytest
 
 from garmin_app.garmin_utils import (convert_gmn_to_gpx, convert_fit_to_tcx, convert_gmn_to_xml,
                                      get_md5, get_md5_old, days_in_month, expected_calories,
@@ -24,11 +25,14 @@ from garmin_app.garmin_cache import (GarminCache, read_pickle_object_in_file,
 from garmin_app.garmin_cache_sql import (GarminCacheSQL, GarminSummaryTable,
                                          _write_postgresql_table)
 from garmin_app.garmin_report import GarminReport, print_history_buttons
+from garmin_app import garmin_corrections
+from garmin_app import garmin_corrections_sql
 from garmin_app.garmin_corrections import (list_of_corrected_laps, save_corrections)
 from garmin_app.garmin_file import GarminFile
 from garmin_app.util import (run_command, OpenPostgreSQLsshTunnel, convert_date, POSTGRESTRING,
                              print_h_m_s, openurl)
 from garmin_app import garmin_daemon
+from garmin_app import garmin_server
 
 GMNFILE = 'tests/test.gmn'
 TCXFILE = 'tests/test.tcx'
@@ -287,8 +291,8 @@ class TestGarminApp(unittest.TestCase):
         gsum = GarminSummary(FITFILE)
         gsum.read_file()
         output = '%s' % gsum
-        #output = output.replace('begin_datetime=2014-01-12 16:00:05+00:00',
-                                #'begin_datetime=2014-01-12 11:00:05-05:00')
+        # output = output.replace('begin_datetime=2014-01-12 16:00:05+00:00',
+        # 'begin_datetime=2014-01-12 11:00:05-05:00')
         print(output)
         print(GARMINSUMMARYSTR)
         self.assertEqual(output, GARMINSUMMARYSTR)
@@ -317,9 +321,10 @@ class TestGarminApp(unittest.TestCase):
         options = {'script_path': '%s/garmin_app' % script_path, 'cache_dir': script_path}
         html_path = gr_.file_report_html(copy_to_public_html=False, options=options)
         file_md5 = [[
-            'index.html', ['1c1abe181f36a85949974a222cc874df',
-                           '548581a142811d412dbf955d2e5372aa',
-                           '73bb500bed38ef9f2881f11019b7c27c']
+            'index.html', [
+                '1c1abe181f36a85949974a222cc874df', '548581a142811d412dbf955d2e5372aa',
+                '73bb500bed38ef9f2881f11019b7c27c'
+            ]
         ]]
         for fn_, fmd5 in file_md5:
             md5 = get_md5('%s/%s' % (html_path, fn_))
@@ -441,7 +446,7 @@ class TestGarminApp(unittest.TestCase):
         mstr = hashlib.md5()
         mstr.update(output.encode())
         print(output)
-#        print(test_output)
+        #        print(test_output)
         self.assertIn(output, [test_output, test_output0])
 
         sqlite_str = 'sqlite:///%s/run/cache/test.db' % CURDIR
@@ -501,10 +506,10 @@ class TestGarminApp(unittest.TestCase):
             gc_.delete_table()
             mstr = hashlib.md5()
             mstr.update(output.encode())
-            self.assertIn(mstr.hexdigest(),
-                          ['06465ba08d19d59c963e542bc19f12b7',
-                           '34605a1d755eda499022946e46d46c1a',
-                           '9fbf84e57a513d875f471fbcabe20e22'])
+            self.assertIn(mstr.hexdigest(), [
+                '06465ba08d19d59c963e542bc19f12b7', '34605a1d755eda499022946e46d46c1a',
+                '9fbf84e57a513d875f471fbcabe20e22'
+            ])
 
         gc_ = GarminCache(
             pickle_file='%s/temp.pkl.gz' % CURDIR,
@@ -731,8 +736,8 @@ class TestGarminApp(unittest.TestCase):
                'total_distance=6437.376, total_duration=1050, ' + \
                'total_hr_dur=0, total_hr_dis=0, number_of_items=1, ' + \
                'md5sum=eaa1e1a2bc26b1145a046c39f31b4024>'
-        #tmp = tmp.replace('begin_datetime=2012-11-05 11:52:21+00:00',
-                          #'begin_datetime=2012-11-05 06:52:21-05:00')
+        # tmp = tmp.replace('begin_datetime=2012-11-05 11:52:21+00:00',
+        # 'begin_datetime=2012-11-05 06:52:21-05:00')
         print(tmp)
         print(test)
         self.assertEqual(tmp, test)
@@ -845,6 +850,125 @@ def test_garmin_daemon():
     conn.recv.return_value = 'prev year run'
 
     garmin_daemon.handle_connection(conn, msgq)
+
+
+@mock.patch('garmin_app.garmin_cache.pickle')
+def test_garmin_cache_pickle_error(mock_pickle):
+    b = bytes([0])
+    s = str('TEST')
+    mock_pickle.load.side_effect = UnicodeDecodeError(s, b, 0, 1, s)
+
+    gfile = GarminParse(FITFILE)
+    gfile.read_file()
+    gcache = GarminCache(
+        pickle_file='%s/temp.pkl.gz' % CURDIR,
+        cache_directory='%s/run/cache' % CURDIR,
+        use_sql=False)
+    write_pickle_object_to_file(gfile, gcache.pickle_file)
+    del gfile
+
+    result = read_pickle_object_in_file(gcache.pickle_file)
+
+    assert result is None
+
+
+@mock.patch('garmin_app.garmin_cache.os')
+def test_garmin_cache_makedir(mock_os):
+    mock_path = mock.MagicMock()
+    mock_os.path = mock_path
+    mock_path.exists.return_value = False
+
+    gcache = GarminCache(
+        pickle_file='%s/temp.pkl.gz' % CURDIR,
+        cache_directory='%s/run/cache' % CURDIR,
+        use_sql=False)
+
+    mock_os.makedirs.assert_called_once_with('%s/run/cache' % CURDIR)
+
+
+@mock.patch('garmin_app.garmin_cache.read_pickle_object_in_file')
+def test_read_cached_gfile(mock_func):
+    mock_func.side_effect = ValueError()
+
+    gc_ = GarminCache(
+        pickle_file='%s/temp.pkl.gz' % CURDIR,
+        cache_directory='%s/run/cache' % CURDIR,
+        use_sql=False)
+    gsum = GarminSummary(FITFILE)
+    gfile = gsum.read_file()
+    gc_.write_cached_gfile(gfile)
+    gfile_new = gc_.read_cached_gfile(gfbname=gfile.filename)
+    assert gfile_new is False
+
+
+def test_garmin_corrections():
+    test_json = {
+        u'2011-07-04T08:58:27Z': {
+            0: 3.1068559611866697
+        },
+        u'2012-03-13T18:21:11Z': {
+            0: 0.362
+        },
+        u'DUMMY': {
+            0: 0.0
+        }
+    }
+    save_corrections(test_json, json_path='json_test', json_file='test.json')
+    tmp = list_of_corrected_laps(json_path='json_test', json_file='test.json')
+    assert garmin_corrections.get_list_of_corrected_laps() == tmp
+
+
+@mock.patch('garmin_app.garmin_corrections_sql.sessionmaker')
+@mock.patch('garmin_app.garmin_corrections_sql.create_engine')
+def test_garmin_corrections_sql(mock_create_engine, mock_sessionmaker):
+    tmp = '%s' % garmin_corrections_sql.GarminCorrectionsLaps()
+    assert tmp == 'GarminCorrectionsLaps<start_time=None, lap_number=None, ' \
+        'distance=None, duration=None>'
+
+    mock_engine = mock.MagicMock()
+    mock_create_engine.return_value = mock_engine
+    mock_session = mock.MagicMock()
+    mock_session.return_value = mock_session
+    mock_sessionmaker.return_value = mock_session
+    mock_session.query.return_value = mock_session
+    mock_row = mock.MagicMock()
+    mock_row.dur = 5.0
+    mock_row.dis = 5.0
+    mock_row.start_time = datetime.datetime(2017, 5, 1, 13)
+    mock_session.all.return_value = [mock_row]
+    g = garmin_corrections_sql.GarminCorrectionsSQL(garmin_corrections_={'TEST': 'TEST'})
+    assert g.garmin_corrections_ == {'TEST': 'TEST'}
+
+    t = g.read_sql_table()
+    assert t['TEST'] == 'TEST'
+    assert '2017-05-01T13:00:00Z' in t
+
+
+@mock.patch('garmin_app.garmin_daemon.exit')
+@mock.patch('garmin_app.garmin_daemon.handle_connection')
+@mock.patch('garmin_app.garmin_daemon.OpenSocketConnection')
+@mock.patch('garmin_app.garmin_daemon.OpenUnixSocketServer')
+def test_garmin_daemon_server_thread(mock_server, mock_con, mock_handle, mock_exit):
+    mock_sock = mock.MagicMock()
+    mock_server.__enter__.return_value = mock_sock
+    mock_conn = mock.MagicMock()
+    mock_con.__enter__.return_value = mock_conn
+    mock_handle.side_effect = KeyboardInterrupt()
+    mock_exit.side_effect = Exception()
+
+    with pytest.raises(Exception):
+        garmin_daemon.server_thread()
+
+
+@mock.patch('garmin_app.garmin_server.mp')
+def test_garmin_server(mock_mp):
+    mock_manager = mock.MagicMock()
+    mock_mp.Manager.return_value = mock_manager
+    mock_mp.Process.return_value = mock_manager
+
+    with garmin_server.garmin_server() as g:
+        g.start.assert_called_once()
+    mock_manager.join.assert_called_once()
 
 
 if __name__ == '__main__':
