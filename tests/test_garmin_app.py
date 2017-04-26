@@ -266,7 +266,6 @@ class TestGarminApp(unittest.TestCase):
             '73c52b6753bc841dc09936dadac33c9c', '53087d6c0777c42c9ff06326ad52ab3c',
             '7c67d4fb98b12129b4878d11a2af35ee'
         ])
-#        cleanup_pickle()
 
     def test_pickle_fit(self):
         """ test cache dump pickle to dataframe """
@@ -284,7 +283,6 @@ class TestGarminApp(unittest.TestCase):
         gdf.to_csv('temp.fit.point.csv', index=False, float_format='%.4f')
         md5 = md5_command('cat temp.fit.point.csv | md5sum')
         self.assertEqual(md5, '9b5dd53949c7f9555d97c4a95be1934e')
-#        cleanup_pickle()
 
     def test_garmin_summary(self):
         """ test GarminSummary.__repr__ """
@@ -916,7 +914,7 @@ def test_garmin_corrections():
     save_corrections(test_json, json_path='json_test', json_file='test.json')
     tmp = list_of_corrected_laps(json_path='json_test', json_file='test.json')
     assert garmin_corrections.get_list_of_corrected_laps() == tmp
-
+    cleanup_pickle()
 
 @mock.patch('garmin_app.garmin_corrections_sql.sessionmaker')
 @mock.patch('garmin_app.garmin_corrections_sql.create_engine')
