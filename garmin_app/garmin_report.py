@@ -462,7 +462,7 @@ class GarminReport(object):
         alt_vals = []
         vertical_climb = 0
         for point in gfile.points:
-            if point.altitude > 0:
+            if point.altitude > 0 and point.altitude < 10000:
                 alt_vals.append(point.altitude)
                 if len(alt_vals) > 1 and alt_vals[-1] > alt_vals[-2]:
                     vertical_climb += alt_vals[-1] - alt_vals[-2]
@@ -506,7 +506,7 @@ class GarminReport(object):
                 sum_time += point.duration_from_last
                 hr_vals.append(point.heart_rate)
                 hr_values.append([xval, point.heart_rate])
-            if point.altitude > 0:
+            if point.altitude > 0 and point.altitude < 10000:
                 alt_vals.append(point.altitude)
                 alt_values.append([xval, point.altitude])
             if point.speed_mph > 0 and point.speed_mph < 20:

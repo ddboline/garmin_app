@@ -186,12 +186,18 @@ class GarminParse(GarminFile):
         if not eles:
             eles = [0 for _ in range(len(lats))]
         last = None
+        last_alt = 0
         distance = 0
         for lat, lon, ele, time in zip(lats, lons, eles, times):
             cur_point = GarminPoint()
             cur_point.latitude = lat
             cur_point.longitude = lon
+            if ele > 10000:
+                ele = last_alt
+            else:
+                last_alt = ele
             cur_point.altitude = ele
+            
             cur_point.time = time
             if last is not None:
                 distance += haversine_distance(lat, lon, last[0], last[1])
