@@ -79,8 +79,13 @@ class GarminCacheSQL(object):
             gsum = GarminSummary()
             for sl_ in DB_ENTRIES:
                 if sl_ == 'begin_datetime':
-                    tmp = getattr(row, sl_).replace(tzinfo=utc)
-                    tmp = tmp.astimezone(est)
+                    tmp = getattr(row, sl_)
+                    if 'txt' in row.filename:
+                        tmp = tmp.replace(tzinfo=est)
+                        tmp = tmp.astimezone(est)
+                    else:
+                        tmp = tmp.replace(tzinfo=utc)
+                        tmp = tmp.astimezone(est)
                     setattr(gsum, sl_, tmp)
                 else:
                     setattr(gsum, sl_, getattr(row, sl_))
