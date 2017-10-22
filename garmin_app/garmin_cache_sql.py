@@ -31,8 +31,8 @@ class GarminSummaryTable(Base):
     md5sum = Column(String(32))
 
     def __repr__(self):
-        return 'GarminSummaryTable<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
-                                                    for x in DB_ENTRIES)
+        return 'GarminSummaryTable<%s>' % ', '.join(
+            '%s=%s' % (x, getattr(self, x)) for x in DB_ENTRIES)
 
 
 class GarminCacheSQL(object):

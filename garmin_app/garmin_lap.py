@@ -43,8 +43,8 @@ class GarminLap(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminLap<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
-                                           for x in self._db_entries)
+        return 'GarminLap<%s>' % ', '.join(
+            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
 
     def read_lap_xml(self, ents):
         """ read lap from xml file """

@@ -300,8 +300,8 @@ class GarminReport(object):
             retval.append('')
             retval.append(
                 self.week_average_report_txt(
-                    total_summary, 'total', number_days=len(day_set), number_of_weeks=len(
-                        week_set)))
+                    total_summary, 'total', number_days=len(day_set),
+                    number_of_weeks=len(week_set)))
             cmd_args.append('')
             retval.append('')
         for sport in SPORT_TYPES:
@@ -425,8 +425,8 @@ class GarminReport(object):
         if gfile.total_distance > 0:
             min_mile = (gfile.total_duration / 60.) / (gfile.total_distance / METERS_PER_MILE)
         if gfile.total_duration > 0:
-            mi_per_hr = (
-                (gfile.total_distance / METERS_PER_MILE) / (gfile.total_duration / 60. / 60.))
+            mi_per_hr = ((gfile.total_distance / METERS_PER_MILE) /
+                         (gfile.total_duration / 60. / 60.))
 
         tmpstr = []
         if gfile.sport == 'running':
@@ -636,13 +636,13 @@ class GarminReport(object):
                         elif 'MINLAT' in line or 'MAXLAT' in line\
                                 or 'MINLON' in line or 'MAXLON' in line:
                             htmlfile.write(
-                                line.replace('MINLAT', '%s' % minlat)
-                                .replace('MAXLAT', '%s' % maxlat).replace('MINLON', '%s' % minlon)
+                                line.replace('MINLAT', '%s' % minlat).replace(
+                                    'MAXLAT', '%s' % maxlat).replace('MINLON', '%s' % minlon)
                                 .replace('MAXLON', '%s' % maxlon))
                         elif 'CENTRALLAT' in line or 'CENTRALLON' in line:
                             htmlfile.write(
-                                line.replace('CENTRALLAT', '%s' % central_lat)
-                                .replace('CENTRALLON', '%s' % central_lon))
+                                line.replace('CENTRALLAT', '%s' % central_lat).replace(
+                                    'CENTRALLON', '%s' % central_lon))
                         elif 'INSERTOTHERIMAGESHERE' in line:
                             for gfile in graphs:
                                 htmlfile.write('<p>\n<img src="%s">\n</p>' % gfile)
@@ -697,13 +697,15 @@ class GarminReport(object):
         ]
 
         if sport == 'running' or sport == 'walking':
-            retval.append(' %10s \t' % ('%s / mi' % print_h_m_s(gsum.total_duration / (
-                gsum.total_distance / METERS_PER_MILE), False)))
-            retval.append(' %10s \t' % ('%s / km' % print_h_m_s(
-                gsum.total_duration / (gsum.total_distance / 1000.), False)))
+            retval.append(' %10s \t' %
+                          ('%s / mi' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / METERS_PER_MILE), False)))
+            retval.append(' %10s \t' %
+                          ('%s / km' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / 1000.), False)))
         elif sport == 'biking':
-            retval.append(' %10s \t' % ('%.2f mph' % (
-                (gsum.total_distance / METERS_PER_MILE) / (gsum.total_duration / 60. / 60.))))
+            retval.append(' %10s \t' % ('%.2f mph' % ((gsum.total_distance / METERS_PER_MILE) /
+                                                      (gsum.total_duration / 60. / 60.))))
         else:
             retval.append(' %10s \t' % ' ')
         retval.append(' %10s \t' % (print_h_m_s(gsum.total_duration)))
@@ -725,24 +727,28 @@ class GarminReport(object):
         weekdayname = WEEKDAY_NAMES[cur_date.weekday()]
         if sport == 'running' or sport == 'walking':
             if gsum.total_distance > 0:
+                retval.append(
+                    '%17s %10s \t %10s \t %10s \t %10s \t %10s \t %10s' %
+                    ('%10s %02i %3s' % (cur_date, week, weekdayname), sport, '%.2f mi' %
+                     (gsum.total_distance / METERS_PER_MILE), '%i cal' % gsum.total_calories,
+                     '%s / mi' % print_h_m_s(gsum.total_duration /
+                                             (gsum.total_distance / METERS_PER_MILE), False),
+                     '%s / km' % print_h_m_s(gsum.total_duration /
+                                             (gsum.total_distance / 1000.), False),
+                     print_h_m_s(gsum.total_duration)))
+            else:
                 retval.append('%17s %10s \t %10s \t %10s \t %10s \t %10s \t %10s' %
                               ('%10s %02i %3s' % (cur_date, week, weekdayname), sport,
-                               '%.2f mi' % (gsum.total_distance / METERS_PER_MILE), '%i cal' %
-                               gsum.total_calories, '%s / mi' % print_h_m_s(gsum.total_duration / (
-                                   gsum.total_distance / METERS_PER_MILE), False), '%s / km' %
-                               print_h_m_s(gsum.total_duration / (gsum.total_distance / 1000.),
-                                           False), print_h_m_s(gsum.total_duration)))
-            else:
-                retval.append('%17s %10s \t %10s \t %10s \t %10s \t %10s \t %10s' % (
-                    '%10s %02i %3s' % (cur_date, week, weekdayname), sport, '%.2f mi' %
-                    (gsum.total_distance / METERS_PER_MILE), '%i cal' % gsum.total_calories,
-                    '         / mi', '         / km', print_h_m_s(gsum.total_duration)))
+                               '%.2f mi' % (gsum.total_distance / METERS_PER_MILE),
+                               '%i cal' % gsum.total_calories, '         / mi', '         / km',
+                               print_h_m_s(gsum.total_duration)))
         elif sport == 'biking':
-            retval.append('%17s %10s \t %10s \t %10s \t %10s \t %10s' % (
-                '%10s %02i %3s' % (cur_date, week, weekdayname), sport,
-                '%.2f mi' % (gsum.total_distance / METERS_PER_MILE), '%i cal' % gsum.total_calories,
-                '%.2f mph' % ((gsum.total_distance / METERS_PER_MILE) /
-                              (gsum.total_duration / 60. / 60.)), print_h_m_s(gsum.total_duration)))
+            retval.append('%17s %10s \t %10s \t %10s \t %10s \t %10s' %
+                          ('%10s %02i %3s' % (cur_date, week, weekdayname), sport, '%.2f mi' %
+                           (gsum.total_distance / METERS_PER_MILE), '%i cal' % gsum.total_calories,
+                           '%.2f mph' % ((gsum.total_distance / METERS_PER_MILE) /
+                                         (gsum.total_duration / 60. / 60.)),
+                           print_h_m_s(gsum.total_duration)))
         else:
             retval.append('%17s %10s \t %10s \t %10s \t %10s \t %10s' %
                           ('%10s %02i %3s' % (cur_date, week, weekdayname), sport,
@@ -759,20 +765,22 @@ class GarminReport(object):
         if number_days == 0:
             return ''
         if sport == 'running' or sport == 'walking':
-            retval.append('%17s %10s \t %10s \t %10s \t %10s \t %10s \t %10s' % (
-                'average / day', sport, '%.2f mi' % (gsum.total_distance / METERS_PER_MILE /
-                                                     number_days),
-                '%i cal' % (gsum.total_calories / number_days), '%s / mi' % print_h_m_s(
-                    gsum.total_duration / (gsum.total_distance / METERS_PER_MILE), False),
-                '%s / km' % print_h_m_s(gsum.total_duration / (gsum.total_distance / 1000.),
-                                        False), print_h_m_s(gsum.total_duration / number_days)))
+            retval.append('%17s %10s \t %10s \t %10s \t %10s \t %10s \t %10s' %
+                          ('average / day', sport,
+                           '%.2f mi' % (gsum.total_distance / METERS_PER_MILE / number_days),
+                           '%i cal' % (gsum.total_calories / number_days),
+                           '%s / mi' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / METERS_PER_MILE), False),
+                           '%s / km' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / 1000.), False),
+                           print_h_m_s(gsum.total_duration / number_days)))
         elif sport == 'biking':
             retval.append('%17s %10s \t %10s \t %10s \t %10s \t %10s' %
                           ('average / day', sport,
                            '%.2f mi' % (gsum.total_distance / METERS_PER_MILE / number_days),
-                           '%i cal' % (gsum.total_calories / number_days), '%.2f mph' % (
-                               (gsum.total_distance / METERS_PER_MILE) /
-                               (gsum.total_duration / 60. / 60.)),
+                           '%i cal' % (gsum.total_calories / number_days),
+                           '%.2f mph' % ((gsum.total_distance / METERS_PER_MILE) /
+                                         (gsum.total_duration / 60. / 60.)),
                            print_h_m_s(gsum.total_duration / number_days)))
         else:
             retval.append('%17s %10s \t %10s \t %10s \t %10s \t %10s' %
@@ -808,8 +816,9 @@ class GarminReport(object):
 
         retval = []
         if sport == 'total':
-            retval.append('%17s %10s \t %10s \t %10s \t' % (
-                '%i week %02i' % (isoyear, isoweek), sport, ' ', '%i cal' % gsum.total_calories))
+            retval.append('%17s %10s \t %10s \t %10s \t' % ('%i week %02i' % (isoyear,
+                                                                              isoweek), sport, ' ',
+                                                            '%i cal' % gsum.total_calories))
         else:
             retval.append('%17s %10s \t %10s \t %10s \t' %
                           ('%i week %02i' % (isoyear, isoweek), sport, '%4.2f mi' %
@@ -817,16 +826,19 @@ class GarminReport(object):
 
         if sport == 'running' or sport == 'walking':
             if gsum.total_distance > 0:
-                retval.append(' %10s \t' % ('%s / mi' % print_h_m_s(
-                    gsum.total_duration / (gsum.total_distance / METERS_PER_MILE), False)))
-                retval.append(' %10s \t' % ('%s / km' % print_h_m_s(
-                    gsum.total_duration / (gsum.total_distance / 1000.), False)))
+                retval.append(
+                    ' %10s \t' %
+                    ('%s / mi' % print_h_m_s(gsum.total_duration /
+                                             (gsum.total_distance / METERS_PER_MILE), False)))
+                retval.append(' %10s \t' %
+                              ('%s / km' % print_h_m_s(gsum.total_duration /
+                                                       (gsum.total_distance / 1000.), False)))
             else:
                 retval.append(' %10s \t' % (''))
                 retval.append(' %10s \t' % (''))
         elif sport == 'biking':
-            retval.append(' %10s \t' % ('%.2f mph' % (
-                (gsum.total_distance / METERS_PER_MILE) / (gsum.total_duration / 60. / 60.))))
+            retval.append(' %10s \t' % ('%.2f mph' % ((gsum.total_distance / METERS_PER_MILE) /
+                                                      (gsum.total_duration / 60. / 60.))))
         else:
             retval.append(' %10s \t' % ' ')
         retval.append(' %10s \t' % (print_h_m_s(gsum.total_duration)))
@@ -854,13 +866,15 @@ class GarminReport(object):
                            '%i cal' % (gsum.total_calories / number_of_weeks)))
 
         if sport == 'running' or sport == 'walking':
-            retval.append(' %10s \t' % ('%s / mi' % print_h_m_s(gsum.total_duration / (
-                gsum.total_distance / METERS_PER_MILE), False)))
-            retval.append(' %10s \t' % ('%s / km' % print_h_m_s(
-                gsum.total_duration / (gsum.total_distance / 1000.), False)))
+            retval.append(' %10s \t' %
+                          ('%s / mi' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / METERS_PER_MILE), False)))
+            retval.append(' %10s \t' %
+                          ('%s / km' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / 1000.), False)))
         elif sport == 'biking':
-            retval.append(' %10s \t' % ('%.2f mph' % (
-                (gsum.total_distance / METERS_PER_MILE) / (gsum.total_duration / 60. / 60.))))
+            retval.append(' %10s \t' % ('%.2f mph' % ((gsum.total_distance / METERS_PER_MILE) /
+                                                      (gsum.total_duration / 60. / 60.))))
         else:
             retval.append(' %10s \t' % ' ')
         retval.append(' %10s \t' % (print_h_m_s(gsum.total_duration / number_of_weeks)))
@@ -893,13 +907,15 @@ class GarminReport(object):
                           ('%i %s' % (year, MONTH_NAMES[month - 1]), sport, '%4.2f mi' %
                            (gsum.total_distance / METERS_PER_MILE), '%i cal' % gsum.total_calories))
         if sport == 'running' or sport == 'walking':
-            retval.append(' %10s \t' % ('%s / mi' % print_h_m_s(gsum.total_duration / (
-                gsum.total_distance / METERS_PER_MILE), False)))
-            retval.append(' %10s \t' % ('%s / km' % print_h_m_s(
-                gsum.total_duration / (gsum.total_distance / 1000.), False)))
+            retval.append(' %10s \t' %
+                          ('%s / mi' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / METERS_PER_MILE), False)))
+            retval.append(' %10s \t' %
+                          ('%s / km' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / 1000.), False)))
         elif sport == 'biking':
-            retval.append(' %10s \t' % ('%.2f mph' % (
-                (gsum.total_distance / METERS_PER_MILE) / (gsum.total_duration / 60. / 60.))))
+            retval.append(' %10s \t' % ('%.2f mph' % ((gsum.total_distance / METERS_PER_MILE) /
+                                                      (gsum.total_duration / 60. / 60.))))
         else:
             retval.append(' %10s \t' % ' ')
         retval.append(' %10s \t' % (print_h_m_s(gsum.total_duration)))
@@ -917,21 +933,25 @@ class GarminReport(object):
             return ''
         retval = []
         if sport == 'total':
-            retval.append('%17s %10s \t %10s \t %10s \t' % (
-                'average / month', sport, ' ', '%i cal' % (gsum.total_calories / number_of_months)))
+            retval.append('%17s %10s \t %10s \t %10s \t' %
+                          ('average / month', sport, ' ',
+                           '%i cal' % (gsum.total_calories / number_of_months)))
         else:
-            retval.append('%17s %10s \t %10s \t %10s \t' % ('average / month', sport, '%4.2f mi' % (
-                gsum.total_distance / METERS_PER_MILE /
-                number_of_months), '%i cal' % (gsum.total_calories / number_of_months)))
+            retval.append('%17s %10s \t %10s \t %10s \t' %
+                          ('average / month', sport,
+                           '%4.2f mi' % (gsum.total_distance / METERS_PER_MILE / number_of_months),
+                           '%i cal' % (gsum.total_calories / number_of_months)))
         if sport == 'running' or sport == 'walking':
-            retval.append(' %10s \t' % ('%s / mi' % print_h_m_s(gsum.total_duration / (
-                gsum.total_distance / METERS_PER_MILE), False)))
-            retval.append(' %10s \t' % ('%s / km' % print_h_m_s(
-                gsum.total_duration / (gsum.total_distance / 1000.), False)))
+            retval.append(' %10s \t' %
+                          ('%s / mi' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / METERS_PER_MILE), False)))
+            retval.append(' %10s \t' %
+                          ('%s / km' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / 1000.), False)))
         elif sport == 'biking':
             if gsum.total_duration > 0:
-                retval.append(' %10s \t' % ('%.2f mph' % (
-                    (gsum.total_distance / METERS_PER_MILE) / (gsum.total_duration / 60. / 60.))))
+                retval.append(' %10s \t' % ('%.2f mph' % ((gsum.total_distance / METERS_PER_MILE) /
+                                                          (gsum.total_duration / 60. / 60.))))
             else:
                 retval.append(' %10s \t' % ('0.0 mph'))
         else:
@@ -951,8 +971,8 @@ class GarminReport(object):
         retval = []
         total_days = days_in_year(year)
         if datetime.datetime.today().year == year:
-            total_days = (datetime.datetime.today() - datetime.datetime(
-                datetime.datetime.today().year, 1, 1)).days
+            total_days = (datetime.datetime.today() -
+                          datetime.datetime(datetime.datetime.today().year, 1, 1)).days
         if sport == 'total':
             retval.append('%17s %10s \t %10s \t %10s \t' % (year, sport, ' ',
                                                             '%i cal' % gsum.total_calories))
@@ -961,13 +981,15 @@ class GarminReport(object):
                           (year, sport, '%4.2f mi' % (gsum.total_distance / METERS_PER_MILE),
                            '%i cal' % gsum.total_calories))
         if sport == 'running' or sport == 'walking':
-            retval.append(' %10s \t' % ('%s / mi' % print_h_m_s(gsum.total_duration / (
-                gsum.total_distance / METERS_PER_MILE), False)))
-            retval.append(' %10s \t' % ('%s / km' % print_h_m_s(
-                gsum.total_duration / (gsum.total_distance / 1000.), False)))
+            retval.append(' %10s \t' %
+                          ('%s / mi' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / METERS_PER_MILE), False)))
+            retval.append(' %10s \t' %
+                          ('%s / km' % print_h_m_s(gsum.total_duration /
+                                                   (gsum.total_distance / 1000.), False)))
         elif sport == 'biking':
-            retval.append(' %10s \t' % ('%.2f mph' % (
-                (gsum.total_distance / METERS_PER_MILE) / (gsum.total_duration / 60. / 60.))))
+            retval.append(' %10s \t' % ('%.2f mph' % ((gsum.total_distance / METERS_PER_MILE) /
+                                                      (gsum.total_duration / 60. / 60.))))
         else:
             retval.append(' %10s \t' % ' ')
         retval.append(' %10s \t' % (print_h_m_s(gsum.total_duration)))
@@ -992,7 +1014,8 @@ def print_lap_string(glap, sport):
         if glap.lap_distance > 0:
             outstr.extend([
                 print_h_m_s(glap.lap_duration / (glap.lap_distance / METERS_PER_MILE), False),
-                '/ mi ', print_h_m_s(glap.lap_duration / (glap.lap_distance / 1000.), False), '/ km'
+                '/ mi ',
+                print_h_m_s(glap.lap_duration / (glap.lap_distance / 1000.), False), '/ km'
             ])
     if glap.lap_avg_hr and glap.lap_avg_hr > 0:
         outstr.append('%i bpm' % glap.lap_avg_hr)
@@ -1058,11 +1081,13 @@ def print_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi'):
     if not split_vector:
         return ''
     for dis, tim, hrt in split_vector:
-        retval.append('%i %s \t %s \t %s / mi \t %s / km \t %s \t %i bpm avg' % (
-            dis, label, print_h_m_s(tim), print_h_m_s(tim / (split_distance_in_meters /
-                                                             METERS_PER_MILE), False),
-            print_h_m_s(tim / (split_distance_in_meters / 1000.), False), print_h_m_s(tim / (
-                split_distance_in_meters / METERS_PER_MILE) * MARATHON_DISTANCE_MI), hrt))
+        retval.append(
+            '%i %s \t %s \t %s / mi \t %s / km \t %s \t %i bpm avg' %
+            (dis, label, print_h_m_s(tim),
+             print_h_m_s(tim / (split_distance_in_meters / METERS_PER_MILE), False),
+             print_h_m_s(tim / (split_distance_in_meters / 1000.), False),
+             print_h_m_s(tim /
+                         (split_distance_in_meters / METERS_PER_MILE) * MARATHON_DISTANCE_MI), hrt))
     return '\n'.join(retval)
 
 
@@ -1104,8 +1129,8 @@ def get_file_html(gfile):
     retval.append('<table border="1" class="dataframe">')
     retval.append('<thead><tr style="text-align: center;"><th>Start Time</th>'
                   '<th>Sport</th></tr></thead>')
-    retval.append('<tbody><tr style="text-align: center;"><td>%s</td><td>%s</td>' % (
-        print_date_string(gfile.begin_datetime), gfile.sport) + '</tr></tbody>')
+    retval.append('<tbody><tr style="text-align: center;"><td>%s</td><td>%s</td>' %
+                  (print_date_string(gfile.begin_datetime), gfile.sport) + '</tr></tbody>')
     retval.append('</table><br>')
 
     labels = [
@@ -1133,14 +1158,17 @@ def get_file_html(gfile):
     if gfile.sport == 'running':
         labels = ['', 'Distance', 'Calories', 'Time', 'Pace / mi', 'Pace / km']
         values = [
-            'total', '%.2f mi' % (gfile.total_distance / METERS_PER_MILE), gfile.total_calories,
-            print_h_m_s(gfile.total_duration), print_h_m_s(min_mile * 60, False),
+            'total',
+            '%.2f mi' % (gfile.total_distance / METERS_PER_MILE), gfile.total_calories,
+            print_h_m_s(gfile.total_duration),
+            print_h_m_s(min_mile * 60, False),
             print_h_m_s(min_mile * 60 / METERS_PER_MILE * 1000., False)
         ]
     else:
         labels = ['total', 'Distance', 'Calories', 'Time', 'Pace mph']
         values = [
-            '', '%.2f mi' % (gfile.total_distance / METERS_PER_MILE), gfile.total_calories,
+            '',
+            '%.2f mi' % (gfile.total_distance / METERS_PER_MILE), gfile.total_calories,
             print_h_m_s(gfile.total_duration), mi_per_hr
         ]
     if gfile.total_hr_dur > 0:
@@ -1163,13 +1191,15 @@ def get_file_html(gfile):
 def get_lap_html(glap, sport):
     """ return formatted lap html """
     values = [
-        sport, glap.lap_number, '%.2f mi' % (glap.lap_distance / METERS_PER_MILE),
-        print_h_m_s(glap.lap_duration), glap.lap_calories, '%.2f min' % (glap.lap_duration / 60.)
+        sport, glap.lap_number,
+        '%.2f mi' % (glap.lap_distance / METERS_PER_MILE),
+        print_h_m_s(glap.lap_duration), glap.lap_calories,
+        '%.2f min' % (glap.lap_duration / 60.)
     ]
     if glap.lap_distance > 0:
         values.extend([
-            '%s / mi' % print_h_m_s(glap.lap_duration / (glap.lap_distance / METERS_PER_MILE),
-                                    False),
+            '%s / mi' % print_h_m_s(glap.lap_duration /
+                                    (glap.lap_distance / METERS_PER_MILE), False),
             '%s / km' % print_h_m_s(glap.lap_duration / (glap.lap_distance / 1000.), False)
         ])
     if glap.lap_avg_hr:
@@ -1189,10 +1219,12 @@ def get_html_splits(gfile, split_distance_in_meters=METERS_PER_MILE, label='mi')
     split_vector = get_splits(gfile, split_distance_in_meters, label)
     for dis, tim, hrt in split_vector:
         tmp_vector = [
-            '%i %s' % (dis, label), print_h_m_s(tim), print_h_m_s(tim / (split_distance_in_meters /
-                                                                         METERS_PER_MILE), False),
-            print_h_m_s(tim / (split_distance_in_meters / 1000.), False), print_h_m_s(tim / (
-                split_distance_in_meters / METERS_PER_MILE) * MARATHON_DISTANCE_MI), '%i bpm' % hrt
+            '%i %s' % (dis, label),
+            print_h_m_s(tim),
+            print_h_m_s(tim / (split_distance_in_meters / METERS_PER_MILE), False),
+            print_h_m_s(tim / (split_distance_in_meters / 1000.), False),
+            print_h_m_s(tim / (split_distance_in_meters / METERS_PER_MILE) * MARATHON_DISTANCE_MI),
+            '%i bpm' % hrt
         ]
         values.append(tmp_vector)
 

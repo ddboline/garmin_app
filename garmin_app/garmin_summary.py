@@ -40,8 +40,8 @@ class GarminSummary(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminSummary<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
-                                               for x in self._db_entries)
+        return 'GarminSummary<%s>' % ', '.join(
+            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
 
     def read_file(self):
         """  read the file, calculate some stuff """

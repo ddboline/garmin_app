@@ -28,9 +28,8 @@ class GarminCorrectionsLaps(Base):
     unique_key = Column(String, unique=True)
 
     def __repr__(self):
-        return 'GarminCorrectionsLaps<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x))
-            for x in ('start_time', 'lap_number', 'distance', 'duration'))
+        return 'GarminCorrectionsLaps<%s>' % ', '.join('%s=%s' % (
+            x, getattr(self, x)) for x in ('start_time', 'lap_number', 'distance', 'duration'))
 
 
 class GarminCorrectionsSQL(object):

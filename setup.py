@@ -9,9 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 from setuptools import setup
 
-console_scripts = (
-    ('garmin-app', 'garmin_app.garmin_utils:main'),
-    ('strava-upload', 'garmin_app.strava_upload:strava_upload'))
+console_scripts = (('garmin-app', 'garmin_app.garmin_utils:main'),
+                   ('strava-upload', 'garmin_app.strava_upload:strava_upload'))
 
 if sys.version_info.major == 2:
     console_scripts = ['%s = %s' % (x, y) for x, y in console_scripts]

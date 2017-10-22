@@ -48,8 +48,8 @@ class GarminFile(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminFile<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
-                                            for x in self._db_entries)
+        return 'GarminFile<%s>' % ', '.join(
+            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
 
     def calculate_speed(self):
         """
@@ -74,8 +74,8 @@ class GarminFile(object):
             if totdur > 0 and not point0.speed_mps:
                 point0.speed_mps = totdis / totdur
             if d1_ > 0:
-                point0.avg_speed_value_permi = ((
-                    (t1_ - self.points[0].time).total_seconds() / 60.) / (d1_ / METERS_PER_MILE))
+                point0.avg_speed_value_permi = (((
+                    t1_ - self.points[0].time).total_seconds() / 60.) / (d1_ / METERS_PER_MILE))
             if (t1_ - self.points[0].time).total_seconds() > 0:
-                point0.avg_speed_value_mph = ((point0.distance / METERS_PER_MILE) / (
-                    (t1_ - self.points[0].time).total_seconds() / 3600.))
+                point0.avg_speed_value_mph = ((point0.distance / METERS_PER_MILE) /
+                                              ((t1_ - self.points[0].time).total_seconds() / 3600.))

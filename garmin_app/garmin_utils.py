@@ -48,8 +48,8 @@ COMMANDS = ('get', 'build', 'sync', 'backup', 'year', '(file)', '(directory)',
 
 def days_in_year(year=datetime.date.today().year):
     """ return number of days in a given year """
-    return (datetime.date(year=year + 1, month=1, day=1) - datetime.date(year=year, month=1, day=1)
-            ).days
+    return (datetime.date(year=year + 1, month=1, day=1) -
+            datetime.date(year=year, month=1, day=1)).days
 
 
 def days_in_month(month=None, year=None):
@@ -61,16 +61,16 @@ def days_in_month(month=None, year=None):
     y1_, m1_ = year, month + 1
     if m1_ == 13:
         y1_, m1_ = y1_ + 1, 1
-    return (datetime.date(year=y1_, month=m1_, day=1) - datetime.date(
-        year=year, month=month, day=1)).days
+    return (datetime.date(year=y1_, month=m1_, day=1) -
+            datetime.date(year=year, month=month, day=1)).days
 
 
 def expected_calories(weight=175, pace_min_per_mile=10.0, distance=1.0):
     """ return expected calories for running at a given pace """
     cal_per_mi = weight * (0.0395 + 0.00327 * (60. / pace_min_per_mile) + 0.000455 *
-                           (60. / pace_min_per_mile)**2 + 0.000801 * (
-                               (weight / 154) * 0.425 / weight *
-                               (60. / pace_min_per_mile)**3) * 60. / (60. / pace_min_per_mile))
+                           (60. / pace_min_per_mile)**2 + 0.000801 *
+                           ((weight / 154) * 0.425 / weight *
+                            (60. / pace_min_per_mile)**3) * 60. / (60. / pace_min_per_mile))
     return cal_per_mi * distance
 
 
@@ -127,8 +127,8 @@ def convert_fit_to_tcx(fit_filename):
     with NamedTemporaryFile(prefix='temp', suffix='.tcx', delete=False, mode='wt') as fn_:
         if '.fit' in fit_filename.lower():
             if os.path.exists('/usr/bin/fit2tcx'):
-                run_command('/usr/bin/fit2tcx -i %s ' % fit_filename + '-o %s 2>&1 > /dev/null' %
-                            fn_.name)
+                run_command('/usr/bin/fit2tcx -i %s ' % fit_filename +
+                            '-o %s 2>&1 > /dev/null' % fn_.name)
             elif os.path.exists('%s/bin/fit2tcx' % os.getenv('HOME')):
                 run_command('fit2tcx %s > %s' % (fit_filename, fn_.name))
             elif os.path.exists('./bin/fit2tcx'):
@@ -423,8 +423,8 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             run_command('cd %s/run/ ; ' % cache_dir + 'tar zcvf %s gps_tracks/ ' % fname +
                         'garmin_corrections.json')
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
-                run_command('cp %s %s/public_html/backup/garmin_data.tar.gz' %
-                            (fname, os.getenv('HOME')))
+                run_command('cp %s %s/public_html/backup/garmin_data.tar.gz' % (fname,
+                                                                                os.getenv('HOME')))
             if os.path.exists('%s/public_html/garmin/tar' % os.getenv('HOME')):
                 run_command('mv %s %s/public_html/garmin/tar' % (fname, os.getenv('HOME')))
 

@@ -166,12 +166,12 @@ class GarminCache(object):
                 gmn_md5sum = local_dict[reduced_gmn_filename].md5sum
             if ((reduced_gmn_filename not in local_dict) or
                 (hasattr(local_dict, 'md5sum') and
-                 local_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or (
-                     self.do_update and print_date_string(
-                         local_dict[reduced_gmn_filename].begin_datetime) in self.corr_list)):
+                 local_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
+                (self.do_update and print_date_string(
+                    local_dict[reduced_gmn_filename].begin_datetime) in self.corr_list)):
                 self.cache_file_is_modified = True
-                _job = pool.submit(_read_file_in_par, (reduced_gmn_filename, gmn_filename,
-                                                       gmn_md5sum, self.corr_list),
+                _job = pool.submit(_read_file_in_par,
+                                   (reduced_gmn_filename, gmn_filename, gmn_md5sum, self.corr_list),
                                    self.cache_directory)
                 _work_list.append((gmn_filename, _job))
             else:

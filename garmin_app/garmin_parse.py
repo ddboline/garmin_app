@@ -197,7 +197,7 @@ class GarminParse(GarminFile):
             else:
                 last_alt = ele
             cur_point.altitude = ele
-            
+
             cur_point.time = time
             if last is not None:
                 distance += haversine_distance(lat, lon, last[0], last[1])

@@ -123,8 +123,8 @@ def strava_upload():
                 cp_.write(open(os.path.expanduser('~/.stravacli'), "w"))
             break
 
-    print("Authorized to access account of {} {} (id {:d})."
-          .format(athlete.firstname, athlete.lastname, athlete.id))
+    print("Authorized to access account of {} {} (id {:d}).".format(athlete.firstname,
+                                                                    athlete.lastname, athlete.id))
 
     for act in args.activities:
         if act is stdin:

@@ -35,8 +35,8 @@ class GarminPoint(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminPoint<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
-                                             for x in self.__slots__)
+        return 'GarminPoint<%s>' % ', '.join(
+            '%s=%s' % (x, getattr(self, x)) for x in self.__slots__)
 
     def read_point_xml(self, ents):
         """ read xml point """
