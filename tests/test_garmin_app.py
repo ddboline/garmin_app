@@ -471,7 +471,8 @@ class TestGarminApp(unittest.TestCase):
         mstr.update(output.encode())
         self.assertIn(mstr.hexdigest(), [
             '06465ba08d19d59c963e542bc19f12b7', 'a59c8ee120e789eda36e0cc8592ffce1',
-            '34605a1d755eda499022946e46d46c1a', '9fbf84e57a513d875f471fbcabe20e22'
+            '34605a1d755eda499022946e46d46c1a', '9fbf84e57a513d875f471fbcabe20e22',
+            '9e23c7a7bc3c436ef319a5a3d1003264'
         ])
 
         with OpenPostgreSQLsshTunnel(port=5435, do_tunnel=True) as pport:
@@ -485,7 +486,8 @@ class TestGarminApp(unittest.TestCase):
             self.assertIn(mstr.hexdigest(), [
                 'c06f13236f9abed0723e4af7537ca3d4', 'a59c8ee120e789eda36e0cc8592ffce1',
                 '35475bfdd07e72c9cd3988c83a07b083', '34605a1d755eda499022946e46d46c1a',
-                '9fbf84e57a513d875f471fbcabe20e22', 'f1749a2ec48d1ca814b570d2bf36d587'
+                '9fbf84e57a513d875f471fbcabe20e22', 'f1749a2ec48d1ca814b570d2bf36d587',
+                '9e23c7a7bc3c436ef319a5a3d1003264'
             ])
 
         with OpenPostgreSQLsshTunnel(port=5436, do_tunnel=True) as pport:
@@ -506,7 +508,7 @@ class TestGarminApp(unittest.TestCase):
             mstr.update(output.encode())
             self.assertIn(mstr.hexdigest(), [
                 '06465ba08d19d59c963e542bc19f12b7', '34605a1d755eda499022946e46d46c1a',
-                '9fbf84e57a513d875f471fbcabe20e22'
+                '9fbf84e57a513d875f471fbcabe20e22', '9e23c7a7bc3c436ef319a5a3d1003264'
             ])
 
         gc_ = GarminCache(
