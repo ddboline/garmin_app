@@ -933,6 +933,7 @@ def test_garmin_corrections_sql(mock_create_engine, mock_sessionmaker):
     mock_session.query.return_value = mock_session2
     mock_row = mock.MagicMock()
     mock_row.dur = 5.0
+    mock_row.duration = 5.0
     mock_row.dis = 5.0
     mock_row.start_time = datetime.datetime(2017, 5, 1, 13)
     mock_session2.all.return_value = [mock_row]
