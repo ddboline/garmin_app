@@ -13,7 +13,7 @@ from time import strftime
 
 HOSTNAME = os.uname()[1]
 HOMEDIR = os.getenv('HOME')
-USER = os.getenv('USER')
+USER = 'ddboline'
 
 POSTGRESTRING = 'postgresql://%s:BQGIvkKFZPejrKvX@localhost' % USER
 
