@@ -20,7 +20,7 @@ else:
 
 setup(
     name='garmin_app',
-    version='0.0.8.6',
+    version='0.0.8.8',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='garmin_app',
