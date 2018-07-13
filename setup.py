@@ -9,13 +9,13 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 from setuptools import setup
 
-console_scripts = (('garmin-app', 'garmin_app.garmin_utils:main'),
+console_scripts_ = (('garmin-app', 'garmin_app.garmin_utils:main'),
                    ('strava-upload', 'garmin_app.strava_upload:strava_upload'))
 
-console_scripts = ['%s = %s' % (x, y) for x, y in console_scripts]
+console_scripts = ['%s = %s' % (x, y) for x, y in console_scripts_]
 
 v = sys.version_info.major
-console_scripts.extend('%s%s = %s' % (x, v, y) for x, y in console_scripts)
+console_scripts.extend('%s%s = %s' % (x, v, y) for x, y in console_scripts_)
 
 setup(
     name='garmin_app',
