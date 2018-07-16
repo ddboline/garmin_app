@@ -20,6 +20,27 @@ class GarminLap(object):
     ]
     __slots__ = _db_entries
 
+    _avro_schema = {
+        'namespace': 'garmin.avro',
+        'type': 'record',
+        'name': 'GarminPoint',
+        'fields': [
+            {'name': 'lap_type', 'type': ['string', 'null']},
+            {'name': 'lap_index', 'type': 'int'},
+            {'name': 'lap_start', 'type': 'int', 'logicalType': 'time-millis'},
+            {'name': 'lap_duration', 'type': 'float'},
+            {'name': 'lap_distance', 'type': 'float'},
+            {'name': 'lap_trigger', 'type': ['lap_trigger', 'null']},
+            {'name': 'lap_max_speed', 'type': 'float'},
+            {'name': 'lap_calories', 'type': 'int'},
+            {'name': 'lap_avg_hr', 'type': 'int'},
+            {'name': 'lap_max_hr', 'type': 'int'},
+            {'name': 'lap_intensity', 'type': ['string', 'null']},
+            {'name': 'lap_number', 'type': 'int'},
+            {'name': 'lap_start_string', 'type': 'string'},
+        ]
+    }
+
     def __init__(self, **options):
         """ Init Method """
         self.lap_type = None

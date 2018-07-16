@@ -18,6 +18,27 @@ class GarminPoint(object):
     ]
     __slots__ = _db_entries
 
+    _avro_schema = {
+        'namespace': 'garmin.avro',
+        'type': 'record',
+        'name': 'GarminPoint',
+        'fields': [
+            {'name': 'time', 'type': 'int', 'logicalType': 'time-millis'},
+            {'name': 'latitude', 'type': 'float'},
+            {'name': 'longitude', 'type': 'float'},
+            {'name': 'altitude', 'type': 'float'},
+            {'name': 'distance', 'type': 'float'},
+            {'name': 'heart_rate', 'type': 'float'},
+            {'name': 'duration_from_last', 'type': 'float'},
+            {'name': 'duration_from_begin', 'type': 'float'},
+            {'name': 'speed_mps', 'type': 'float'},
+            {'name': 'speed_permi', 'type': 'float'},
+            {'name': 'speed_mph', 'type': 'float'},
+            {'name': 'avg_speed_value_permi', 'type': 'float'},
+            {'name': 'avg_speed_value_mph', 'type': 'float'},
+        ]
+    }
+
     def __init__(self, **options):
         """ Init Method """
         for attr in self.__slots__:

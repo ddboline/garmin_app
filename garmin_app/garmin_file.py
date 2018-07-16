@@ -10,6 +10,8 @@ try:
 except ImportError:
     from builtins import zip as izip
 
+from garmin_app.garmin_lap import GarminLap
+from garmin_app.garmin_point import GarminPoint
 from garmin_app.garmin_utils import METERS_PER_MILE
 
 
@@ -26,6 +28,25 @@ class GarminFile(object):
     ]
     __slots__ = _db_entries + ['orig_filename', 'laps', 'points']
     garmin_file_types = ('txt', 'tcx', 'fit', 'gpx', 'gmn')
+
+    _avro_schema = {
+        'namespace': 'garmin.avro',
+        'type': 'record',
+        'name': 'GarminPoint',
+        'fields': [
+            {'name': 'filename', 'type': 'string'},
+            {'name': 'filetype', 'type': 'string'},
+            {'name': 'begin_datetime', 'type': 'int', 'logicalType': 'time-millis'},
+            {'name': 'sport', 'type': ['string', 'null']},
+            {'name': 'total_calories', 'type': 'int'},
+            {'name': 'total_distance', 'type': 'float'},
+            {'name': 'total_duration', 'type': 'float'},
+            {'name': 'total_hr_dur', 'type': 'int'},
+            {'name': 'total_hr_dis', 'type': 'float'},
+            {'name': 'laps', 'type': 'array', 'items': GarminLap._avro_schema},
+            {'name': 'points', 'type': 'array', 'items': GarminPoint._avro_schema},
+        ]
+    }
 
     def __init__(self, filename='', filetype=''):
         """ Init Method """
