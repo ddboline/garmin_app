@@ -17,7 +17,7 @@ from tempfile import NamedTemporaryFile
 
 from garmin_app.garmin_server import garmin_server
 
-from garmin_app.util import (run_command, openurl, dump_to_file, HOMEDIR, walk_wrapper,
+from garmin_app.util import (run_command, dump_to_file, HOMEDIR, walk_wrapper,
                              datetimefromstring, HOSTNAME)
 
 # 'https://ddbolineathome.mooo.com/~ddboline'
@@ -220,18 +220,6 @@ def compare_with_remote(cache_dir):
     """ sync files at script_path with files at BASEURL """
     from garmin_app.save_to_s3 import save_to_s3
     s3_file_chksum = save_to_s3()
-    remote_file_chksum = {}
-    remote_file_path = {}
-    for line in openurl('%s/garmin/files/garmin.list' % BASEURL):
-        if len(line) < 2:
-            continue
-        md5sum, fname = line.split()[0:2]
-        fn_ = fname.split('/')[-1]
-        if fn_ not in remote_file_chksum:
-            remote_file_chksum[fn_] = md5sum
-            remote_file_path[fn_] = '/'.join(fname.split('/')[:-1])
-        else:
-            print('duplicate?:', fname, md5sum, remote_file_chksum[fn_])
 
     local_file_chksum = {}
 
@@ -246,23 +234,15 @@ def compare_with_remote(cache_dir):
                 continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True, single_line=True).split()[0]
+            md5sum = md5sum.decode()
             if fn_ not in local_file_chksum:
                 local_file_chksum[fn_] = md5sum
 
     walk_wrapper('%s/run' % cache_dir, process_files, None)
 
-    for fn_ in remote_file_chksum:
-        if fn_ not in local_file_chksum or remote_file_chksum[fn_] != \
-                local_file_chksum[fn_]:
-            print('download:', fn_, remote_file_chksum[fn_], remote_file_path[fn_], cache_dir)
-            if not os.path.exists('%s/run/%s/' % (cache_dir, remote_file_path[fn_])):
-                os.makedirs('%s/run/%s/' % (cache_dir, remote_file_path[fn_]))
-            with open('%s/run/%s/%s' % (cache_dir, remote_file_path[fn_], fn_), 'wb') as outfile:
-                urlout = '%s/garmin/files/%s/%s' % (BASEURL, remote_file_path[fn_], fn_)
-                dump_to_file(urlout, outfile)
-
     local_files_not_in_s3 = [
-        '%s/run/%s/%s' % (cache_dir, remote_file_path.get(fn_, ''), fn_)
+        '%s/run/gps_tracks/%s' % (cache_dir, fn_)
+        if fn_ != 'garmin_corrections.json' else '%s/run/%s' % (cache_dir, fn_)
         for fn_ in local_file_chksum
         if fn_ not in s3_file_chksum or local_file_chksum[fn_] != s3_file_chksum[fn_]
     ]
@@ -271,7 +251,9 @@ def compare_with_remote(cache_dir):
         fn_ for fn_ in s3_file_chksum
         if fn_ not in local_file_chksum or local_file_chksum[fn_] != s3_file_chksum[fn_]
     ]
+
     if local_files_not_in_s3:
+        print('local_files_not_in_s3')
         print('\n'.join(local_files_not_in_s3))
         s3_file_chksum = save_to_s3(filelist=local_files_not_in_s3)
     if s3_files_not_in_local:
