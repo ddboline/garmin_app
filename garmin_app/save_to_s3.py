@@ -53,6 +53,7 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
         filelist = []
     for fn_ in filelist:
         if not os.path.exists(fn_):
+            print('file doesnt exists %s' % fn_)
             continue
         kn_ = fn_.split('/')[-1]
         with open(fn_, 'rb') as infile:
@@ -61,6 +62,7 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
                 if int(parse(k.last_modified).strftime("%s")) \
                         > int(os.stat(fn_).st_mtime):
                     k.get_contents_to_filename(fn_)
+                    print('get_contents_to_filename? %s' % fn_)
                     continue
             else:
                 k = boto.s3.key.Key(bucket)

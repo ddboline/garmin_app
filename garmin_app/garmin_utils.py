@@ -241,7 +241,7 @@ def compare_with_remote(cache_dir):
     walk_wrapper('%s/run' % cache_dir, process_files, None)
 
     local_files_not_in_s3 = [
-        '%s/run/cache/%s' % (cache_dir, fn_)
+        '%s/run/gps_tracks/%s' % (cache_dir, fn_)
         if fn_ != 'garmin_corrections.json' else '%s/run/%s' % (cache_dir, fn_)
         for fn_ in local_file_chksum
         if fn_ not in s3_file_chksum or local_file_chksum[fn_] != s3_file_chksum[fn_]
@@ -253,6 +253,7 @@ def compare_with_remote(cache_dir):
     ]
 
     if local_files_not_in_s3:
+        print('local_files_not_in_s3')
         print('\n'.join(local_files_not_in_s3))
         s3_file_chksum = save_to_s3(filelist=local_files_not_in_s3)
     if s3_files_not_in_local:
