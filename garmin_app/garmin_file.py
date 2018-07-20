@@ -32,7 +32,7 @@ class GarminFile(object):
     _avro_schema = {
         'namespace': 'garmin.avro',
         'type': 'record',
-        'name': 'GarminPoint',
+        'name': 'GarminFile',
         'fields': [
             {'name': 'filename', 'type': 'string'},
             {'name': 'filetype', 'type': 'string'},

@@ -23,7 +23,7 @@ class GarminLap(object):
     _avro_schema = {
         'namespace': 'garmin.avro',
         'type': 'record',
-        'name': 'GarminPoint',
+        'name': 'GarminLap',
         'fields': [
             {'name': 'lap_type', 'type': ['string', 'null']},
             {'name': 'lap_index', 'type': 'int'},
