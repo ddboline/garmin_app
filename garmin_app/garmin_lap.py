@@ -4,6 +4,8 @@
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+from dateutil.parser import parse
+
 from garmin_app.garmin_utils import (convert_date_string, convert_time_string)
 
 
@@ -27,17 +29,17 @@ class GarminLap(object):
         'fields': [
             {'name': 'lap_type', 'type': ['string', 'null']},
             {'name': 'lap_index', 'type': 'int'},
-            {'name': 'lap_start', 'type': 'int', 'logicalType': 'time-millis'},
+            {'name': 'lap_start', 'type': 'string'},
             {'name': 'lap_duration', 'type': 'float'},
             {'name': 'lap_distance', 'type': 'float'},
-            {'name': 'lap_trigger', 'type': ['lap_trigger', 'null']},
-            {'name': 'lap_max_speed', 'type': 'float'},
+            {'name': 'lap_trigger', 'type': ['string', 'null']},
+            {'name': 'lap_max_speed', 'type': ['float', 'null']},
             {'name': 'lap_calories', 'type': 'int'},
-            {'name': 'lap_avg_hr', 'type': 'int'},
-            {'name': 'lap_max_hr', 'type': 'int'},
+            {'name': 'lap_avg_hr', 'type': ['float', 'null']},
+            {'name': 'lap_max_hr', 'type': ['int', 'null']},
             {'name': 'lap_intensity', 'type': ['string', 'null']},
             {'name': 'lap_number', 'type': 'int'},
-            {'name': 'lap_start_string', 'type': 'string'},
+            {'name': 'lap_start_string', 'type': ['string', 'null']},
         ]
     }
 
@@ -66,6 +68,18 @@ class GarminLap(object):
         """ string representation """
         return 'GarminLap<%s>' % ', '.join(
             '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
+
+    def __eq__(self, other):
+        for field in self.__slots__:
+            value0 = getattr(self, field)
+            value1 = getattr(other, field)
+            if isinstance(value0, float) and isinstance(value1, float):
+                if abs(value0 - value1) > 0.01:
+                    return False
+            else:
+                if value0 != value1:
+                    return False
+        return True
 
     def read_lap_xml(self, ents):
         """ read lap from xml file """
@@ -119,3 +133,32 @@ class GarminLap(object):
                     self.lap_max_hr = int(ents[1].split('=')[1])
             elif 'Intensity' in ents[0]:
                 self.lap_intensity = ents[0].split('=')[1]
+
+    def to_dict(self):
+        output = {}
+        for field in self._avro_schema['fields']:
+            name = field['name']
+            type_ = field['type']
+            value = getattr(self, name)
+            if value is None:
+                print(name)
+                continue
+            if name == 'lap_start':
+                output[name] = getattr(self, name).isoformat()
+            elif type_ == 'int':
+                output[name] = int(getattr(self, name))
+            else:
+                output[name] = getattr(self, name)
+        return output
+    
+    @staticmethod
+    def from_dict(record):
+        glap = GarminLap()
+        for field in GarminLap._avro_schema['fields']:
+            name = field['name']
+            type_ = field['type']
+            if name == 'lap_start':
+                setattr(glap, name, parse(record[name]))
+            else:
+                setattr(glap, name, record[name])
+        return glap

@@ -5,6 +5,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
+from dateutil.parser import parse
 try:
     from itertools import izip
 except ImportError:
@@ -36,24 +37,25 @@ class GarminFile(object):
         'fields': [
             {'name': 'filename', 'type': 'string'},
             {'name': 'filetype', 'type': 'string'},
-            {'name': 'begin_datetime', 'type': 'int', 'logicalType': 'time-millis'},
+            {'name': 'begin_datetime', 'type': 'string'},
             {'name': 'sport', 'type': ['string', 'null']},
             {'name': 'total_calories', 'type': 'int'},
             {'name': 'total_distance', 'type': 'float'},
             {'name': 'total_duration', 'type': 'float'},
-            {'name': 'total_hr_dur', 'type': 'int'},
+            {'name': 'total_hr_dur', 'type': 'float'},
             {'name': 'total_hr_dis', 'type': 'float'},
-            {'name': 'laps', 'type': 'array', 'items': GarminLap._avro_schema},
-            {'name': 'points', 'type': 'array', 'items': GarminPoint._avro_schema},
+            {'name': 'laps', 'type': {'type': 'array', 'items': GarminLap._avro_schema}},
+            {'name': 'points', 'type': {'type': 'array', 'items': GarminPoint._avro_schema}},
         ]
     }
 
     def __init__(self, filename='', filetype=''):
         """ Init Method """
-        self.orig_filename = filename
-        self.filename = os.path.basename(filename)
-        if not os.path.exists(filename):
-            raise IOError
+        if filename != '':
+            self.orig_filename = filename
+            self.filename = os.path.basename(filename)
+            if not os.path.exists(filename):
+                raise IOError
         self.filetype = ''
         if filetype in self.garmin_file_types:
             self.filetype = filetype
@@ -71,6 +73,22 @@ class GarminFile(object):
         """ string representation """
         return 'GarminFile<%s>' % ', '.join(
             '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
+
+    def __eq__(self, other):
+        for field in self._db_entries:
+            value0 = getattr(self, field)
+            value1 = getattr(other, field)
+            if isinstance(value0, float) and isinstance(value1, float):
+                if abs(value0 - value1) > 0.01:
+                    return False
+            else:
+                if value0 != value1:
+                    return False
+        for field in 'laps', 'points':
+            for l0, l1 in zip(getattr(self, field), getattr(other, field)):
+                if l0 != l1:
+                    return False
+        return True
 
     def calculate_speed(self):
         """
@@ -100,3 +118,37 @@ class GarminFile(object):
             if (t1_ - self.points[0].time).total_seconds() > 0:
                 point0.avg_speed_value_mph = ((point0.distance / METERS_PER_MILE) /
                                               ((t1_ - self.points[0].time).total_seconds() / 3600.))
+
+    def to_dict(self):
+        output = {}
+        for field in self._avro_schema['fields']:
+            name = field['name']
+            type_ = field['type']
+            if 'time' in name:
+                output[name] = getattr(self, name).isoformat()
+            elif type_ == 'array':
+                continue
+            elif type_ == 'int':
+                output[name] = int(getattr(self, name))
+            else:
+                output[name] = getattr(self, name)
+        output['laps'] = [lap.to_dict() for lap in self.laps]
+        output['points'] = [point.to_dict() for point in self.points]
+        return output
+    
+    @staticmethod
+    def from_dict(record):
+        gfile = GarminFile()
+        for field in GarminFile._avro_schema['fields']:
+            name = field['name']
+            type_ = field['type']
+            if 'time' in name:
+                setattr(gfile, name, parse(record[name]))
+            elif type_ == 'array':
+                continue
+            else:
+                setattr(gfile, name, record[name])
+        setattr(gfile, 'laps', [GarminLap.from_dict(lap) for lap in record['laps']])
+        setattr(gfile, 'points', [GarminPoint.from_dict(point) for point in record['points']])
+
+        return gfile

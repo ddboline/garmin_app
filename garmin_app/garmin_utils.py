@@ -508,18 +508,12 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
             print('usage: ./garmin.py <%s>' % '|'.join(COMMANDS))
             return
         elif arg == 'get':
+            raise NotImplementedError()
             if not os.path.exists('%s/run' % cache_dir):
                 os.makedirs('%s/run/' % cache_dir)
                 os.chdir('%s/run' % cache_dir)
-                with open('temp.tar.gz', 'wb') as outfile:
-                    urlout = '%s/backup/garmin_data.tar.gz' % BASEURL
-                    dump_to_file(urlout, outfile)
-                if not os.path.exists('temp.tar.gz'):
-                    raise OSError
-                print('downloaded file')
-                run_command('tar zxf temp.tar.gz 2>&1 > /dev/null')
-                os.remove('temp.tar.gz')
 
+                # TODO: rewrite using avro cache files, pulled from S3
                 from garmin_app.garmin_cache import (read_pickle_object_in_file as read_,
                                                      write_pickle_object_to_file as write_)
 

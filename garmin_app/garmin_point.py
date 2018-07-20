@@ -4,6 +4,8 @@
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+from dateutil.parser import parse
+
 from garmin_app.garmin_utils import convert_date_string, METERS_PER_MILE
 
 
@@ -23,12 +25,12 @@ class GarminPoint(object):
         'type': 'record',
         'name': 'GarminPoint',
         'fields': [
-            {'name': 'time', 'type': 'int', 'logicalType': 'time-millis'},
-            {'name': 'latitude', 'type': 'float'},
-            {'name': 'longitude', 'type': 'float'},
-            {'name': 'altitude', 'type': 'float'},
-            {'name': 'distance', 'type': 'float'},
-            {'name': 'heart_rate', 'type': 'float'},
+            {'name': 'time', 'type': 'string'},
+            {'name': 'latitude', 'type': ['float', 'null']},
+            {'name': 'longitude', 'type': ['float', 'null']},
+            {'name': 'altitude', 'type': ['float', 'null']},
+            {'name': 'distance', 'type': ['float', 'null']},
+            {'name': 'heart_rate', 'type': ['float', 'null']},
             {'name': 'duration_from_last', 'type': 'float'},
             {'name': 'duration_from_begin', 'type': 'float'},
             {'name': 'speed_mps', 'type': 'float'},
@@ -58,6 +60,18 @@ class GarminPoint(object):
         """ string representation """
         return 'GarminPoint<%s>' % ', '.join(
             '%s=%s' % (x, getattr(self, x)) for x in self.__slots__)
+
+    def __eq__(self, other):
+        for field in self.__slots__:
+            value0 = getattr(self, field)
+            value1 = getattr(other, field)
+            if isinstance(value0, float) and isinstance(value1, float):
+                if abs(value0 - value1) > 0.01:
+                    return False
+            else:
+                if value0 != value1:
+                    return False
+        return True
 
     def read_point_xml(self, ents):
         """ read xml point """
@@ -99,3 +113,28 @@ class GarminPoint(object):
                         self.speed_mph = (self.speed_mps * 3600. / METERS_PER_MILE)
                         if self.speed_mps > 0.:
                             self.speed_permi = (METERS_PER_MILE / self.speed_mps / 60.)
+
+    def to_dict(self):
+        output = {}
+        for field in self._avro_schema['fields']:
+            name = field['name']
+            type_ = field['type']
+            if 'time' in name:
+                output[name] = getattr(self, name).isoformat()
+            elif type_ == 'int':
+                output[name] = int(getattr(self, name))
+            else:
+                output[name] = getattr(self, name)
+        return output
+
+    @staticmethod
+    def from_dict(record):
+        gpoint = GarminPoint()
+        for field in GarminPoint._avro_schema['fields']:
+            name = field['name']
+            type_ = field['type']
+            if 'time' in name:
+                setattr(gpoint, name, parse(record[name]))
+            else:
+                setattr(gpoint, name, record[name])
+        return gpoint

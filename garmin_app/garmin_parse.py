@@ -81,6 +81,11 @@ class GarminParse(GarminFile):
             if printed_datetime in LIST_OF_MISLABELED_TIMES[sport]:
                 self.sport = sport
         self.calculate_speed()
+        for idx, lap in enumerate(self.laps):
+            if lap.lap_index is None:
+                lap.lap_index = idx
+            if lap.lap_number is None:
+                lap.lap_number = idx
 
     def read_file_xml(self):
         """ read xml file """
