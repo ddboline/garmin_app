@@ -514,8 +514,8 @@ def find_gps_tracks(arg, cache_dir, s3_files={}):
             continue
         if arg in s3_file or arg.replace('-', '') in s3_file:
             download_from_s3(s3_file, fname)
-            files.append(fname)
-    return files
+            files.add(fname)
+    return sorted(files)
 
 
 def test_find_gps_tracks():
