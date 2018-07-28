@@ -141,7 +141,6 @@ class GarminLap(object):
             type_ = field['type']
             value = getattr(self, name)
             if value is None:
-                print(name)
                 continue
             if name == 'lap_start':
                 output[name] = getattr(self, name).isoformat()
@@ -156,7 +155,6 @@ class GarminLap(object):
         glap = GarminLap()
         for field in GarminLap._avro_schema['fields']:
             name = field['name']
-            type_ = field['type']
             if name == 'lap_start':
                 setattr(glap, name, parse(record[name]))
             else:

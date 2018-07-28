@@ -132,7 +132,6 @@ class GarminPoint(object):
         gpoint = GarminPoint()
         for field in GarminPoint._avro_schema['fields']:
             name = field['name']
-            type_ = field['type']
             if 'time' in name:
                 setattr(gpoint, name, parse(record[name]))
             else:

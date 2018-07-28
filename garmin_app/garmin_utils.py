@@ -513,7 +513,6 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 os.makedirs('%s/run/' % cache_dir)
                 os.chdir('%s/run' % cache_dir)
 
-                # TODO: rewrite using avro cache files, pulled from S3
                 from garmin_app.garmin_cache import (read_pickle_object_in_file as read_,
                                                      write_pickle_object_to_file as write_)
 
