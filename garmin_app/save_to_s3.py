@@ -23,7 +23,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import boto3
 import os
 import glob
-from dateutil.parser import parse
 
 
 def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
