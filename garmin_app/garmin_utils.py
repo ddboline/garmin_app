@@ -230,7 +230,8 @@ def compare_with_remote(cache_dir):
             if os.path.isdir(fname) or \
                     ('garmin.pkl' in fn_) or \
                     ('garmin.list' in fn_) or \
-                    ('.pkl.gz' in fn_):
+                    ('.pkl.gz' in fn_) or \
+                    ('.avro.gz' in fn_):
                 continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True, single_line=True).split()[0]
@@ -288,7 +289,7 @@ def read_garmin_file(fname, msg_q=None, options=None):
         _gfile.read_file()
     if not _gfile:
         return False
-    cache_.write_cached_gfile(garminfile=_gfile)
+    cache_.write_cached_gfile(garminfile=_gfile, update=options['do_update'])
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q, gfile=_gfile)
     print(_report.file_report_txt())
     _report.file_report_html(options=options)
@@ -300,7 +301,9 @@ def read_garmin_file(fname, msg_q=None, options=None):
 
 def do_summary(directory_, msg_q=None, options=None):
     """ produce summary report """
-    from garmin_app.garmin_cache import GarminCache
+    from garmin_app.garmin_cache import (
+        GarminCache, read_pickle_object_in_file, write_pickle_object_to_file
+    )
     from garmin_app.garmin_corrections import list_of_corrected_laps
     from garmin_app.garmin_corrections_sql import write_corrections_table
     from garmin_app.garmin_report import GarminReport
@@ -325,6 +328,8 @@ def do_summary(directory_, msg_q=None, options=None):
             corr_list=corr_list_,
             use_sql=False,
             check_md5=True,
+            cache_read_fn=read_pickle_object_in_file,
+            cache_write_fn=write_pickle_object_to_file,
             do_tunnel=options.get('do_tunnel', False))
         cache_.cache_write_fn(cache_.cache_summary_file_dict)
         write_corrections_table(corr_list_, do_tunnel=options.get('do_tunnel', False))
