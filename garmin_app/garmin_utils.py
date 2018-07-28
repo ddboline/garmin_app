@@ -16,9 +16,9 @@ import argparse
 from tempfile import NamedTemporaryFile
 
 from garmin_app.garmin_server import garmin_server
-
-from garmin_app.util import (run_command, dump_to_file, HOMEDIR, walk_wrapper, datetimefromstring,
-                             HOSTNAME)
+from garmin_app.save_to_s3 import get_list_of_keys, download_from_s3
+from garmin_app.util import (run_command, dump_to_file, HOMEDIR, walk_wrapper,
+                             datetimefromstring, HOSTNAME)
 
 # 'https://ddbolineathome.mooo.com/~ddboline'
 BASEURL = 'http://ddbolineinthecloud.mooo.com/~ubuntu'
@@ -281,7 +281,7 @@ def compare_with_remote(cache_dir, sync_cache=False):
         print('missing files', s3_files_not_in_local)
 
 
-def read_garmin_file(fname, msg_q=None, options=None):
+def read_garmin_file(fname, msg_q=None, options=None, s3_files=None):
     """ read single garmin file """
     from garmin_app.garmin_cache import pool
     from garmin_app.garmin_cache import GarminCache
@@ -298,7 +298,16 @@ def read_garmin_file(fname, msg_q=None, options=None):
 
     pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
     cache_dir_ = '%s/run/cache' % cache_dir
-    cache_ = GarminCache(pickle_file=pickle_file_, cache_directory=cache_dir_, corr_list=corr_list_)
+    
+    avro_file = '%s/%s.avro.gz' % (cache_dir, os.path.basename(fname))
+    if not os.path.exists(avro_file):
+        s3_cache_files = get_list_of_keys('garmin-scripts-cache-ddboline')
+        s3_key = os.path.basename(avro_file)
+        if s3_key in s3_cache_files:
+            download_from_s3('garmin-scripts-cache-ddboline', s3_key, avro_file)
+    
+    cache_ = GarminCache(cache_directory=cache_dir_, corr_list=corr_list_)
+    
     _temp_file = None
     if not options['do_update']:
         _temp_file = cache_.read_cached_gfile(gfbname=os.path.basename(fname))
@@ -309,7 +318,8 @@ def read_garmin_file(fname, msg_q=None, options=None):
         _gfile.read_file()
     if not _gfile:
         return False
-    cache_.write_cached_gfile(garminfile=_gfile, update=options['do_update'])
+    if options['do_update'] or not os.path.exists(avro_file):
+        cache_.write_cached_gfile(garminfile=_gfile)
     _report = GarminReport(cache_obj=cache_, msg_q=msg_q, gfile=_gfile)
     print(_report.file_report_txt())
     _report.file_report_html(options=options)
@@ -415,6 +425,8 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
         options = {'cache_dir': CACHEDIR}
     cache_dir = options['cache_dir']
 
+    s3_files = get_list_of_keys()
+
     gdir = set()
     for arg in args:
         if arg == 'build':
@@ -471,9 +483,9 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                 options['do_sport'] = spts[0]
             elif arg == 'bike':
                 options['do_sport'] = 'biking'
-            elif '-' in arg or arg in ('%4d' % _ for _ in range(2008,
-                                                                datetime.date.today().year + 1)):
-                gdir.update(find_gps_tracks(arg, cache_dir))
+            elif '-' in arg or arg in ('%4d' % _
+                                       for _ in range(2008, datetime.date.today().year + 1)):
+                gdir.update(find_gps_tracks(arg, cache_dir, s3_files=s3_files))
             elif '.gmn' in arg or 'T' in arg:
                 files = glob.glob('%s/run/gps_tracks/%s' % (cache_dir, arg))
                 gdir.update(files)
@@ -485,19 +497,26 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
     gdir = sorted(gdir)
 
     if len(gdir) == 1 and os.path.isfile(gdir[0]):
-        return read_garmin_file(gdir[0], msg_q=msg_q, options=options)
+        return read_garmin_file(gdir[0], msg_q=msg_q, options=options, s3_files=s3_files)
     return do_summary(gdir, msg_q=msg_q, options=options)
 
 
-def find_gps_tracks(arg, cache_dir):
+def find_gps_tracks(arg, cache_dir, s3_files={}):
     """ find gps files matching pattern in cache_dir """
-    files = glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg))
-    files += glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg.replace('-', '')))
+    files = set(glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg)))
+    files |= set(glob.glob('%s/run/gps_tracks/%s*' % (cache_dir, arg.replace('-', ''))))
     basenames = [f.split('/')[-1] for f in sorted(files)]
     if len([x for x in basenames if x[:10] == basenames[0][:10]]) == \
             len(basenames):
         for fn_ in basenames:
             print(fn_)
+    for s3_file in s3_files:
+        fname = '%s/run/gps_tracks/%s' % (cache_dir, s3_file)
+        if os.path.exists(fname):
+            continue
+        if arg in s3_file or arg.replace('-', '') in s3_file:
+            download_from_s3(s3_file, fname)
+            files.append(fname)
     return files
 
 
