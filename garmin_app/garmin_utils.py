@@ -267,8 +267,6 @@ def compare_with_remote(cache_dir, sync_cache=False):
         if fn_ not in local_file_chksum or local_file_chksum[fn_] != s3_file_chksum[fn_]
     ]
 
-    import pdb ; pdb.set_trace()
-
     if local_files_not_in_s3:
         print('local_files_not_in_s3')
         print('\n'.join(local_files_not_in_s3))
