@@ -230,12 +230,13 @@ def compare_with_remote(cache_dir, sync_cache=False):
         """ callback function for os.walk """
         for fn_ in names:
             fname = '%s/%s' % (dirname, fn_)
-            if os.path.isdir(fname) or \
-                    ('garmin.pkl' in fn_) or \
-                    ('garmin.list' in fn_) or \
-                    ('.pkl.gz' in fn_) or \
-                    (not sync_cache and '.avro.gz' in fn_):
-                continue
+            if not sync_cache:
+                if os.path.isdir(fname) or \
+                        ('garmin.pkl' in fn_) or \
+                        ('garmin.list' in fn_) or \
+                        ('.pkl.gz' in fn_) or \
+                        ('.avro.gz' in fn_):
+                    continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True, single_line=True).split()[0]
             md5sum = md5sum.decode()
@@ -265,6 +266,8 @@ def compare_with_remote(cache_dir, sync_cache=False):
         fn_ for fn_ in s3_file_chksum
         if fn_ not in local_file_chksum or local_file_chksum[fn_] != s3_file_chksum[fn_]
     ]
+
+    import pdb ; pdb.set_trace()
 
     if local_files_not_in_s3:
         print('local_files_not_in_s3')

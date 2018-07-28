@@ -48,7 +48,7 @@ def save_to_s3(bname='garmin_scripts_gps_files_ddboline', filelist=None):
     s3_ = boto.connect_s3(
         aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     bucket = s3_.create_bucket(bucket_name=bname)
-    list_of_keys = get_list_of_keys()
+    list_of_keys = get_list_of_keys(bname=bname)
     if not filelist:
         filelist = []
     for fn_ in filelist:
