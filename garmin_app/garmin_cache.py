@@ -6,15 +6,16 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
-
+import fastavro
 import gzip
 from functools import partial
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor
 
-from garmin_app.util import walk_wrapper
+from garmin_app.garmin_file import GarminFile
 from garmin_app.garmin_summary import GarminSummary
 from garmin_app.garmin_utils import get_md5, print_date_string
+from garmin_app.util import walk_wrapper
 
 try:
     import cPickle as pickle
@@ -25,6 +26,28 @@ _work_list = []
 NCPU = mp.cpu_count()
 pool = ProcessPoolExecutor(max_workers=NCPU)
 
+
+def write_garmin_file_object_to_file(gfile, avro_file):
+    parsed_schema = fastavro.parse_schema(GarminFile._avro_schema)
+    js = [gfile.to_dict()]
+    with gzip.open('%s.tmp' % avro_file, 'wb') as f:
+        fastavro.writer(f, parsed_schema, js, validator=True)
+    os.rename('%s.tmp' % avro_file, avro_file)
+    return True
+
+
+def read_avro_object(avro_file):
+    parsed_schema = fastavro.parse_schema(GarminFile._avro_schema)
+    result = None
+    if os.path.exists(avro_file):
+        with gzip.open(avro_file, 'rb') as f:
+            for record in fastavro.reader(f, parsed_schema):
+                result = record
+                break
+    if result is not None:
+        return GarminFile.from_dict(result)
+    else:
+        return None
 
 def read_pickle_object_in_file(pickle_file):
     """ read python object from gzipped pickle file """
@@ -49,8 +72,8 @@ def write_pickle_object_to_file(inpobj, pickle_file):
 def _write_cached_file(garminfile, cache_directory):
     if not garminfile or not cache_directory:
         return False
-    pkl_file = '%s/%s.pkl.gz' % (cache_directory, garminfile.filename)
-    return write_pickle_object_to_file(garminfile, pkl_file)
+    avro_file = '%s/%s.avro.gz' % (cache_directory, garminfile.filename)
+    return write_garmin_file_object_to_file(garminfile, avro_file)
 
 
 def _read_file_in_par(init, cache_directory):
@@ -70,8 +93,8 @@ class GarminCache(object):
                  pickle_file='',
                  cache_directory='',
                  corr_list=None,
-                 cache_read_fn=read_pickle_object_in_file,
-                 cache_write_fn=write_pickle_object_to_file,
+                 cache_read_fn=read_avro_object,
+                 cache_write_fn=write_garmin_file_object_to_file,
                  use_sql=True,
                  check_md5=False,
                  do_tunnel=False):
@@ -105,11 +128,11 @@ class GarminCache(object):
         """ return cached file """
         if not self.cache_directory:
             return False
-        fname = '%s/%s.pkl.gz' % (self.cache_directory, gfbname)
+        fname = '%s/%s.avro.gz' % (self.cache_directory, gfbname)
         if not os.path.exists(fname):
             return False
         try:
-            return read_pickle_object_in_file(fname)
+            return read_avro_object(fname)
         except ValueError:
             return False
 
