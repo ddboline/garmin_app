@@ -17,8 +17,8 @@ from tempfile import NamedTemporaryFile
 
 from garmin_app.garmin_server import garmin_server
 
-from garmin_app.util import (run_command, dump_to_file, HOMEDIR, walk_wrapper,
-                             datetimefromstring, HOSTNAME)
+from garmin_app.util import (run_command, dump_to_file, HOMEDIR, walk_wrapper, datetimefromstring,
+                             HOSTNAME)
 
 # 'https://ddbolineathome.mooo.com/~ddboline'
 BASEURL = 'http://ddbolineinthecloud.mooo.com/~ubuntu'
@@ -48,8 +48,8 @@ COMMANDS = ('get', 'build', 'sync', 'backup', 'year', '(file)', '(directory)',
 
 def days_in_year(year=datetime.date.today().year):
     """ return number of days in a given year """
-    return (datetime.date(year=year + 1, month=1, day=1) -
-            datetime.date(year=year, month=1, day=1)).days
+    return (datetime.date(year=year + 1, month=1, day=1) - datetime.date(year=year, month=1,
+                                                                         day=1)).days
 
 
 def days_in_month(month=None, year=None):
@@ -61,16 +61,16 @@ def days_in_month(month=None, year=None):
     y1_, m1_ = year, month + 1
     if m1_ == 13:
         y1_, m1_ = y1_ + 1, 1
-    return (datetime.date(year=y1_, month=m1_, day=1) -
-            datetime.date(year=year, month=month, day=1)).days
+    return (datetime.date(year=y1_, month=m1_, day=1) - datetime.date(
+        year=year, month=month, day=1)).days
 
 
 def expected_calories(weight=175, pace_min_per_mile=10.0, distance=1.0):
     """ return expected calories for running at a given pace """
     cal_per_mi = weight * (0.0395 + 0.00327 * (60. / pace_min_per_mile) + 0.000455 *
-                           (60. / pace_min_per_mile)**2 + 0.000801 *
-                           ((weight / 154) * 0.425 / weight *
-                            (60. / pace_min_per_mile)**3) * 60. / (60. / pace_min_per_mile))
+                           (60. / pace_min_per_mile)**2 + 0.000801 * (
+                               (weight / 154) * 0.425 / weight *
+                               (60. / pace_min_per_mile)**3) * 60. / (60. / pace_min_per_mile))
     return cal_per_mi * distance
 
 
@@ -216,10 +216,13 @@ def sync_db(to_local=True, to_remote=False):
         write_corrections_table(corrections, do_tunnel=True)
 
 
-def compare_with_remote(cache_dir):
+def compare_with_remote(cache_dir, sync_cache=False):
     """ sync files at script_path with files at BASEURL """
     from garmin_app.save_to_s3 import save_to_s3
-    s3_file_chksum = save_to_s3()
+    if sync_cache:
+        s3_file_chksum = save_to_s3(bname='garmin-scripts-cache-ddboline')
+    else:
+        s3_file_chksum = save_to_s3()
 
     local_file_chksum = {}
 
@@ -231,7 +234,7 @@ def compare_with_remote(cache_dir):
                     ('garmin.pkl' in fn_) or \
                     ('garmin.list' in fn_) or \
                     ('.pkl.gz' in fn_) or \
-                    ('.avro.gz' in fn_):
+                    (not sync_cache and '.avro.gz' in fn_):
                 continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True, single_line=True).split()[0]
@@ -239,14 +242,24 @@ def compare_with_remote(cache_dir):
             if fn_ not in local_file_chksum:
                 local_file_chksum[fn_] = md5sum
 
-    walk_wrapper('%s/run' % cache_dir, process_files, None)
+    walk_dir = '%s/run' % cache_dir
+    if sync_cache:
+        walk_dir = '%s/run/cache' % cache_dir
 
-    local_files_not_in_s3 = [
-        '%s/run/gps_tracks/%s' % (cache_dir, fn_)
-        if fn_ != 'garmin_corrections.json' else '%s/run/%s' % (cache_dir, fn_)
-        for fn_ in local_file_chksum
-        if fn_ not in s3_file_chksum or local_file_chksum[fn_] != s3_file_chksum[fn_]
-    ]
+    walk_wrapper(walk_dir, process_files, None)
+
+    if not sync_cache:
+        local_files_not_in_s3 = [
+            '%s/run/gps_tracks/%s' % (cache_dir, fn_)
+            if fn_ != 'garmin_corrections.json' else '%s/run/%s' % (cache_dir, fn_)
+            for fn_ in local_file_chksum
+            if fn_ not in s3_file_chksum or local_file_chksum[fn_] != s3_file_chksum[fn_]
+        ]
+    else:
+        local_files_not_in_s3 = [
+            '%s/run/cache/%s' % (cache_dir, fn_) for fn_ in local_file_chksum
+            if fn_ not in s3_file_chksum or local_file_chksum[fn_] != s3_file_chksum[fn_]
+        ]
 
     s3_files_not_in_local = [
         fn_ for fn_ in s3_file_chksum
@@ -256,7 +269,11 @@ def compare_with_remote(cache_dir):
     if local_files_not_in_s3:
         print('local_files_not_in_s3')
         print('\n'.join(local_files_not_in_s3))
-        s3_file_chksum = save_to_s3(filelist=local_files_not_in_s3)
+        if not sync_cache:
+            s3_file_chksum = save_to_s3(filelist=local_files_not_in_s3)
+        else:
+            s3_file_chksum = save_to_s3(
+                filelist=local_files_not_in_s3, bname='garmin-scripts-cache-ddboline')
     if s3_files_not_in_local:
         print('missing files', s3_files_not_in_local)
 
@@ -301,9 +318,8 @@ def read_garmin_file(fname, msg_q=None, options=None):
 
 def do_summary(directory_, msg_q=None, options=None):
     """ produce summary report """
-    from garmin_app.garmin_cache import (
-        GarminCache, read_pickle_object_in_file, write_pickle_object_to_file
-    )
+    from garmin_app.garmin_cache import (GarminCache, read_pickle_object_in_file,
+                                         write_pickle_object_to_file)
     from garmin_app.garmin_corrections import list_of_corrected_laps
     from garmin_app.garmin_corrections_sql import write_corrections_table
     from garmin_app.garmin_report import GarminReport
@@ -410,8 +426,8 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
             run_command('cd %s/run/ ; ' % cache_dir + 'tar zcvf %s gps_tracks/ ' % fname +
                         'garmin_corrections.json')
             if os.path.exists('%s/public_html/backup' % os.getenv('HOME')):
-                run_command('cp %s %s/public_html/backup/garmin_data.tar.gz' % (fname,
-                                                                                os.getenv('HOME')))
+                run_command(
+                    'cp %s %s/public_html/backup/garmin_data.tar.gz' % (fname, os.getenv('HOME')))
             if os.path.exists('%s/public_html/garmin/tar' % os.getenv('HOME')):
                 run_command('mv %s %s/public_html/garmin/tar' % (fname, os.getenv('HOME')))
 
@@ -452,8 +468,8 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                 options['do_sport'] = spts[0]
             elif arg == 'bike':
                 options['do_sport'] = 'biking'
-            elif '-' in arg or arg in ('%4d' % _
-                                       for _ in range(2008, datetime.date.today().year + 1)):
+            elif '-' in arg or arg in ('%4d' % _ for _ in range(2008,
+                                                                datetime.date.today().year + 1)):
                 gdir.update(find_gps_tracks(arg, cache_dir))
             elif '.gmn' in arg or 'T' in arg:
                 files = glob.glob('%s/run/gps_tracks/%s' % (cache_dir, arg))
@@ -534,6 +550,7 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
             return
         if arg == 'sync':
             compare_with_remote(cache_dir)
+            compare_with_remote(cache_dir, sync_cache=True)
             return
 
     if not os.path.exists('%s/run' % cache_dir):

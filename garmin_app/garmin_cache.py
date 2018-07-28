@@ -49,6 +49,7 @@ def read_avro_object(avro_file):
     else:
         return None
 
+
 def read_pickle_object_in_file(pickle_file):
     """ read python object from gzipped pickle file """
     outobj = None
@@ -69,10 +70,12 @@ def write_pickle_object_to_file(inpobj, pickle_file):
     return True
 
 
-def _write_cached_file(garminfile, cache_directory):
+def _write_cached_file(garminfile, cache_directory, update=False):
     if not garminfile or not cache_directory:
         return False
     avro_file = '%s/%s.avro.gz' % (cache_directory, garminfile.filename)
+    if not update and os.path.exists(avro_file):
+        return True
     return write_garmin_file_object_to_file(garminfile, avro_file)
 
 
@@ -82,6 +85,8 @@ def _read_file_in_par(init, cache_directory):
     gfile = gsum.read_file()
     if gfile:
         _write_cached_file(gfile, cache_directory)
+    else:
+        print('no gfile?', gmn_filename)
     outit = (reduced_gmn_filename, gmn_filename, gmn_md5sum, gsum)
     return outit
 
@@ -136,9 +141,9 @@ class GarminCache(object):
         except ValueError:
             return False
 
-    def write_cached_gfile(self, garminfile=None):
+    def write_cached_gfile(self, garminfile=None, update=False):
         """ write cached file """
-        _write_cached_file(garminfile, self.cache_directory)
+        _write_cached_file(garminfile, self.cache_directory, update)
 
     def get_cache_summary_list(self, directory, options=None):
         """ return list of cached garmin_summary objects """
@@ -151,6 +156,7 @@ class GarminCache(object):
 
         self.cache_file_is_modified = False
         temp_list = self.cache_read_fn()
+
         if temp_list:
             if isinstance(temp_list, dict):
                 temp_list = list(temp_list.values())
@@ -172,7 +178,7 @@ class GarminCache(object):
                 gmn_filename = '%s/%s' % (dirname, name)
                 if os.path.isdir(gmn_filename):
                     continue
-                if '.pkl' in gmn_filename:
+                if '.pkl' in gmn_filename or 'avro' in gmn_filename:
                     continue
                 add_file(gmn_filename)
 
@@ -187,6 +193,7 @@ class GarminCache(object):
                 gmn_md5sum = get_md5(gmn_filename)
             else:
                 gmn_md5sum = local_dict[reduced_gmn_filename].md5sum
+
             if ((reduced_gmn_filename not in local_dict) or
                 (hasattr(local_dict, 'md5sum') and
                  local_dict[reduced_gmn_filename].md5sum != gmn_md5sum) or
