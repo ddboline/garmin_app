@@ -43,6 +43,22 @@ class GarminSummary(object):
         return 'GarminSummary<%s>' % ', '.join(
             '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
 
+    def __eq__(self, other):
+        for field in self._db_entries:
+            value0 = getattr(self, field)
+            value1 = getattr(other, field)
+            if isinstance(value0, float) and isinstance(value1, float):
+                if abs(value0 - value1) > 0.01:
+                    return False
+            else:
+                if value0 != value1:
+                    return False
+        for field in 'laps', 'points':
+            for l0, l1 in zip(getattr(self, field), getattr(other, field)):
+                if l0 != l1:
+                    return False
+        return True
+
     def read_file(self):
         """  read the file, calculate some stuff """
         temp_gfile = GarminParse(self.fullfname, corr_list=self.corr_list)
