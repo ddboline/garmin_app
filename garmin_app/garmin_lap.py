@@ -141,13 +141,17 @@ class GarminLap(object):
             type_ = field['type']
             value = getattr(self, name)
             if value is None:
-                continue
+                output[name] = None
             if name == 'lap_start':
-                output[name] = getattr(self, name).isoformat()
+                output[name] = value.isoformat()
+            elif type_ == 'string':
+                output[name] = str(value)
+            elif type_ == 'float':
+                output[name] = float(value)
             elif type_ == 'int':
-                output[name] = int(getattr(self, name))
+                output[name] = int(value)
             else:
-                output[name] = getattr(self, name)
+                output[name] = value
         return output
     
     @staticmethod
