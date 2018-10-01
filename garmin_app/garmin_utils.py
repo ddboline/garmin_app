@@ -20,8 +20,8 @@ from garmin_app.save_to_s3 import get_list_of_keys, download_from_s3
 from garmin_app.util import (run_command, dump_to_file, HOMEDIR, walk_wrapper,
                              datetimefromstring, HOSTNAME)
 
-# 'https://ddbolineathome.mooo.com/~ddboline'
-BASEURL = 'http://ddbolineinthecloud.mooo.com/~ubuntu'
+# 'https://home.ddboline.net/~ddboline'
+BASEURL = 'http://cloud.ddboline.net/~ubuntu'
 BASEDIR = '%s/setup_files/build/garmin_app' % HOMEDIR
 CACHEDIR = '%s/.garmin_cache' % HOMEDIR
 

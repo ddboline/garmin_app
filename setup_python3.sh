@@ -3,8 +3,8 @@
 ### hack...
 export LANG="C.UTF-8"
 
-sudo bash -c "echo deb ssh://ddboline@ddbolineathome.mooo.com/var/www/html/deb/xenial/devel ./ > /etc/apt/sources.list.d/py2deb2.list"
-sudo bash -c "echo deb ssh://ddboline@ddbolineathome.mooo.com/var/www/html/deb/xenial/python3/devel ./ > /etc/apt/sources.list.d/py2deb3.list"
+sudo bash -c "echo deb ssh://ddboline@home.ddboline.net/var/www/html/deb/xenial/devel ./ > /etc/apt/sources.list.d/py2deb2.list"
+sudo bash -c "echo deb ssh://ddboline@home.ddboline.net/var/www/html/deb/xenial/python3/devel ./ > /etc/apt/sources.list.d/py2deb3.list"
 sudo apt-get update
 sudo apt-get install -y --force-yes gpsbabel garmin-forerunner-tools xml2 python3-requests \
                                     python3-pandas python3-dateutil python3-usb fit2tcx \
