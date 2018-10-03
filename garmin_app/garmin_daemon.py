@@ -17,6 +17,9 @@ def handle_connection(conn, msg_q):
     script_path = '%s/garmin_app' % BASEDIR
     cache_dir = CACHEDIR
 
+    if hasattr(recv_, 'decode'):
+        recv_ = recv_.decode()
+
     args = recv_.split()
     isprev = False
     if not args:
@@ -60,7 +63,7 @@ def handle_connection(conn, msg_q):
         if recv_.strip() != 'prev year':
             msg_q.append(recv_.strip())
 
-    conn.send('done')
+    conn.send(b'done')
 
 
 def server_thread(socketfile=GARMIN_SOCKET_FILE, msg_q=None):
