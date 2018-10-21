@@ -6,6 +6,10 @@ import os.path
 import gzip
 import argparse
 import requests
+import socket
+from six.moves.urllib import parse as urlparse
+
+from six.moves.BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 
 from stravalib import Client, exc
 from sys import stderr, stdin
@@ -88,12 +92,13 @@ def strava_upload():
             print('argument -D/--desc not allowed with argument ' '-x/--xml-desc', file=stderr)
 
     # Authorize Strava
-    cid = 3163  # CLIENT_ID
     cp_ = ConfigParser()
     cp_.read(os.path.expanduser('~/.stravacli'))
     cat = None
     if cp_.has_section('API'):
         if 'access_token' in cp_.options('API'):
+            cat = cp_.get('API', 'ACCESS_TOKEN')
+            cs = cp_.get('API', 'CLIENT_SECRET')
             cat = cp_.get('API', 'ACCESS_TOKEN')
 
     while True:
@@ -109,11 +114,17 @@ def strava_upload():
                 "obtain one.",
                 file=stderr)
             client = Client()
-            _uri = 'http://stravacli-dlenski.rhcloud.com/auth'
+            webserver = QueryGrabber(response='<title>Strava auth code received!</title>This window can be closed.')
             _scope = 'view_private,write'
-            authorize_url = client.authorization_url(client_id=cid, redirect_uri=_uri, scope=_scope)
+            authorize_url = client.authorization_url(client_id=cid, redirect_uri=webserver.root_uri(), scope=_scope)
             webbrowser.open_new_tab(authorize_url)
-            client.access_token = cat = raw_input("Enter access token: ")
+            webserver.handle_request()
+            client.access_token = cat = client.exchange_code_for_token(client_id=cid,client_secret=cs,code=webserver.received['code'])
+            cp_.add_section('API')
+            cp_.set('API','CLIENT_ID', cid)
+            cp_.set('API','CLIENT_SECRET', cs)
+            cp_.set('API','ACCESS_TOKEN', cat)
+            cp_.write(open(os.path.expanduser('~/.stravacli'),"w"))
         else:
             if not cp_.has_section('API'):
                 cp_.add_section('API')
@@ -206,3 +217,31 @@ def strava_upload():
         print("  {}{}".format(uri, " (duplicate)" if duplicate else ''), file=stderr)
         if not args.no_popup:
             webbrowser.open_new_tab(uri)
+
+
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.server.received = urlparse.parse_qs(self.path.split('?',1)[1])
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(self.server.response)
+
+class QueryGrabber(HTTPServer):
+    def __init__(self, response='', address=None):
+        self.received = None
+        self.response = response
+        if address!=None:
+            HTTPServer.__init__(self, address, handler)
+        else:
+            for port in range(1024,65536):
+                try:
+                    HTTPServer.__init__(self, ('localhost', port), handler)
+                except socket.error as e:
+                    if e.errno!=98: # Address already in use
+                        raise
+                else:
+                    break
+            else:
+                raise Exception('No open ports')
+    def root_uri(self):
+        return 'http://{}:{:d}'.format(*self.server_address)
