@@ -8,6 +8,7 @@ from garmin_app.garmin_summary import GarminSummary, DB_ENTRIES
 from sqlalchemy import (create_engine, Column, Integer, Float, String, DateTime)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dateutil.parser import parse
 
 from garmin_app.util import (OpenPostgreSQLsshTunnel, POSTGRESTRING, USER, utc, est)
 
@@ -20,7 +21,7 @@ class GarminSummaryTable(Base):
     __tablename__ = 'garmin_summary'
 
     filename = Column(String, primary_key=True)
-    begin_datetime = Column(DateTime)
+    begin_datetime = Column(String)
     sport = Column(String(12))
     total_calories = Column(Integer)
     total_distance = Column(Float)
@@ -81,10 +82,10 @@ class GarminCacheSQL(object):
                 if sl_ == 'begin_datetime':
                     tmp = getattr(row, sl_)
                     if 'txt' in row.filename:
-                        tmp = tmp.replace(tzinfo=est)
+                        tmp = parse(tmp)
                         tmp = tmp.astimezone(est)
                     else:
-                        tmp = tmp.replace(tzinfo=utc)
+                        tmp = parse(tmp)
                         tmp = tmp.astimezone(est)
                     setattr(gsum, sl_, tmp)
                 else:
