@@ -39,7 +39,7 @@ def main():
     parser = argparse.ArgumentParser('Wrapper around python plotting facilities')
     parser.add_argument('-n', '--name', help='Name for plot')
     parser.add_argument('-t', '--title', help='Title for plot')
-    parser.add_argument('-s', '--do_scatter', help='Do Scatter plot')
+    parser.add_argument('-s', '--do_scatter', help='Do Scatter plot', action='store_true')
     parser.add_argument('-x', '--xlabel', help='X-axis label')
     parser.add_argument('-y', '--ylabel', help='Y-axis label')
     parser.add_argument('-c', '--cachedir', help='Cache directory')
@@ -55,7 +55,7 @@ def main():
         break
 
     print(
-        plot_graph(name=args.name, title=args.title, do_scatter=args.scatter, opts=opts, data=data))
+        plot_graph(name=args.name, title=args.title, do_scatter=args.do_scatter, opts=opts, data=data))
 
 
 if __name__ == '__main__':
