@@ -44,7 +44,6 @@ def main():
     parser.add_argument('-y', '--ylabel', help='Y-axis label')
     parser.add_argument('-c', '--cachedir', help='Cache directory')
     parser.add_argument('-m', '--marker', help='Marker')
-    parser.add_argument('data', nargs='*', type=float, help='')
     args = parser.parse_args()
 
     opts = {'xlabel': args.xlabel, 'ylabel': args.ylabel, 'cache_dir': args.cachedir}
