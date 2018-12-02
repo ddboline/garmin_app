@@ -31,21 +31,63 @@ class GarminFile(object):
     garmin_file_types = ('txt', 'tcx', 'fit', 'gpx', 'gmn')
 
     _avro_schema = {
-        'namespace': 'garmin.avro',
-        'type': 'record',
-        'name': 'GarminFile',
+        'namespace':
+        'garmin.avro',
+        'type':
+        'record',
+        'name':
+        'GarminFile',
         'fields': [
-            {'name': 'filename', 'type': 'string'},
-            {'name': 'filetype', 'type': 'string'},
-            {'name': 'begin_datetime', 'type': 'string'},
-            {'name': 'sport', 'type': ['string', 'null']},
-            {'name': 'total_calories', 'type': 'int'},
-            {'name': 'total_distance', 'type': 'float'},
-            {'name': 'total_duration', 'type': 'float'},
-            {'name': 'total_hr_dur', 'type': 'float'},
-            {'name': 'total_hr_dis', 'type': 'float'},
-            {'name': 'laps', 'type': {'type': 'array', 'items': GarminLap._avro_schema}},
-            {'name': 'points', 'type': {'type': 'array', 'items': GarminPoint._avro_schema}},
+            {
+                'name': 'filename',
+                'type': 'string'
+            },
+            {
+                'name': 'filetype',
+                'type': 'string'
+            },
+            {
+                'name': 'begin_datetime',
+                'type': 'string'
+            },
+            {
+                'name': 'sport',
+                'type': ['string', 'null']
+            },
+            {
+                'name': 'total_calories',
+                'type': 'int'
+            },
+            {
+                'name': 'total_distance',
+                'type': 'double'
+            },
+            {
+                'name': 'total_duration',
+                'type': 'double'
+            },
+            {
+                'name': 'total_hr_dur',
+                'type': 'double'
+            },
+            {
+                'name': 'total_hr_dis',
+                'type': 'double'
+            },
+            {
+                'name': 'laps',
+                'type': {
+                    'type': 'array',
+                    'items': GarminLap._avro_schema
+                }
+            },
+            {
+                'name': 'points',
+                'type': {
+                    'type': 'array',
+                    'items': GarminPoint._avro_schema
+                }
+            },
         ]
     }
 
@@ -71,8 +113,8 @@ class GarminFile(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminFile<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
+        return 'GarminFile<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
+                                            for x in self._db_entries)
 
     def __eq__(self, other):
         for field in self._db_entries:
@@ -113,11 +155,11 @@ class GarminFile(object):
             if totdur > 0 and not point0.speed_mps:
                 point0.speed_mps = totdis / totdur
             if d1_ > 0:
-                point0.avg_speed_value_permi = (((
-                    t1_ - self.points[0].time).total_seconds() / 60.) / (d1_ / METERS_PER_MILE))
+                point0.avg_speed_value_permi = ((
+                    (t1_ - self.points[0].time).total_seconds() / 60.) / (d1_ / METERS_PER_MILE))
             if (t1_ - self.points[0].time).total_seconds() > 0:
-                point0.avg_speed_value_mph = ((point0.distance / METERS_PER_MILE) /
-                                              ((t1_ - self.points[0].time).total_seconds() / 3600.))
+                point0.avg_speed_value_mph = ((point0.distance / METERS_PER_MILE) / (
+                    (t1_ - self.points[0].time).total_seconds() / 3600.))
 
     def to_dict(self):
         output = {}
@@ -135,7 +177,7 @@ class GarminFile(object):
         output['laps'] = [lap.to_dict() for lap in self.laps]
         output['points'] = [point.to_dict() for point in self.points]
         return output
-    
+
     @staticmethod
     def from_dict(record):
         gfile = GarminFile()

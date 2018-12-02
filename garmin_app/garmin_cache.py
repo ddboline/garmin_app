@@ -6,6 +6,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
+import snappy
 import fastavro
 import gzip
 from functools import partial
@@ -40,7 +41,8 @@ def read_avro_object(avro_file):
     parsed_schema = fastavro.parse_schema(GarminFile._avro_schema)
     result = None
     if os.path.exists(avro_file):
-        with gzip.open(avro_file, 'rb') as f:
+        with open(avro_file, 'rb') as f:
+            print(avro_file)
             for record in fastavro.reader(f, parsed_schema):
                 result = record
                 break
@@ -73,7 +75,7 @@ def write_pickle_object_to_file(inpobj, pickle_file):
 def _write_cached_file(garminfile, cache_directory, update=False):
     if not garminfile or not cache_directory:
         return False
-    avro_file = '%s/%s.avro.gz' % (cache_directory, garminfile.filename)
+    avro_file = '%s/%s.avro' % (cache_directory, garminfile.filename)
     if not update and os.path.exists(avro_file):
         return True
     return write_garmin_file_object_to_file(garminfile, avro_file)
@@ -133,7 +135,7 @@ class GarminCache(object):
         """ return cached file """
         if not self.cache_directory:
             return False
-        fname = '%s/%s.avro.gz' % (self.cache_directory, gfbname)
+        fname = '%s/%s.avro' % (self.cache_directory, gfbname)
         if not os.path.exists(fname):
             return False
         try:

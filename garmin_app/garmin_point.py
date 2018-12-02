@@ -21,23 +21,65 @@ class GarminPoint(object):
     __slots__ = _db_entries
 
     _avro_schema = {
-        'namespace': 'garmin.avro',
-        'type': 'record',
-        'name': 'GarminPoint',
+        'namespace':
+        'garmin.avro',
+        'type':
+        'record',
+        'name':
+        'GarminPoint',
         'fields': [
-            {'name': 'time', 'type': 'string'},
-            {'name': 'latitude', 'type': ['float', 'null']},
-            {'name': 'longitude', 'type': ['float', 'null']},
-            {'name': 'altitude', 'type': ['float', 'null']},
-            {'name': 'distance', 'type': ['float', 'null']},
-            {'name': 'heart_rate', 'type': ['float', 'null']},
-            {'name': 'duration_from_last', 'type': 'float'},
-            {'name': 'duration_from_begin', 'type': 'float'},
-            {'name': 'speed_mps', 'type': 'float'},
-            {'name': 'speed_permi', 'type': 'float'},
-            {'name': 'speed_mph', 'type': 'float'},
-            {'name': 'avg_speed_value_permi', 'type': 'float'},
-            {'name': 'avg_speed_value_mph', 'type': 'float'},
+            {
+                'name': 'time',
+                'type': 'string'
+            },
+            {
+                'name': 'latitude',
+                'type': ['double', 'null']
+            },
+            {
+                'name': 'longitude',
+                'type': ['double', 'null']
+            },
+            {
+                'name': 'altitude',
+                'type': ['double', 'null']
+            },
+            {
+                'name': 'distance',
+                'type': ['double', 'null']
+            },
+            {
+                'name': 'heart_rate',
+                'type': ['double', 'null']
+            },
+            {
+                'name': 'duration_from_last',
+                'type': 'double'
+            },
+            {
+                'name': 'duration_from_begin',
+                'type': 'double'
+            },
+            {
+                'name': 'speed_mps',
+                'type': 'double'
+            },
+            {
+                'name': 'speed_permi',
+                'type': 'double'
+            },
+            {
+                'name': 'speed_mph',
+                'type': 'double'
+            },
+            {
+                'name': 'avg_speed_value_permi',
+                'type': 'double'
+            },
+            {
+                'name': 'avg_speed_value_mph',
+                'type': 'double'
+            },
         ]
     }
 
@@ -58,8 +100,8 @@ class GarminPoint(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminPoint<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self.__slots__)
+        return 'GarminPoint<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
+                                             for x in self.__slots__)
 
     def __eq__(self, other):
         for field in self.__slots__:

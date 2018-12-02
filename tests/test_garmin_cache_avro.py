@@ -14,8 +14,8 @@ def test():
     for fname in GMNFILE, TCXFILE, FITFILE, TXTFILE, GPXFILE:
         gfile = garmin_parse.GarminParse(fname)
         gfile.read_file()
-        garmin_cache.write_garmin_file_object_to_file(gfile, 'test.avro.gz')
-        
-        result = garmin_cache.read_avro_object('test.avro.gz')
-    
+        garmin_cache.write_garmin_file_object_to_file(gfile, 'test.avro')
+
+        result = garmin_cache.read_avro_object('test.avro')
+
         assert gfile == result

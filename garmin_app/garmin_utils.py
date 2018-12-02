@@ -17,8 +17,8 @@ from tempfile import NamedTemporaryFile
 
 from garmin_app.garmin_server import garmin_server
 from garmin_app.save_to_s3 import get_list_of_keys, download_from_s3
-from garmin_app.util import (run_command, dump_to_file, HOMEDIR, walk_wrapper,
-                             datetimefromstring, HOSTNAME)
+from garmin_app.util import (run_command, dump_to_file, HOMEDIR, walk_wrapper, datetimefromstring,
+                             HOSTNAME)
 
 # 'https://home.ddboline.net/~ddboline'
 BASEURL = 'http://cloud.ddboline.net/~ubuntu'
@@ -235,7 +235,7 @@ def compare_with_remote(cache_dir, sync_cache=False):
                         ('garmin.pkl' in fn_) or \
                         ('garmin.list' in fn_) or \
                         ('.pkl.gz' in fn_) or \
-                        ('.avro.gz' in fn_):
+                        ('.avro' in fn_):
                     continue
             cmd = 'md5sum %s' % fname
             md5sum = run_command(cmd, do_popen=True, single_line=True).split()[0]
@@ -296,16 +296,16 @@ def read_garmin_file(fname, msg_q=None, options=None, s3_files=None):
 
     pickle_file_ = '%s/run/garmin.pkl.gz' % cache_dir
     cache_dir_ = '%s/run/cache' % cache_dir
-    
-    avro_file = '%s/%s.avro.gz' % (cache_dir, os.path.basename(fname))
+
+    avro_file = '%s/%s.avro' % (cache_dir, os.path.basename(fname))
     if not os.path.exists(avro_file):
         s3_cache_files = get_list_of_keys('garmin-scripts-cache-ddboline')
         s3_key = os.path.basename(avro_file)
         if s3_key in s3_cache_files:
             download_from_s3('garmin-scripts-cache-ddboline', s3_key, avro_file)
-    
+
     cache_ = GarminCache(cache_directory=cache_dir_, corr_list=corr_list_)
-    
+
     _temp_file = None
     if not options['do_update']:
         _temp_file = cache_.read_cached_gfile(gfbname=os.path.basename(fname))
@@ -481,8 +481,8 @@ def garmin_parse_arg_list(args, options=None, msg_q=None):
                 options['do_sport'] = spts[0]
             elif arg == 'bike':
                 options['do_sport'] = 'biking'
-            elif '-' in arg or arg in ('%4d' % _
-                                       for _ in range(2008, datetime.date.today().year + 1)):
+            elif '-' in arg or arg in ('%4d' % _ for _ in range(2008,
+                                                                datetime.date.today().year + 1)):
                 gdir.update(find_gps_tracks(arg, cache_dir, s3_files=s3_files))
             elif '.gmn' in arg or 'T' in arg:
                 files = glob.glob('%s/run/gps_tracks/%s' % (cache_dir, arg))
@@ -562,8 +562,9 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
                 if not summary_list_:
                     from garmin_app.garmin_cache_sql import \
                         write_postgresql_table
-                    summary_list_ = write_postgresql_table(
-                        [], get_summary_list=True, do_tunnel=do_tunnel)
+                    summary_list_ = write_postgresql_table([],
+                                                           get_summary_list=True,
+                                                           do_tunnel=do_tunnel)
                     print(len(summary_list_), pickle_file_)
                     # Recreate cache file using list from database
                     write_(summary_list_, pickle_file_)
@@ -598,6 +599,25 @@ def garmin_arg_parse(script_path=BASEDIR, cache_dir=CACHEDIR):
         with garmin_server():
             return None
     return garmin_parse_arg_list(getattr(args, 'command'), options=options)
+
+
+def report():
+    import garmin_app
+    from garmin_app import garmin_cache
+    """ parse command line arguments """
+    help_text = 'usage: ./garmin_report.py <avro file>'
+    parser = argparse.ArgumentParser(description='garmin app')
+    parser.add_argument('avro_file', nargs=1, help=help_text)
+    args = parser.parse_args()
+
+    avro_file = args.avro_file[0]
+
+    gfile = garmin_cache.read_avro_object(avro_file)
+
+    if gfile is None:
+        exit(0)
+
+    print(f'{len(gfile.laps)} {len(gfile.points)}')
 
 
 def main():

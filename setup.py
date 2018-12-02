@@ -10,7 +10,8 @@ import sys
 from setuptools import setup
 
 console_scripts_ = (('garmin-app', 'garmin_app.garmin_utils:main'),
-                   ('strava-upload', 'garmin_app.strava_upload:strava_upload'))
+                   ('strava-upload', 'garmin_app.strava_upload:strava_upload'),
+                   ('garmin-plot-graph', 'garmin_app.plot_graph:main'))
 
 console_scripts = ['%s = %s' % (x, y) for x, y in console_scripts_]
 

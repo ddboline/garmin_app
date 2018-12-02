@@ -23,23 +23,65 @@ class GarminLap(object):
     __slots__ = _db_entries
 
     _avro_schema = {
-        'namespace': 'garmin.avro',
-        'type': 'record',
-        'name': 'GarminLap',
+        'namespace':
+        'garmin.avro',
+        'type':
+        'record',
+        'name':
+        'GarminLap',
         'fields': [
-            {'name': 'lap_type', 'type': ['string', 'null']},
-            {'name': 'lap_index', 'type': 'int'},
-            {'name': 'lap_start', 'type': 'string'},
-            {'name': 'lap_duration', 'type': 'float'},
-            {'name': 'lap_distance', 'type': 'float'},
-            {'name': 'lap_trigger', 'type': ['string', 'null']},
-            {'name': 'lap_max_speed', 'type': ['float', 'null']},
-            {'name': 'lap_calories', 'type': 'int'},
-            {'name': 'lap_avg_hr', 'type': ['float', 'null']},
-            {'name': 'lap_max_hr', 'type': ['int', 'null']},
-            {'name': 'lap_intensity', 'type': ['string', 'null']},
-            {'name': 'lap_number', 'type': 'int'},
-            {'name': 'lap_start_string', 'type': ['string', 'null']},
+            {
+                'name': 'lap_type',
+                'type': ['string', 'null']
+            },
+            {
+                'name': 'lap_index',
+                'type': 'int'
+            },
+            {
+                'name': 'lap_start',
+                'type': 'string'
+            },
+            {
+                'name': 'lap_duration',
+                'type': 'double'
+            },
+            {
+                'name': 'lap_distance',
+                'type': 'double'
+            },
+            {
+                'name': 'lap_trigger',
+                'type': ['string', 'null']
+            },
+            {
+                'name': 'lap_max_speed',
+                'type': ['double', 'null']
+            },
+            {
+                'name': 'lap_calories',
+                'type': 'int'
+            },
+            {
+                'name': 'lap_avg_hr',
+                'type': ['double', 'null']
+            },
+            {
+                'name': 'lap_max_hr',
+                'type': ['int', 'null']
+            },
+            {
+                'name': 'lap_intensity',
+                'type': ['string', 'null']
+            },
+            {
+                'name': 'lap_number',
+                'type': 'int'
+            },
+            {
+                'name': 'lap_start_string',
+                'type': ['string', 'null']
+            },
         ]
     }
 
@@ -66,8 +108,8 @@ class GarminLap(object):
 
     def __repr__(self):
         """ string representation """
-        return 'GarminLap<%s>' % ', '.join(
-            '%s=%s' % (x, getattr(self, x)) for x in self._db_entries)
+        return 'GarminLap<%s>' % ', '.join('%s=%s' % (x, getattr(self, x))
+                                           for x in self._db_entries)
 
     def __eq__(self, other):
         for field in self.__slots__:
@@ -153,7 +195,7 @@ class GarminLap(object):
             else:
                 output[name] = value
         return output
-    
+
     @staticmethod
     def from_dict(record):
         glap = GarminLap()
