@@ -31,6 +31,8 @@ def plot_graph(name=None, title=None, data=None, do_scatter=False, opts={}):
     if 'ylabel' in opts:
         pl.ylabel(opts['ylabel'], verticalalignment='top')
     pl.title(title)
+    if not os.path.exists('%s/html' % cache_dir):
+        os.makedirs('%s/html' % cache_dir)
     pl.savefig('%s/html/%s.png' % (cache_dir, name))
     return '%s.png' % name
 
