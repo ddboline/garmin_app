@@ -5,6 +5,7 @@ import matplotlib.pyplot as pl
 import sys
 import json
 import argparse
+import os
 
 
 def plot_graph(name=None, title=None, data=None, do_scatter=False, opts={}):
