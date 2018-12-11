@@ -20,7 +20,7 @@ console_scripts.extend('%s%s = %s' % (x, v, y) for x, y in console_scripts_)
 
 setup(
     name='garmin_app',
-    version='0.1.0.6',
+    version='0.1.0.7',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='garmin_app',
