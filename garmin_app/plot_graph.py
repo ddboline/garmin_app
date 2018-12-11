@@ -19,7 +19,10 @@ def plot_graph(name=None, title=None, data=None, do_scatter=False, opts={}):
     xar, yar = zip(*data)
     xar, yar = [np.array(x) for x in (xar, yar)]
     if do_scatter:
-        pl.hist2d(xar, yar, bins=10, **popts)
+        if popts:
+            pl.hist2d(xar, yar, bins=10, **popts)
+        else:
+            pl.hist2d(xar, yar, bins=10)
         #pl.hexbin(xar, yar, gridsize=30, **popts)
     else:
         pl.plot(xar, yar, **popts)
@@ -51,14 +54,20 @@ def main():
 
     opts = {'xlabel': args.xlabel, 'ylabel': args.ylabel, 'cache_dir': args.cachedir}
     if hasattr(args, 'marker'):
-        opts['plotopt'] = {'marker': args.marker}
+        if getattr(args, 'marker'):
+            opts['plotopt'] = {'marker': args.marker}
 
     for line in sys.stdin:
         data = json.loads(line)
         break
 
-    print(
-        plot_graph(name=args.name, title=args.title, do_scatter=args.do_scatter, opts=opts, data=data))
+    try:
+        result = plot_graph(name=args.name, title=args.title, do_scatter=args.do_scatter, opts=opts, data=data)
+    except AttributeError as exc:
+        print(args)
+        raise
+
+    print(result)
 
 
 if __name__ == '__main__':
