@@ -245,3 +245,6 @@ class QueryGrabber(HTTPServer):
                 raise Exception('No open ports')
     def root_uri(self):
         return 'http://{}:{:d}'.format(*self.server_address)
+
+if __name__ == '__main__':
+    strava_upload()
